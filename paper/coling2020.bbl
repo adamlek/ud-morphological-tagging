@@ -1,0 +1,56 @@
+\begin{thebibliography}{1}
+
+\bibitem{conneau2019unsupervised}
+Alexis Conneau, Kartikay Khandelwal, Naman Goyal, Vishrav Chaudhary, Guillaume
+  Wenzek, Francisco Guzm{\'a}n, Edouard Grave, Myle Ott, Luke Zettlemoyer, and
+  Veselin Stoyanov.
+\newblock Unsupervised cross-lingual representation learning at scale.
+\newblock {\em arXiv preprint arXiv:1911.02116}, 2019.
+
+\bibitem{devlin2018bert}
+Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova.
+\newblock Bert: Pre-training of deep bidirectional transformers for language
+  understanding.
+\newblock {\em arXiv preprint arXiv:1810.04805}, 2018.
+
+\bibitem{liu2019roberta}
+Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer
+  Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov.
+\newblock Roberta: A robustly optimized bert pretraining approach.
+\newblock {\em arXiv preprint arXiv:1907.11692}, 2019.
+
+\bibitem{mccarthy2018marrying}
+Arya~D McCarthy, Miikka Silfverberg, Ryan Cotterell, Mans Hulden, and David
+  Yarowsky.
+\newblock Marrying universal dependencies and universal morphology.
+\newblock {\em arXiv preprint arXiv:1810.06743}, 2018.
+
+\bibitem{mccarthy2019sigmorphon}
+Arya~D McCarthy, Ekaterina Vylomova, Shijie Wu, Chaitanya Malaviya, Lawrence
+  Wolf-Sonkin, Garrett Nicolai, Christo Kirov, Miikka Silfverberg, Sebastian~J
+  Mielke, Jeffrey Heinz, et~al.
+\newblock The sigmorphon 2019 shared task: Morphological analysis in context
+  and cross-lingual transfer for inflection.
+\newblock {\em arXiv preprint arXiv:1910.11493}, 2019.
+
+\bibitem{nivre2018}
+Joakim Nivre et~al.
+\newblock Universal dependencies 2.2.
+\newblock 2018.
+\newblock {LINDAT}/{CLARIAH}-{CZ} digital library at the Institute of Formal
+  and Applied Linguistics ({{\'U}FAL}), Faculty of Mathematics and Physics,
+  Charles University.
+
+\bibitem{sennrich2015neural}
+Rico Sennrich, Barry Haddow, and Alexandra Birch.
+\newblock Neural machine translation of rare words with subword units.
+\newblock {\em arXiv preprint arXiv:1508.07909}, 2015.
+
+\bibitem{vaswani2017attention}
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
+  Aidan~N Gomez, {\L}ukasz Kaiser, and Illia Polosukhin.
+\newblock Attention is all you need.
+\newblock In {\em Advances in neural information processing systems}, pages
+  5998--6008, 2017.
+
+\end{thebibliography}
