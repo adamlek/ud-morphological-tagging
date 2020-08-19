@@ -50,14 +50,22 @@
 \begin{document}
 	\maketitle
 	
+	\begin{abstract}
+		This document contains the instructions for preparing a paper submitted
+		to COLING-2020 or accepted for publication in its proceedings. The document itself
+		conforms to its own specifications, and is therefore an example of
+		what your manuscript should look like. These instructions should be
+		used for both papers submitted for review and for final versions of
+		accepted papers. Authors are asked to conform to all the directions
+		reported in this document.
+	\end{abstract}
+	
 	\section{Introduction}
 	\label{intro}
 	
 	\textbf{Things added to model:}
 	\begin{itemize}
-		\item Layer attention
 		\item Adaptive learning rate
-		\item Label smoothing
 		\item Fine-tuning
 		\item Dropouts
 		\item Trained character representations (?)
@@ -68,7 +76,7 @@
 		\item (results) More detailed accuracy for len(BPE)$>2$
 		\item (results) With fine-tuning/without fine-tuning
 		\item (data) Data statistics: number of MSD-tags 
-		\item (data) Pick other datasets, try to match dataset sizes better (100k~150k train examples, turkish very small atm)
+		\item (data) Pick other datasets, try to match dataset sizes better (100k-150k train examples, turkish very small atm)
 	\end{itemize}
     
     In this project we explore the transformer model applied to sequence classification. In sequence classification a dataset is split into words (or tokens) and each word is assigned a label. 
@@ -94,15 +102,16 @@
     	\begin{table}[h]
 		\centering
 		\begin{tabular}{l|lrrrr}
-			Language & Typology & BPE-word ratio & Train & Validation & Test \\
+			Language & Typology & $\frac{BPE}{word}$ & Train & Validation & Test \\
 			\hline
 			Arabic-PADT  & Fusional & 1.39 & 225494 & 28089 & 28801  \\
-			Basque-BDT  & Agglutinative & 1.79 & 97336 & 12206 & 11901 \\
 			Czech-CAC   & Fusional & 1.77 & 395043 & 50087 & 49253 \\
-			%English-EWT & Fusional & 1.33 & 204857 & 24470 & 25527 \\
-			Finnish-TDT & Agglutinative & 1.98 & 161791 & 19876 & 20541 \\
+			Polish-LFG & Fusional & 1.75 & 104730 & 13161 & 13076 \\
 			Spanish-AnCora & Fusional & 1.34 & 439925 & 55196 & 54449 \\
+			Finnish-TDT & Agglutinative & 1.98 & 161791 & 19876 & 20541 \\
+			Basque-BDT  & Agglutinative & 1.79 & 97336 & 12206 & 11901 \\
 			Turkish-IMST & Agglutinative & 1.73 & 46417 & 5708 & 5734 \\
+			Estonian-EDT & Agglutinative & 1.86 & 346986 & 43434 & 43825 \\
 		\end{tabular}
 		\caption{\label{tab:data} Treebank statistics.}
 	\end{table}
@@ -163,7 +172,17 @@
 	\end{equation}
 	
 	\subsection{Model}
-	The model we employ use XLMR as a feature extractor, i.e. we only extract BPE embeddings from the model and do not fine-tune it. 
+	For morphological tagging we use the XLMR base model with a classification module on top. The classification module is a LSTM followed by a two layer linear transformation. 
+	
+	When extracting features from XLMR we compute a weighted sum of the layer representations. This is inspired by previous work showing that the different layers in language models encode different kinds of information. That is, we create a random vector $w$ with one element per layer, indicating the importance of the layer. We the BPE representation as follows:
+	
+	\begin{equation}
+		x = \sum_{1}^{N} c_n l_n
+	\end{equation}
+	
+	Given that many of the languages have a large number of morphological tags we want to prevent the model from growing overconfident for certain classes. To address this we introduce label smoothing, that is, instead of the incorrect classes having 0 probability and the correct class $100\%$ probability we let each of the incorrect classes have a probability of $\alpha$. We assign probabilities to a target $t$ by $(1-\alpha)t + \alpha / |C|$ where $|C|$ is the number of classes. 
+	
+	
 	%
 	An outline of the model is presented in \cref{fig:model}, in the outline $f$ represent the different methods we use to combine BPE embeddings.
 	
@@ -181,32 +200,75 @@
 	\section{Results}
 	\label{results}
 	
-	We present the results of our experiments in \cref{tab:results}. In general, our simple model using XLMR as a feature extractor yield good performance compared to the baseline. One exception is Basque, where the baseline is 0.1\% better than our model. 
+	
+	
+	We present the accuracy of assigning morphological tags to all tokens in \cref{tab:results_tokens}. Both when we finetune and only extract BPE weights we see that using an RNN to compose BPE tokens yields slightly better performance.
 	%
-	We see the best improvement for Czech, where our model score above the baseline by 16.8\%. For the other languages, our best model increase the performance compared to the baseline by about 4\%.  
 	
-	In general the results indicate that combining BPE embeddings into word representations using a RNN works well for all languages. It achieves the best score for tokens overall for all six languages. 
-	Looking at the accuracy of word representations containing two or more BPE embeddings, RNN also appear to work best. One exception is for Spanish-AnCora where Att3 performed marginally better (0.1\%) than the RNN method.
 	
-		\begin{table}[h]
-		\small
-		\centering
-		\begin{tabular}{l|c|cccccc||cccccc}
-			& &  \multicolumn{6}{c}{All Tokens Accuracy} & \multicolumn{6}{c}{BPE$>=2$ Accuracy} \\
-			Treebank & Ratio & Sum & Mean & RNN & Att1 & Att3 & max & Sum & Mean & RNN & Att1 & Att3 & max \\
-			\hline
-			Finnish-TDT & .751 & .818 & .820 & \textbf{.833} & .821 & .822 & .817 & .738 & .739 & \textbf{.773} & .741 & .747 & 722 \\ 
-			Basque-BDT & .676 & .652 & .659 & \textbf{.675} & 652 & .666 & .656 & .473 & .482 & \textbf{.525} & .474 & .499 & .478 \\
-			Turkish-IMST & .620 & .623 & .626 & \textbf{.646} & .623 & .624 & .610 & .396 & .396 & \textbf{.449} & .396 & .410 & .368\\
-			Spanish-AnCora & .842 & \textbf{.881} & .811 & \textbf{.881} & \textbf{.881} & .880 & .880 & .829 & .831 & .835 & .831 & \textbf{.836} & .828\\
-			Arabic-PADT & .770 & .822 & .827&\textbf{.829}&.824&.825&.825&.709&.715&\textbf{.730}&.716&.718&.707\\
-			Czech-CAC & .771 &.933 & .935 & \textbf{.939} & .933 & .935 &.914& .890 & .891 & \textbf{.905} & .890 & .893&.851\\
-			
-		\end{tabular}
-		\caption{\label{tab:results} Accuracy for morphological tagging. Evaluated on all tokens and on all tokens that are composed of 2 or more BPE tokens.}
+
+	\begin{table}[h]
+	%\small
+	\centering
+	\begin{tabular}{l|c|ccc|ccc}
+		& & \multicolumn{3}{c}{Finetuning} & \multicolumn{3}{c}{Feature extraction} \\
+		Treebank & Baseline & Sum & Mean & RNN & Sum & Mean & RNN \\
+		\hline
+		% agglutinative languages
+		Finnish-TDT & .751 & .965 & .963 & \textbf{.967} & .930 & .931 &\\ 
+		Basque-BDT & .676 & .910 & .909 & \textbf{.920} & .865 & .865 & .888 \\
+		Turkish-IMST & .620 & .898 & .891 & \textbf{.905} &  &  &\\
+		Estonian-EDT & & & & & & & \\
+		% fusional languages
+		Spanish-AnCora & .842 & .979 & .979 & \textbf{.980} &  &  &\\
+		Arabic-PADT & .770 & .952 & .953&\textbf{.954} &  &  &\\
+		Czech-CAC & .771 &  &  &  &  &  &\\
+		Polish-LFG & & & & &  &  &\\
+	\end{tabular}
+	\caption{\label{tab:results_tokens} Accuracy for morphological tagging. We evaluate both when we finetune the XLMR model and when we only extract BPE embeddings weights.}
 	\end{table}
 
+	However, the results in \cref{tab:results_tokens} also include tokens which are only composed of one BPE token. To better evaluate our composition methods we compute the accuracy for tokens which are composed of two or more BPE tokens. The results can be seen in \cref{tab:results_large_tokens}.
 
+	\begin{table}[h]
+	%\small
+	\centering
+	\begin{tabular}{l|c|ccc|ccc}
+		& & \multicolumn{3}{c}{Finetuning} & \multicolumn{3}{c}{Feature extraction} \\
+		Treebank & Baseline & Sum & Mean & RNN & Sum & Mean & RNN \\
+		\hline
+		% agglutinative languages
+		Finnish-TDT & & & & & & & \\ 
+		Basque-BDT & & & & & & & \\
+		Turkish-IMST & & & & & & & \\
+		Estonian-EDT & & & & & & & \\
+		% fusional languages
+		Spanish-AnCora & & & & & & & \\
+		Arabic-PADT & & & & & & & \\
+		Czech-CAC & & & & & & & \\
+		Polish-LFG & & & & & & & \\
+	\end{tabular}
+	\caption{\label{tab:results_large_tokens} Accuracy for morphological tagging on all tokens that are composed of 2 or more BPE tokens.}
+\end{table}
+
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{lr}
+		Parameter & Value \\
+		\hline
+		Epochs & 15 \\
+		Batch size & 4 / 32 \\
+		Character representation size & 128 \\
+		% optimizers
+		Optimizer & Adam \\
+		Learning rate & 0.001 \\
+		Learning rate$_{xlmr}$ & 1e-06 \\
+		% regularization
+		Label smoothing & 0.03 \\
+		
+	\end{tabular}
+\end{table}
 
 	
 	
