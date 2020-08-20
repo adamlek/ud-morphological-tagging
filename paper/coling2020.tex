@@ -155,9 +155,16 @@
     %\paragraph{Task:} We explore combination of BPE embeddings with the task of Morphological-Tagging-in-Context \citep{mccarthy2019sigmorphon}. 
     %The task is simply to predict the morphological features (such as case, number person, ...) of each word (as defined in the dataset) given the sentence which the word occur in.
     
-    \paragraph{Task:} In this paper we explore morphological sequence classification. Morphological tagging involves identifying a set of morphological features that a word posses, such as number, person, case and so on. 
-    Morphological features primarily depend on the affixes of words, but additional information is also provided by the words context. 
-    
+        \paragraph{Task:} In this paper we further focus on the task
+        of morphological sequence classification. Morphological
+        tagging involves identifying a set of morphological features
+        that a word possesses, such as number, person, case, etc. In
+        many languages, morphological features primarily depend on the
+        affixes of words. However, mapping affixes back to
+        morphological classes is not simple. In many cases, the
+        context of the sentence will affect which class should be
+        assigned to a word.
+
     \paragraph{Data:} For the task we will use the Universal Dependencies dataset \citep{nivre2018} annotated with the UniMorph schema \citep{mccarthy2018marrying}. We are interested both in the general effects of using different composition methods, and whether some methods favor languages with certain typology. To explore this, we take a sample of eight languages from the Universal Dependencies dataset, four languages that use \textit{fusional} morphology, an affix may be indicative of one or more morphological features, and four languages that use \textit{agglutinative} morphology, each affix is mapped to one and only one morphological feature. 
     
    	The fusional languages we look at are Arabic, Czech, Polish and Spanish, and the agglutinative languages we look at are Finnish, Basque, Turkish and Estonian. The size of the dataset and the average number of BPE tokens per word are shown in \cref{tab:data}.
