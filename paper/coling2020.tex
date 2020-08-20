@@ -40,7 +40,8 @@
 
 \title{Composing Byte-Pair Encodings for Morphological Sequence Classification}
 
-\author{Adam Ek,\\
+
+\author{Adam Ek \and Jean-Philippe Bernardy\\
 	Centre for Linguistic Theory and Studies in Probability,\\
 	Department of Philosophy, Linguistics and Theory of Science,\\
 	University of Gothenburg,\\
@@ -80,8 +81,16 @@
 		\item (data) Pick other datasets, try to match dataset sizes better (100k-150k train examples, turkish very small atm)
 	\end{itemize}
 
-	bla bla bla bullshit about transformer as an introduction. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long.
-	
+        Since its introduction \cite{todo}, the transformer model has
+        emerged as the dominant architecture for statistical language
+        model, gradually displacing recurrent neural networks, in
+        particular the LSTM and its variants. The transformer owes its
+        success to several factors, including the availability of
+        pretrained models, which effectively yield rich contextual
+        word embeddings. Such embeddings can be used as is (for
+        so-called feature extraction), or the pre-trained models can
+        be fine-tuned to specific applications.
+
 	The transformer models have diverged from the tokenization of classical natural language processing systems, favoring a statistical approach splitting a string of characters into (statistically) meaningful units. Rather than identifying complete words it aims to find sub-word units occurring significantly often. Typical approaches to composing tokens from sub-token units have focused on combining character n-grams [cite bojanowski], while other approaches have looked at splitting words into \textit{roots} and \textit{morphs} then combining them. Byte-pair take another approach by not specifically looking for either character n-grams or morphs, rather it aims to split a corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user defined. [EXPAND]
 	
 	In this paper we explore how to combine bpe-pair encodings in a transformer model to perform sequence classification. The goal in sequence classification is to assign a label to every token in a sentence. When we are using byte-pair encoding (or similar sub-token representations) we must then find some way of combining the units that build the word whose receive some label. 
