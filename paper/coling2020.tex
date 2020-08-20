@@ -97,7 +97,9 @@
         statistical approaches are favoured to splits strings of
         characters into units which are not necessarily meaningful
         linguistically, but rather have statistically balanced
-        frequencies.
+        frequencies. For example, the word "scientifically" may be
+        composed of the tokens: "scient", "ifical", "ly" --- here the
+        central token does not correspond to a morpheme.
         %
         Rather than identifying complete words or morphemes, it aims
         to find sub-word units occurring significantly often. Typical
@@ -106,7 +108,7 @@
         while other approaches have looked at splitting words into
         \textit{roots} and \textit{morphs}\jp{morphemes?}, and then
         combining them. In this paper, we consider in particular
-        Byte-Pair Encodings (BPE), which take another approach. One does not
+        Byte-Pair Encodings (BPE) \citep{sennrich2015neural}, which take another approach. One does not
         specifically look for either character n-grams or morphs, but
         rather it aim to split a corpus $\mathcal{C}$ into $N$ tokens,
         where $N$ is user defined. [EXPAND]
@@ -118,12 +120,15 @@
 
 	In this paper we explore how to combine Byte-Pair Encodings
         from a transformer model to perform sequence
-        classification. For our purposes, the goal in sequence
+        classification, which is used in particular in the popular BERT model \citep{devlin2018bert}. For our purposes, the goal in sequence
         classification is to assign a label to every word in a
         sentence. When we are using byte-pair encoding (or similar
         sub-token representations) we must then find some way of
         combining the units that build the word, before it is
-        eventually assigned a label.
+        eventually assigned a label. Coming back to our example, we
+        must map the feature-set assigned (depending on the context)
+        to "scient", "ifical", "ly". Then this combined feature set is
+        mapped to a class for the whole word ``scientifically''.
 
 	To our knownledge, this is a little studied
         problem. \citet{todo} have only brushed the surface by
@@ -131,10 +136,10 @@
         methods. In this paper we wish to explore the problem in
         further detail and identify what effect different methods have
         on the final performance of a model.
-	
+
     %In this paper we explore the transformer model applied to sequence classification. In sequence classification a dataset is split into words (or tokens) and each word is assigned a label. 
     %Neural model can predict the label of a word by assigning it a representation and passing it through the network. However, the transformer model use byte-pair encoding (BPE) \cite{sennrich2015neural}, or some variation of it \citep{devlin2018bert}, to tokenize text. 
-    %BPE tokens are sub-strings that occur significantly often in the corpus, and does not correspond directly to words. For example, the word "scientifically" may be composed of the the BPE tokens: ["scient", "ifical", "ly"].
+    %BPE tokens are sub-strings that occur significantly often in the corpus, and does not correspond directly to words. 
     %
     %In sequence classification, we need to assign a label to the word "scientifically". But the word is now composed of three BPE embeddings, so to predict a label for the word we need to compose all of the BPE embeddings into one representation.
     
