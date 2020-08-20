@@ -78,7 +78,7 @@
 		\item (data) Data statistics: number of MSD-tags 
 		\item (data) Pick other datasets, try to match dataset sizes better (100k-150k train examples, turkish very small atm)
 	\end{itemize}
-    
+
     In this project we explore the transformer model applied to sequence classification. In sequence classification a dataset is split into words (or tokens) and each word is assigned a label. 
     Neural model can predict the label of a word by assigning it a representation and passing it through the network. However, the transformer model use byte-pair encoding (BPE) \cite{sennrich2015neural}, or some variation of it \citep{devlin2018bert}, to tokenize text. 
     BPE tokens are sub-strings that occur significantly often in the corpus, and does not correspond directly to words. For example, the word "scientifically" may be composed of the the BPE tokens: ["scient", "ifical", "ly"].
@@ -182,8 +182,9 @@
 	
 	Given that many of the languages have a large number of morphological tags we want to prevent the model from growing overconfident for certain classes. To address this we introduce label smoothing, that is, instead of the incorrect classes having 0 probability and the correct class $100\%$ probability we let each of the incorrect classes have a probability of $\alpha$. We assign probabilities to a target $t$ by $(1-\alpha)t + \alpha / |C|$ where $|C|$ is the number of classes. 
 	
+	When fine-tuning the model we freeze the XLMR parameters for the first epoch.
+	When training the model we use cosine annealing learning rate with restarts every epoch, that is, the learning rate starts high then incrementally decrease to $1e-12$ during N steps, where N is the number of batches in an epoch.
 	
-	%
 	An outline of the model is presented in \cref{fig:model}, in the outline $f$ represent the different methods we use to combine BPE embeddings.
 	
 	\begin{figure}[h!]
@@ -195,6 +196,25 @@
 	The model we use to predict morphological features is simple. For each sentence we extract $n$ BPE embeddings from $XLMR_{LARGE}$ then align them to words. 
 	We then run all words who consist of more than one BPE embedding through a function $f$ which combine the BPE embeddings. This produce one embedding per word which we pass to a bidirectional LSTM to extract contextual features. 
 	We pass the LSTM outputs to a linear transformation layer that compute scores for each class in the output. We then apply softmax and compute the loss.
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{lr}
+			Parameter & Value \\
+			\hline
+			Epochs & 15 \\
+			Batch size & 4 / 32 \\
+			Character representation size & 128 \\
+			% optimizers
+			Optimizer & Adam \\
+			Learning rate & 0.001 \\
+			Learning rate$_{xlmr}$ & 1e-06 \\
+			% regularization
+			Label smoothing & 0.03 \\
+			
+		\end{tabular}
+		\caption{\label{tab:parameters} Hyperparameters used for training the model. Slashed indicate the value of a parameter when we finetune or extract features.}
+	\end{table}
 
 	
 	\section{Results}
@@ -204,7 +224,7 @@
 	
 	We present the accuracy of assigning morphological tags to all tokens in \cref{tab:results_tokens}. Both when we finetune and only extract BPE weights we see that using an RNN to compose BPE tokens yields slightly better performance.
 	%
-	
+	In general, our results are lower than the reported State-of-the-Art.
 	
 
 	\begin{table}[h]
@@ -215,15 +235,15 @@
 		Treebank & Baseline & Sum & Mean & RNN & Sum & Mean & RNN \\
 		\hline
 		% agglutinative languages
-		Finnish-TDT & .751 & .965 & .963 & \textbf{.967} & .930 & .931 &\\ 
-		Basque-BDT & .676 & .910 & .909 & \textbf{.920} & .865 & .865 & .888 \\
-		Turkish-IMST & .620 & .898 & .891 & \textbf{.905} &  &  &\\
+		Finnish-TDT & .751 & .965 & .963 & \textbf{.967} & .930 & .931 & \textbf{.942} \\ 
+		Basque-BDT & .676 & .910 & .909 & \textbf{.920} & .865 & .865 & \textbf{.888} \\
+		Turkish-IMST & .620 & .898 & .891 & \textbf{.905} & .856 & .849 & .866\\
 		Estonian-EDT & & & & & & & \\
 		% fusional languages
-		Spanish-AnCora & .842 & .979 & .979 & \textbf{.980} &  &  &\\
-		Arabic-PADT & .770 & .952 & .953&\textbf{.954} &  &  &\\
-		Czech-CAC & .771 &  &  &  &  &  &\\
-		Polish-LFG & & & & &  &  &\\
+		Spanish-AnCora & .842 & .979 & .979 & \textbf{.980} & .968 & .967 & \textbf{.971} \\
+		Arabic-PADT & .770 & .952 & .953&\textbf{.954} & .941 & .939 & \textbf{.948} \\
+		Czech-CAC & .771 &  &  &  & &  &\\
+		Polish-LFG & & & &  &  &  &\\
 	\end{tabular}
 	\caption{\label{tab:results_tokens} Accuracy for morphological tagging. We evaluate both when we finetune the XLMR model and when we only extract BPE embeddings weights.}
 	\end{table}
@@ -233,41 +253,22 @@
 	\begin{table}[h]
 	%\small
 	\centering
-	\begin{tabular}{l|c|ccc|ccc}
-		& & \multicolumn{3}{c}{Finetuning} & \multicolumn{3}{c}{Feature extraction} \\
-		Treebank & Baseline & Sum & Mean & RNN & Sum & Mean & RNN \\
-		\hline
+	\begin{tabular}{l|ccc}
+		 & \multicolumn{3}{c}{Method} \\
+		Treebank & Sum & Mean & RNN \\
+		 		\hline
 		% agglutinative languages
-		Finnish-TDT & & & & & & & \\ 
-		Basque-BDT & & & & & & & \\
-		Turkish-IMST & & & & & & & \\
-		Estonian-EDT & & & & & & & \\
+		Finnish-TDT & .927 & .928 & .939 \\ 
+		Basque-BDT  & .864 & .863 & .886 \\
+		Turkish-IMST & .853 & .846 & .863 \\
+		Estonian-EDT & & & \\
 		% fusional languages
-		Spanish-AnCora & & & & & & & \\
-		Arabic-PADT & & & & & & & \\
-		Czech-CAC & & & & & & & \\
-		Polish-LFG & & & & & & & \\
+		Spanish-AnCora & .967 & .966 & .970 \\
+		Arabic-PADT & .937 & .935 & .945\\
+		Czech-CAC & & & \\
+		Polish-LFG & .906 & .906 & .927 \\
 	\end{tabular}
 	\caption{\label{tab:results_large_tokens} Accuracy for morphological tagging on all tokens that are composed of 2 or more BPE tokens.}
-\end{table}
-
-
-\begin{table}[h]
-	\centering
-	\begin{tabular}{lr}
-		Parameter & Value \\
-		\hline
-		Epochs & 15 \\
-		Batch size & 4 / 32 \\
-		Character representation size & 128 \\
-		% optimizers
-		Optimizer & Adam \\
-		Learning rate & 0.001 \\
-		Learning rate$_{xlmr}$ & 1e-06 \\
-		% regularization
-		Label smoothing & 0.03 \\
-		
-	\end{tabular}
 \end{table}
 
 	
@@ -278,7 +279,9 @@
         Interestingly, this observation seem task-dependant rather than BPE dependant. We can see in \cref{tab:data} that Czech is a fusional language, but with a BPE-to-word ratio ($1.77$) comparable to the agglutinative languages. But, Czech also exhibit the pattern of benefiting less from RNN than from Mean, indicating that fusional languages\footnote{In our language/treebank sample.} regardless of BPE-to-word ratio is less affected by the composition method than agglutinative languages. 
         
         %In general, the agglutinative languages have a higher BPE-to-word ratio, with one exception, Czech. Czech have a BPE-to-word ratio of $1.77$, but still exhibit a lower difference between the RNN and mean method. Thus, from this small sample of treebanks it appears as if the method of combining BPE embeddings is more important for agglutinative languages than for fusional languages. 
-        
+    
+    \section{Conclusions}
+    	As a general summary of our work, we highlight that language typology is not irrelevant when working with models that employ byte-pair encoding.     
 	
 	%\section*{Acknowledgments}
 	
