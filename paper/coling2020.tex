@@ -91,7 +91,25 @@
         so-called feature extraction), or the pre-trained models can
         be fine-tuned to specific applications.
 
-	The transformer models have diverged from the tokenization of classical natural language processing systems, favoring a statistical approach splitting a string of characters into (statistically) meaningful units. Rather than identifying complete words it aims to find sub-word units occurring significantly often. Typical approaches to composing tokens from sub-token units have focused on combining character n-grams [cite bojanowski], while other approaches have looked at splitting words into \textit{roots} and \textit{morphs} then combining them. Byte-pair take another approach by not specifically looking for either character n-grams or morphs, rather it aims to split a corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user defined. [EXPAND]
+	At the same time as transformer models became popular, the
+        tokenization of natural language texts have shifted away from
+        methods explicitly oriented on words or morphemes. Rather,
+        statistical approaches are favoured to splits strings of
+        characters into units which are not necessarily meaningful
+        linguistically, but rather have statistically balanced
+        frequencies.
+        %
+        Rather than identifying complete words or morphemes, it aims
+        to find sub-word units occurring significantly often. Typical
+        approaches to composing tokens from sub-token units have
+        focused on combining character n-grams \cite{TODO:bojanowski},
+        while other approaches have looked at splitting words into
+        \textit{roots} and \textit{morphs}\jp{morphemes?}, and then
+        combining them. In this paper, we consider in particular
+        Byte-Pair Encodings, which take another approach. One does not
+        specifically look for either character n-grams or morphs, but
+        rather it aim to split a corpus $\mathcal{C}$ into $N$ tokens,
+        where $N$ is user defined. [EXPAND]
 	
 	In this paper we explore how to combine bpe-pair encodings in a transformer model to perform sequence classification. The goal in sequence classification is to assign a label to every token in a sentence. When we are using byte-pair encoding (or similar sub-token representations) we must then find some way of combining the units that build the word whose receive some label. 
 	
