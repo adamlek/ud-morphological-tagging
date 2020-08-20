@@ -2,6 +2,11 @@
 \BOOKMARK [1][-]{section.2}{Method}{}% 2
 \BOOKMARK [2][-]{subsection.2.1}{Byte-pair combination methods}{section.2}% 3
 \BOOKMARK [2][-]{subsection.2.2}{Model}{section.2}% 4
-\BOOKMARK [1][-]{section.3}{Results}{}% 5
-\BOOKMARK [1][-]{section.4}{Discussion}{}% 6
-\BOOKMARK [1][-]{section.5}{Conclusions}{}% 7
+\BOOKMARK [3][-]{subsubsection.2.2.1}{BPE features}{subsection.2.2}% 5
+\BOOKMARK [3][-]{subsubsection.2.2.2}{XLMR features}{subsection.2.2}% 6
+\BOOKMARK [3][-]{subsubsection.2.2.3}{Character features}{subsection.2.2}% 7
+\BOOKMARK [3][-]{subsubsection.2.2.4}{Label smoothing}{subsection.2.2}% 8
+\BOOKMARK [2][-]{subsection.2.3}{Training}{section.2}% 9
+\BOOKMARK [1][-]{section.3}{Results}{}% 10
+\BOOKMARK [1][-]{section.4}{Discussion}{}% 11
+\BOOKMARK [1][-]{section.5}{Conclusions}{}% 12

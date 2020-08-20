@@ -27,9 +27,10 @@
 \usepackage[noabbrev,capitalize]{cleveref}
 \usepackage{graphicx}
 \usepackage{natbib}
+\usepackage{pgfplots}
 
 %\setlength\titlebox{5cm}
-\colingfinalcopy % Uncomment this line for the final submission
+%\colingfinalcopy % Uncomment this line for the final submission
 
 % You can expand the titlebox if you need extra space
 % to show all the authors. Please do not make the titlebox
@@ -79,13 +80,21 @@
 		\item (data) Pick other datasets, try to match dataset sizes better (100k-150k train examples, turkish very small atm)
 	\end{itemize}
 
-    In this project we explore the transformer model applied to sequence classification. In sequence classification a dataset is split into words (or tokens) and each word is assigned a label. 
-    Neural model can predict the label of a word by assigning it a representation and passing it through the network. However, the transformer model use byte-pair encoding (BPE) \cite{sennrich2015neural}, or some variation of it \citep{devlin2018bert}, to tokenize text. 
-    BPE tokens are sub-strings that occur significantly often in the corpus, and does not correspond directly to words. For example, the word "scientifically" may be composed of the the BPE tokens: ["scient", "ifical", "ly"].
+	bla bla bla bullshit about transformer as an introduction. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long. Roughly this long.
+	
+	The transformer models have diverged from the tokenization of classical natural language processing systems, favoring a statistical approach splitting a string of characters into (statistically) meaningful units. Rather than identifying complete words it aims to find sub-word units occurring significantly often. Typical approaches to composing tokens from sub-token units have focused on combining character n-grams [cite bojanowski], while other approaches have looked at splitting words into \textit{roots} and \textit{morphs} then combining them. Byte-pair take another approach by not specifically looking for either character n-grams or morphs, rather it aims to split a corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user defined. [EXPAND]
+	
+	In this paper we explore how to combine bpe-pair encodings in a transformer model to perform sequence classification. The goal in sequence classification is to assign a label to every token in a sentence. When we are using byte-pair encoding (or similar sub-token representations) we must then find some way of combining the units that build the word whose receive some label. 
+	
+	Previous work have only brushed the surface of this problem by reporting that few differences are found between different methods. In this paper we wish to explore this in further detail and try to identify what effect different methods have for the final performance of a model.  
+	
+    %In this paper we explore the transformer model applied to sequence classification. In sequence classification a dataset is split into words (or tokens) and each word is assigned a label. 
+    %Neural model can predict the label of a word by assigning it a representation and passing it through the network. However, the transformer model use byte-pair encoding (BPE) \cite{sennrich2015neural}, or some variation of it \citep{devlin2018bert}, to tokenize text. 
+    %BPE tokens are sub-strings that occur significantly often in the corpus, and does not correspond directly to words. For example, the word "scientifically" may be composed of the the BPE tokens: ["scient", "ifical", "ly"].
     %
-    In sequence classification, we need to assign a label to the word "scientifically". But the word is now composed of three BPE embeddings, so to predict a label for the word we need to compose all of the BPE embeddings into one representation.
+    %In sequence classification, we need to assign a label to the word "scientifically". But the word is now composed of three BPE embeddings, so to predict a label for the word we need to compose all of the BPE embeddings into one representation.
     
-    In this project is to explore six different methods of creating word representations from multiple BPE embeddings.
+    %In this project is to explore six different methods of creating word representations from multiple BPE embeddings.
 	
 %%%
     %Typically, the transformer model use some variation of byte-pair endings (BPE)  to split sentences into tokens. For non-bpe tokenization schemas typically words are selected based on white-space. This is convenient in sequence classification or parsing where for each word some label is assigned. 
@@ -94,10 +103,15 @@
     
     %In this project we explore how to compose embeddings of BPE tokens into word representations. More specifically, in cases when a word is associated with several BPE embeddings (for example: the word "scientifically" may be composed of the the BPE tokens: ["scient", "ifical", "ly"]) how do we combine the BPE embeddings to create a word representation ("scientifically") which we assign a label to.
     
-    \paragraph{Task:} We explore combination of BPE embeddings with the task of Morphological-Tagging-in-Context \citep{mccarthy2019sigmorphon}. 
-    The task is simply to predict the morphological features (such as case, number person, ...) of each word (as defined in the dataset) given the sentence which the word occur in.
+    %\paragraph{Task:} We explore combination of BPE embeddings with the task of Morphological-Tagging-in-Context \citep{mccarthy2019sigmorphon}. 
+    %The task is simply to predict the morphological features (such as case, number person, ...) of each word (as defined in the dataset) given the sentence which the word occur in.
     
-    \paragraph{Data:} For the task we will use the Universal Dependencies dataset \citep{nivre2018} annotated with the UniMorph schema \citep{mccarthy2018marrying}. We look at 6 different languages: Arabic, Basque, Finnish, Czech, Spanish and Turkish. The language typology, ratio of BPE-tokens per word and training/development and test data can be found in \cref{tab:data}.
+    \paragraph{Task:} In this paper we explore morphological sequence classification. Morphological tagging involves identifying a set of morphological features that a word posses, such as number, person, case and so on. 
+    Morphological features primarily depend on the affixes of words, but additional information is also provided by the words context. 
+    
+    \paragraph{Data:} For the task we will use the Universal Dependencies dataset \citep{nivre2018} annotated with the UniMorph schema \citep{mccarthy2018marrying}. We are interested both in the general effects of using different composition methods, and whether some methods favor languages with certain typology. To explore this, we take a sample of eight languages from the Universal Dependencies dataset, four languages that use \textit{fusional} morphology, an affix may be indicative of one or more morphological features, and four languages that use \textit{agglutinative} morphology, each affix is mapped to one and only one morphological feature. 
+    
+   	The fusional languages we look at are Arabic, Czech, Polish and Spanish, and the agglutinative languages we look at are Finnish, Basque, Turkish and Estonian. The size of the dataset and the average number of BPE tokens per word are shown in \cref{tab:data}.
     
     	\begin{table}[h]
 		\centering
@@ -116,74 +130,30 @@
 		\caption{\label{tab:data} Treebank statistics.}
 	\end{table}
     
-    \paragraph{Base model}
+    The fusional languages where chosen such that two of them (Czech and Polish) have a higher BPE per token ratio than the other two (Arabic and Spanish). We do this because one factor that impact composition method may be BPE per token ratio, and we want to exclude this from our analysis. Thus, by having both fusional and agglutinative languages with similar BPE per token ratio we can discard this as an explanatory factor. 
     
-	For the task we will use the XLMR \citep{conneau2019unsupervised} model\footnote{We use the fairseq implementation: \url{https://github.com/pytorch/fairseq/tree/master/examples/xlmr}}. XLMR is a masked language model based on the transformer (specifically, RoBERTa \citep{liu2019roberta}) trained on data from 100 different languages, using a shared vocabulary. In this experiment we use \textsc{XLMR}$_{LARGE}$, the model have 12 encoder layers, 16 attention heads and use 1024 dimensions for its hidden size.
+
 	
 	\section{Method}
 	\label{method}
 	
-	In this section we present different methods of composing BPE embeddings into word representations and the structure of our neural network. We align BPE tokens to words by a simple string matching algorithm. 
+	In this section we present the model used for sequence classification, the methods we use to compose BPE embeddings, and how we trained the model.
+	
+	
+	\paragraph{Transformer model}
+	For the task we use the XLMR \citep{conneau2019unsupervised} model\footnote{We use the huggingface implementation [CITE/LINK]}. XLMR is a masked language model based on the transformer (specifically, RoBERTa \citep{liu2019roberta}) trained on data from 100 different languages, using a shared vocabulary. In this experiment we use \textsc{XLMR}$_{base}$ model, it has 12 encoder layers, 16 (?) attention heads and use 768 dimensions for its hidden size. 
 	
 	\subsection{Byte-pair combination methods}
 	
-	\paragraph{Sum:} For the sum method, we simply take the sum for each dimension of all BPE embeddings. Thus, for dimension $i$ we add all the values in all BPE embeddings $x_i^0 + ,..., + x_i^n$:
-	
-	\begin{equation}
-	    x'_{i} = \sum_{j=1}^{n} x_i^j
-	\end{equation}
-	
-		%\begin{equation}
-		%	f(x) = \sum_{1}^{N} \sum_{1}^{d} x_d^0 + ... + x_d^n
-		%\end{equation}
-		
-		%\begin{equation}
-		%f(x) = \Big[(\sum_{1}^{n} x_0^0 + ... + x_0^n), ..., (\sum_{1}^{n} x_d^0 + ... %+ x_d^n)\Big]
-		%\end{equation}
-	
-	\paragraph{Mean:} In the mean method we calculate the sum and divide by the number of BPE embeddings in the word. Thus, for dimension $i$ we calculate $\frac{x_i^0 + ,..., + x_i^n}{n}$: 
-	
-    	\begin{equation}
-    	    x'_{i} = \frac{1}{n}\sum_{j=1}^{n} x_i^j
-    	\end{equation}
-		%\begin{equation}
-		%	f(x) = \frac{1}{n}\Big[(\sum_{1}^{n} x_0^0 + ... + x_0^n), ..., %(\sum_{1}^{n} x_d^0 + ... + x_d^n)\Big]
-		%\end{equation}
-	
-	\paragraph{Max:} In the max method we take the most activated value of dimension $i$ over all BPE embeddings $x^0...x^n$ in the word. 
-	
-		\begin{equation}
-			x'_i = {argmax(x_i^0,...x_i^n)}
-		\end{equation}
-	
-	\paragraph{RNN:} In this method we employ a bidirectional RNN to learn how to compose the BPE embeddings. For each multi-BPE token, we pass the sequence of BPE embeddings through an RNN and use the final output as the word representation.
-	
-	\paragraph{Att1:} In the first attention method we use self-attention \citep{vaswani2017attention} with one linear transformation. Like in the transformer we use three copies of the BPE sequence as inputs and transform one of them using a linear layer.
-	We then calculate pairwise scores and apply softmax. We then use the softmax to create a weighted sum for the word representation.
-	
-	\begin{equation}
-	    x = softmax(\frac{q (kW_k)^\intercal}{\sqrt{d}}) \cdot V
-	\end{equation}
-	
-	\paragraph{Att3:} Like in the first attention method we use self-attentions. However, in the second attention approach we use three linear transformations, one for each copy of the input. 
-	
-	\begin{equation}
-	    x = softmax(\frac{qW_q kW_k ^\intercal}{\sqrt{d}}) \cdot vW_v
-	\end{equation}
+
+
 	
 	\subsection{Model}
 	For morphological tagging we use the XLMR base model with a classification module on top. The classification module is a LSTM followed by a two layer linear transformation. 
 	
-	When extracting features from XLMR we compute a weighted sum of the layer representations. This is inspired by previous work showing that the different layers in language models encode different kinds of information. That is, we create a random vector $w$ with one element per layer, indicating the importance of the layer. We the BPE representation as follows:
-	
-	\begin{equation}
-		x = \sum_{1}^{N} c_n l_n
-	\end{equation}
-	
-	Given that many of the languages have a large number of morphological tags we want to prevent the model from growing overconfident for certain classes. To address this we introduce label smoothing, that is, instead of the incorrect classes having 0 probability and the correct class $100\%$ probability we let each of the incorrect classes have a probability of $\alpha$. We assign probabilities to a target $t$ by $(1-\alpha)t + \alpha / |C|$ where $|C|$ is the number of classes. 
-	
-	When fine-tuning the model we freeze the XLMR parameters for the first epoch.
-	When training the model we use cosine annealing learning rate with restarts every epoch, that is, the learning rate starts high then incrementally decrease to $1e-12$ during N steps, where N is the number of batches in an epoch.
+	The model we use to predict morphological features is simple. For each sentence we extract $n$ BPE embeddings from $XLMR_{base}$ then align them to words. 
+	We then run all words who consist of more than one BPE embedding through a function $f$ which combine the BPE embeddings. This produce one embedding per word which we concatenate with character features generated by a character LSTM. We then pass the BPE features concatenated with the character features to a LSTM to extracxt contextual features.
+	We pass the LSTM outputs to a linear transformation layer that compute scores for each class in the output. We then apply softmax and compute the loss.
 	
 	An outline of the model is presented in \cref{fig:model}, in the outline $f$ represent the different methods we use to combine BPE embeddings.
 	
@@ -193,9 +163,46 @@
 		\caption{\label{fig:model} Procedure outline}
 	\end{figure}
 	
-	The model we use to predict morphological features is simple. For each sentence we extract $n$ BPE embeddings from $XLMR_{LARGE}$ then align them to words. 
-	We then run all words who consist of more than one BPE embedding through a function $f$ which combine the BPE embeddings. This produce one embedding per word which we pass to a bidirectional LSTM to extract contextual features. 
-	We pass the LSTM outputs to a linear transformation layer that compute scores for each class in the output. We then apply softmax and compute the loss.
+	\subsubsection{BPE features} 	
+	
+	We obtain BPE features for a \textit{token} by combining the BPE tokens that compose the token by combining their features using three different methods:
+	
+	\paragraph{Sum:} For the sum method, we take the sum for each dimension of all BPE embeddings. Thus, for dimension $i$ we add all the values in all BPE embeddings $x_i^0 + ,..., + x_i^n$:
+	
+	\begin{equation}
+	x'_{i} = \sum_{j=1}^{n} x_i^j
+	\end{equation}
+	
+	
+	\paragraph{Mean:} In the mean method we calculate the sum and divide by the number of BPE embeddings in the word. Thus, for dimension $i$ we calculate $\frac{x_i^0 + ,..., + x_i^n}{n}$: 
+	
+	\begin{equation}
+	x'_{i} = \frac{1}{n}\sum_{j=1}^{n} x_i^j
+	\end{equation}
+	
+	
+	\paragraph{RNN:} In this method we employ a bidirectional RNN to learn how to compose the BPE embeddings. For each multi-BPE token, we pass the sequence of BPE embeddings through an RNN and use the final output as the word representation.
+	
+	\subsubsection{XLMR features}
+	
+	When extracting features from XLMR we compute a weighted sum of the layer representations. This is inspired by previous work showing that the different layers in language models encode different kinds of information. That is, we create a random vector $w$ with one element per layer, indicating the importance of the layer. We calculate the layerwise weighted sum for each bpe representation as follows:
+	
+	\begin{equation}
+		x_i = \sum_{1}^{J} softmax(c)_j l_{ji}
+	\end{equation}
+	
+	\subsubsection{Character features}
+	In addition to layer attention we use a character LSTM to extract a word representation based on characters. The final representation we pass to the word-LSTM is the concatenation of the word representation based on BPE compositions and characters, $w_i = \text{concat}(f(bpe_0,...,bpe_K), LSTM(c_0, ..., c_M))$
+	
+	\subsubsection{Label smoothing}
+	Given that many of the languages have a large number of morphological tags we want to prevent the model from growing overconfident for certain classes. To address this we introduce label smoothing, that is, instead of the incorrect classes having 0 probability and the correct class $100\%$ probability we let each of the incorrect classes have a probability of $\alpha$. We assign probabilities to a target $t$ by $(1-\alpha)t + \alpha / |C|$ where $|C|$ is the number of classes. 
+	
+
+	
+	\subsection{Training}
+	
+	When fine-tuning the model we freeze the XLMR parameters for the first epoch.
+	When training the model we use cosine annealing learning rate with restarts every epoch, that is, the learning rate starts high then incrementally decrease to $1e-12$ during N steps, where N is the number of batches in an epoch.
 	
 	\begin{table}[h]
 		\centering
@@ -237,13 +244,13 @@
 		% agglutinative languages
 		Finnish-TDT & .751 & .965 & .963 & \textbf{.967} & .930 & .931 & \textbf{.942} \\ 
 		Basque-BDT & .676 & .910 & .909 & \textbf{.920} & .865 & .865 & \textbf{.888} \\
-		Turkish-IMST & .620 & .898 & .891 & \textbf{.905} & .856 & .849 & .866\\
-		Estonian-EDT & & & & & & & \\
+		Turkish-IMST & .620 & .898 & .891 & \textbf{.905} & .856 & .849 & \textbf{.866}\\
+		Estonian-EDT & & & & & .931 & .934 & \textbf{.939} \\
 		% fusional languages
 		Spanish-AnCora & .842 & .979 & .979 & \textbf{.980} & .968 & .967 & \textbf{.971} \\
 		Arabic-PADT & .770 & .952 & .953&\textbf{.954} & .941 & .939 & \textbf{.948} \\
 		Czech-CAC & .771 &  &  &  & &  &\\
-		Polish-LFG & & & &  &  &  &\\
+		Polish-LFG & & & &  & .907 & .907 & \textbf{.928} \\
 	\end{tabular}
 	\caption{\label{tab:results_tokens} Accuracy for morphological tagging. We evaluate both when we finetune the XLMR model and when we only extract BPE embeddings weights.}
 	\end{table}
@@ -271,14 +278,87 @@
 	\caption{\label{tab:results_large_tokens} Accuracy for morphological tagging on all tokens that are composed of 2 or more BPE tokens.}
 \end{table}
 
+\begin{center}
+	\begin{tikzpicture}
+
+	\begin{axis}[
+	title={},
+	xlabel={BPE tokens per word},
+	ylabel={Accuracy},
+	xmin=2, xmax=7,
+	ymin=0.65, ymax=1,
+	xtick=data,
+	ytick={0.65,0.8,1.0},
+	typeset ticklabels with strut,
+	legend pos=outer north east,
+	ymajorgrids=true,
+	grid style=dashed,
+	width=12cm,
+	height=5cm
+	]
+	
+	\addplot[
+	color=blue,
+	mark=square,
+	]
+	coordinates {(2, 0.9163053722902922)(3, 0.9090291921249152)(4, 0.9081133919843597)(5, 0.9302325581395349)(6, 0.9074074074074074)(7, 0.875)};
+	\legend{Finnish}
+	
+	\addplot[
+	color=red,
+	mark=square,
+	]
+	coordinates {(2, 0.8662081900593935)(3, 0.7957794417971409)(4, 0.8051948051948052)(5, 0.7866666666666666)(6, 1.0)(7, 1.0)};
+	\legend{Basque}
+	
+	\addplot[
+	color=green,
+	mark=square,
+	]
+	coordinates {(2, 0.8173395102581072)(3, 0.8154981549815498)(4, 0.8313953488372093)(5, 0.7391304347826086)(6, 0.6923076923076923)(7, 1.0)};
+	\legend{Turskish}
+	
+	\addplot[
+	color=purple,
+	mark=square,
+	]
+	coordinates {(2, 0.9207130730050934)(3, 0.9058250456667343)(4, 0.9142367066895368)(5, 0.9327433628318584)(6, 0.9276315789473685)(7, 0.925531914893617)};\legend{Estonian}
+	
+	\addplot[
+	color=orange,
+	mark=square,
+	]
+	coordinates {(2, 0.9375252729478366)(3, 0.930576070901034)(4, 0.9455252918287937)(5, 0.9333333333333333)};\legend{Arabic}
+	
+	\addplot[
+	color=cyan,
+	mark=square,
+	]
+	coordinates {(2, 0.9616295004360284)(3, 0.9546589018302829)(4, 0.9638242894056848)(5, 0.8867924528301887)(6, 0.96)(7, 0.75)};\legend{Spanish}
+	
+	\legend{
+		Finish,
+		Basque,
+		Turkish,
+		Estonian,
+		Spanish,
+		Arabic
+	}
+	
+	\end{axis}
+	\end{tikzpicture}
+\end{center}
+
 	
 	
 	\section{Discussion}
-        We can observe an interesting trend for the treebank samples. For the languages with agglutinative morphology\footnote{1-to-1 correspondence between morphemes and grammatical/syntactic features.} the average increase using RNN compared to Mean is 4.3\%. For the fusional\footnote{1-to-many correspondence between morphemes and grammatical/syntactic features.} languages, the difference between RNN and Mean is only 1.1\%. 
+        %We can observe an interesting trend for the treebank samples. For the languages with agglutinative morphology\footnote{1-to-1 correspondence between morphemes and grammatical/syntactic features.} the average increase using RNN compared to Mean is 4.3\%. For the fusional\footnote{1-to-many correspondence between morphemes and grammatical/syntactic features.} languages, the difference between RNN and Mean is only 1.1\%. 
         
-        Interestingly, this observation seem task-dependant rather than BPE dependant. We can see in \cref{tab:data} that Czech is a fusional language, but with a BPE-to-word ratio ($1.77$) comparable to the agglutinative languages. But, Czech also exhibit the pattern of benefiting less from RNN than from Mean, indicating that fusional languages\footnote{In our language/treebank sample.} regardless of BPE-to-word ratio is less affected by the composition method than agglutinative languages. 
+        %Interestingly, this observation seem task-dependant rather than BPE dependant. We can see in \cref{tab:data} that Czech is a fusional language, but with a BPE-to-word ratio ($1.77$) comparable to the agglutinative languages. But, Czech also exhibit the pattern of benefiting less from RNN than from Mean, indicating that fusional languages\footnote{In our language/treebank sample.} regardless of BPE-to-word ratio is less affected by the composition method than agglutinative languages. 
         
         %In general, the agglutinative languages have a higher BPE-to-word ratio, with one exception, Czech. Czech have a BPE-to-word ratio of $1.77$, but still exhibit a lower difference between the RNN and mean method. Thus, from this small sample of treebanks it appears as if the method of combining BPE embeddings is more important for agglutinative languages than for fusional languages. 
+        
+        Analogously to character embeddings, the RNN method seem to provide stronger results than using either Sum or Mean for combining BPE tokens. We hypothesize that this is because Sum or Mean don't respect the ordering of elements within a word, that is, we don't relate the values of $BPE_0$ to $BPE_{1:N}$ with respect to the morphological tags. 
     
     \section{Conclusions}
     	As a general summary of our work, we highlight that language typology is not irrelevant when working with models that employ byte-pair encoding.     
