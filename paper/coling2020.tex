@@ -106,14 +106,31 @@
         while other approaches have looked at splitting words into
         \textit{roots} and \textit{morphs}\jp{morphemes?}, and then
         combining them. In this paper, we consider in particular
-        Byte-Pair Encodings, which take another approach. One does not
+        Byte-Pair Encodings (BPE), which take another approach. One does not
         specifically look for either character n-grams or morphs, but
         rather it aim to split a corpus $\mathcal{C}$ into $N$ tokens,
         where $N$ is user defined. [EXPAND]
-	
-	In this paper we explore how to combine bpe-pair encodings in a transformer model to perform sequence classification. The goal in sequence classification is to assign a label to every token in a sentence. When we are using byte-pair encoding (or similar sub-token representations) we must then find some way of combining the units that build the word whose receive some label. 
-	
-	Previous work have only brushed the surface of this problem by reporting that few differences are found between different methods. In this paper we wish to explore this in further detail and try to identify what effect different methods have for the final performance of a model.  
+
+        One issue with statistical tokenization is that one is seldom
+        interested in the encoding, but rather in the semantically
+        meaningful units in the original texts. Thus the question of
+        mapping data about the token back to the original text arises.
+
+	In this paper we explore how to combine Byte-Pair Encodings
+        from a transformer model to perform sequence
+        classification. For our purposes, the goal in sequence
+        classification is to assign a label to every word in a
+        sentence. When we are using byte-pair encoding (or similar
+        sub-token representations) we must then find some way of
+        combining the units that build the word, before it is
+        eventually assigned a label.
+
+	To our knownledge, this is a little studied
+        problem. \citet{todo} have only brushed the surface by
+        reporting that few differences are found between different
+        methods. In this paper we wish to explore the problem in
+        further detail and identify what effect different methods have
+        on the final performance of a model.
 	
     %In this paper we explore the transformer model applied to sequence classification. In sequence classification a dataset is split into words (or tokens) and each word is assigned a label. 
     %Neural model can predict the label of a word by assigning it a representation and passing it through the network. However, the transformer model use byte-pair encoding (BPE) \cite{sennrich2015neural}, or some variation of it \citep{devlin2018bert}, to tokenize text. 
