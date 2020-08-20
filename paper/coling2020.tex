@@ -249,7 +249,7 @@
 		% fusional languages
 		Spanish-AnCora & .842 & .979 & .979 & \textbf{.980} & .968 & .967 & \textbf{.971} \\
 		Arabic-PADT & .770 & .952 & .953&\textbf{.954} & .941 & .939 & \textbf{.948} \\
-		Czech-CAC & .771 &  &  &  & &  &\\
+		Czech-CAC & .771 &  &  &  & .944 &  &  \\
 		Polish-LFG & & & &  & .907 & .907 & \textbf{.928} \\
 	\end{tabular}
 	\caption{\label{tab:results_tokens} Accuracy for morphological tagging. We evaluate both when we finetune the XLMR model and when we only extract BPE embeddings weights.}
@@ -265,15 +265,15 @@
 		Treebank & Sum & Mean & RNN \\
 		 		\hline
 		% agglutinative languages
-		Finnish-TDT & .927 & .928 & .939 \\ 
-		Basque-BDT  & .864 & .863 & .886 \\
-		Turkish-IMST & .853 & .846 & .863 \\
-		Estonian-EDT & & & \\
+		Finnish-TDT & .893 & .897 & \textbf{.913} \\ 
+		Basque-BDT  & .802 & .803 & \textbf{.840} \\
+		Turkish-IMST & .807 & .796 & \textbf{.816} \\
+		Estonian-EDT & .904 & .908 & \textbf{.916} \\
 		% fusional languages
-		Spanish-AnCora & .967 & .966 & .970 \\
-		Arabic-PADT & .937 & .935 & .945\\
+		Spanish-AnCora & .952 & .951 & \textbf{.959} \\
+		Arabic-PADT & .927 & .925 & \textbf{.935}\\
 		Czech-CAC & & & \\
-		Polish-LFG & .906 & .906 & .927 \\
+		Polish-LFG & .834 & .833 & \textbf{.876} \\
 	\end{tabular}
 	\caption{\label{tab:results_large_tokens} Accuracy for morphological tagging on all tokens that are composed of 2 or more BPE tokens.}
 \end{table}
