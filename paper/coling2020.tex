@@ -29,6 +29,7 @@
 \usepackage{natbib}
 \usepackage{pgfplots}
 
+\newcommand\jp[1]{(\textbf{JP:} #1)}
 %\setlength\titlebox{5cm}
 %\colingfinalcopy % Uncomment this line for the final submission
 
@@ -165,9 +166,24 @@
         many cases, the context of the sentence will affect which
         class should be assigned to a word.
 
-    \paragraph{Data:} For the task we will use the Universal Dependencies dataset \citep{nivre2018} annotated with the UniMorph schema \citep{mccarthy2018marrying}. We are interested both in the general effects of using different composition methods, and whether some methods favor languages with certain typology. To explore this, we take a sample of eight languages from the Universal Dependencies dataset, four languages that use \textit{fusional} morphology, an affix may be indicative of one or more morphological features, and four languages that use \textit{agglutinative} morphology, each affix is mapped to one and only one morphological feature. 
+        \paragraph{Data:} For the task we will use the Universal
+        Dependencies dataset \citep{nivre2018} annotated with the
+        UniMorph schema \citep{mccarthy2018marrying}. We are
+        interested both in the general effects of using different
+        composition methods, and whether some methods favor languages
+        with certain typologies. To explore this, we take a sample of
+        eight languages from the Universal Dependencies dataset. Four
+        of them use a \textit{fusional} morphology, meaning that an
+        affix may be indicative of one or more morphological
+        features. Four of them use an \textit{agglutinative}
+        morphology, meaning that each affix is mapped to one and only
+        one morphological feature.
     
-   	The fusional languages we look at are Arabic, Czech, Polish and Spanish, and the agglutinative languages we look at are Finnish, Basque, Turkish and Estonian. The size of the dataset and the average number of BPE tokens per word are shown in \cref{tab:data}.
+   	The fusional languages we consider are Arabic, Czech, Polish
+        and Spanish, and the agglutinative languages we consider are
+        Finnish, Basque, Turkish and Estonian. The size of the dataset
+        \jp{in original words?}  and the average number of BPE tokens
+        per word are shown in \cref{tab:data}.
     
     	\begin{table}[h]
 		\centering
