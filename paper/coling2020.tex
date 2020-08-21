@@ -131,7 +131,7 @@
         to "scient", "ifical", "ly". Then this combined feature set is
         mapped to a class for the whole word ``scientifically''.
 
-	To our knownledge, this is a little studied
+	To our knownledge, this is a little-studied
         problem. \citet{todo} have only brushed the surface by
         reporting that few differences are found between different
         methods. In this paper we wish to explore the problem in
@@ -179,13 +179,13 @@
         morphology, meaning that each affix is mapped to one and only
         one morphological feature.
     
-   	The fusional languages we consider are Arabic, Czech, Polish
-        and Spanish, and the agglutinative languages we consider are
-        Finnish, Basque, Turkish and Estonian. The size of the dataset
-        \jp{in original words?}  and the average number of BPE tokens
-        per word are shown in \cref{tab:data}.
+   	The fusional languages that we consider are Arabic, Czech,
+        Polish and Spanish, and the agglutinative languages that we
+        consider are Finnish, Basque, Turkish and Estonian. The size
+        of the dataset \jp{in original words?}  and the average number
+        of BPE tokens per word are shown in \cref{tab:data}.
     
-    	\begin{table}[h]
+    	\begin{table} % JP it's better to leave placement to the tex engine and the style sheet. (unless there is a real problem doing so)
 		\centering
 		\begin{tabular}{l|lrrrr}
 			Language & Typology & $\frac{BPE}{word}$ & Train & Validation & Test \\
@@ -202,7 +202,14 @@
 		\caption{\label{tab:data} Treebank statistics.}
 	\end{table}
     
-    The fusional languages where chosen such that two of them (Czech and Polish) have a higher BPE per token ratio than the other two (Arabic and Spanish). We do this because one factor that impact composition method may be BPE per token ratio, and we want to exclude this from our analysis. Thus, by having both fusional and agglutinative languages with similar BPE per token ratio we can discard this as an explanatory factor. 
+        The fusional languages where chosen such that two of them
+        (Czech and Polish) have a higher BPE per token ratio than the
+        other two (Arabic and Spanish). We make this choice because
+        one factor that impacts the accuracy obtained by a composition
+        method may be the BPE per token ratio.  By having both
+        fusional and agglutinative languages with similar BPE per
+        token ratio we can take this variable into account properly in
+        our analysis.
     
 
 	
