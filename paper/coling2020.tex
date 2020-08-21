@@ -27,6 +27,7 @@
 \usepackage[noabbrev,capitalize]{cleveref}
 \usepackage{graphicx}
 \usepackage{natbib}
+\usepackage{subcaption}
 \usepackage{pgfplots}
 
 %\setlength\titlebox{5cm}
@@ -249,11 +250,31 @@
 		% fusional languages
 		Spanish-AnCora & .842 & .979 & .979 & \textbf{.980} & .968 & .967 & \textbf{.971} \\
 		Arabic-PADT & .770 & .952 & .953&\textbf{.954} & .941 & .939 & \textbf{.948} \\
-		Czech-CAC & .771 &  &  &  & .944 &  &  \\
+		Czech-CAC & .771 &  &  &  & .944 & .944 & \textbf{.952} \\
 		Polish-LFG & & & &  & .907 & .907 & \textbf{.928} \\
 	\end{tabular}
-	\caption{\label{tab:results_tokens} Accuracy for morphological tagging. We evaluate both when we finetune the XLMR model and when we only extract BPE embeddings weights.}
+	\caption{\label{tab:results_tokens} Accuracy for morphological tagging. We evaluate both when we finetune the XLMR model and when we only extract BPE embeddings.}
 	\end{table}
+
+	\begin{table}[h]
+	%\small
+	\centering
+	\begin{tabular}{l|c|ccc|ccc}
+		& & \multicolumn{3}{c}{Finetuning} & \multicolumn{3}{c}{Feature extraction} \\
+		Treebank & Baseline & Sum & Mean & RNN & Sum & Mean & RNN \\
+		\hline
+		Basque-BDT  &   & 0 & 0 & 0 & 0.789 & 0.780 & 0.834 \\
+		Finnish-TDT  &  & 0 & 0 & 0 & 0.856 & 0.847 & 0.899 \\
+		Turkish-IMST  &   & 0 & 0 & 0& 0.741 & 0.735 & 0.775 \\
+		Estonian-EDT  &   & & 0 & 0 & 0.856 & 0.853 & 0.901 \\
+		Spanish-AnCora  &  & 0 & 0 & 0 & 0.954 & 0.952 & 0.962 \\
+		Arabic-PADT  & & 0 & 0 & 0  & 0.923 & 0.902 & 0.936 \\
+		Czech-CAC  &  & 0 & 0 &  & 0.887 & 0.881 & 0.924 \\
+		Polish-LFG  & & 0 & 0 & 0  & 0.844 & 0.840 & 0.878 \\
+		
+	\end{tabular}
+	\caption{\label{tab:results_tokens_nochars} Without character LSTM}
+\end{table}
 
 	However, the results in \cref{tab:results_tokens} also include tokens which are only composed of one BPE token. To better evaluate our composition methods we compute the accuracy for tokens which are composed of two or more BPE tokens. The results can be seen in \cref{tab:results_large_tokens}.
 
@@ -261,9 +282,9 @@
 	%\small
 	\centering
 	\begin{tabular}{l|ccc}
-		 & \multicolumn{3}{c}{Method} \\
+		 & \multicolumn{3}{c}{Feature extraction} \\
 		Treebank & Sum & Mean & RNN \\
-		 		\hline
+		 \hline
 		% agglutinative languages
 		Finnish-TDT & .893 & .897 & \textbf{.913} \\ 
 		Basque-BDT  & .802 & .803 & \textbf{.840} \\
@@ -272,82 +293,273 @@
 		% fusional languages
 		Spanish-AnCora & .952 & .951 & \textbf{.959} \\
 		Arabic-PADT & .927 & .925 & \textbf{.935}\\
-		Czech-CAC & & & \\
+		Czech-CAC & .915 & .916 & \textbf{.930} \\
 		Polish-LFG & .834 & .833 & \textbf{.876} \\
 	\end{tabular}
 	\caption{\label{tab:results_large_tokens} Accuracy for morphological tagging on all tokens that are composed of 2 or more BPE tokens.}
 \end{table}
 
-\begin{center}
-	\begin{tikzpicture}
+	\begin{figure}[h!]
+		\centering
+		\begin{tikzpicture}
+		\begin{axis}[
+		name=finnish,
+		title={Finnish},
+		xlabel={},
+		ylabel={},
+		typeset ticklabels with strut,
+		legend pos=south west,
+		ymajorgrids=true,
+		grid style=dashed,
+		height=5cm
+		]
+		
+		\addplot[
+		color=blue,
+		mark=square,
+		]
+		coordinates {(2, 0.8967012252591895)(3, 0.8906992532247114)(4, 0.8787878787878788)(5, 0.9127906976744186)(6, 0.8981481481481481)(7, 0.875)};
+		
+		\addplot[
+		color=red,
+		mark=square,
+		]
+		coordinates {(2, 0.8983977379830349)(3, 0.8985064494229463)(4, 0.8856304985337243)(5, 0.9156976744186046)(6, 0.9259259259259259)(7, 0.875)};
+		
+		\addplot[
+		color=green,
+		mark=square,
+		]
+		coordinates {(2, 0.9163053722902922)(3, 0.9090291921249152)(4, 0.9081133919843597)(5, 0.9302325581395349)(6, 0.9074074074074074)(7, 0.875)};
+	
+		\end{axis}
+		\end{tikzpicture}
+		\begin{tikzpicture}
+		\begin{axis}[
+		name=basque,
+		title={Basque},
+		xlabel={},
+		ylabel={},
+		typeset ticklabels with strut,
+		legend pos=south west,
+		ymajorgrids=true,
+		grid style=dashed,
+				height=5cm
+		]
+		
+		\addplot[
+		color=blue,
+		mark=square,
+		]
+		coordinates {(2, 0.8243201000312598)(3, 0.7692307692307693)(4, 0.7662337662337663)(5, 0.72)(6, 0.8333333333333334)(7, 1.0)};
+		
+		\addplot[
+		color=red,
+		mark=square,
+		]
+		coordinates {(2, 0.8233823069709284)(3, 0.7705922396187883)(4, 0.7532467532467533)(5, 0.84)(6, 0.9166666666666666)(7, 1.0)};
+		
+		\addplot[
+		color=green,
+		mark=square,
+		]
+		coordinates {(2, 0.8662081900593935)(3, 0.7957794417971409)(4, 0.8051948051948052)(5, 0.7866666666666666)(6, 1.0)(7, 1.0)};
+		\end{axis}
+		\end{tikzpicture}
+		\begin{tikzpicture}
+		\begin{axis}[
+		name=turkish,
+		title={Turkish},
+		xlabel={},
+		ylabel={},
+		typeset ticklabels with strut,
+		legend pos=south west,
+		ymajorgrids=true,
+		grid style=dashed,
+		height=5cm
+		]
+		
+		\addplot[
+		color=blue,
+		mark=square,
+		]
+		coordinates {(2, 0.8054268696227663)(3, 0.8191881918819188)(4, 0.8081395348837209)(5, 0.6956521739130435)(6, 0.6923076923076923)(7, 1.0)};
+		
+		\addplot[
+		color=red,
+		mark=square,
+		]
+		coordinates {(2, 0.8034414295168762)(3, 0.7878228782287823)(4, 0.7848837209302325)(5, 0.7391304347826086)(6, 0.6153846153846154)(7, 1.0)};
+		
+		\addplot[
+		color=green,
+		mark=square,
+		]
+		coordinates {(2, 0.8173395102581072)(3, 0.8154981549815498)(4, 0.8313953488372093)(5, 0.7391304347826086)(6, 0.6923076923076923)(7, 1.0)};
+		\end{axis}
+		\end{tikzpicture}
+		\begin{tikzpicture}
+		\begin{axis}[
+		name=estonian,
+		title={Estonian},
+		xlabel={},
+		ylabel={},
+		typeset ticklabels with strut,
+		legend pos=south west,
+		ymajorgrids=true,
+		grid style=dashed,
+		height=5cm
+		]
+		
+		\addplot[
+		color=blue,
+		mark=square,
+		]
+		coordinates {(2, 0.9061969439728353)(3, 0.8942561396387254)(4, 0.9136649514008005)(5, 0.9221238938053097)(6, 0.9210526315789473)(7, 0.9148936170212766)};
+		
+		\addplot[
+		color=red,
+		mark=square,
+		]
+		coordinates {(2, 0.9132427843803056)(3, 0.8934442865841282)(4, 0.9073756432246999)(5, 0.9256637168141593)(6, 0.9342105263157895)(7, 0.9148936170212766)};
+		
+		\addplot[
+		color=green,
+		mark=square,
+		]
+		coordinates {(2, 0.9207130730050934)(3, 0.9058250456667343)(4, 0.9142367066895368)(5, 0.9327433628318584)(6, 0.9276315789473685)(7, 0.925531914893617)};
+		\end{axis}
+		\end{tikzpicture}
+		\begin{tikzpicture}
+		\begin{axis}[
+		name=spanish,
+		title={Spanish},
+		xlabel={},
+		ylabel={},
+		typeset ticklabels with strut,
+		legend pos=south west,
+		ymajorgrids=true,
+		grid style=dashed,
+		height=5cm
+		]
+		
+		\addplot[
+		color=blue,
+		mark=square,
+		]
+		coordinates {(2, 0.955400523234085)(3, 0.9459234608985025)(4, 0.958656330749354)(5, 0.8679245283018868)(6, 0.96)(7, 0.75)};
+		
+		\addplot[
+		color=red,
+		mark=square,
+		]
+		coordinates {(2, 0.9547776255138907)(3, 0.9421797004991681)(4, 0.937984496124031)(5, 0.8867924528301887)(6, 0.96)(7, 0.75)};
+		
+		\addplot[
+		color=green,
+		mark=square,
+		]
+		coordinates {(2, 0.9616295004360284)(3, 0.9546589018302829)(4, 0.9638242894056848)(5, 0.8867924528301887)(6, 0.96)(7, 0.75)};
+		\end{axis}
+		\end{tikzpicture}
+		\begin{tikzpicture}
+		\begin{axis}[
+		name=arabic,
+		title={Arabic},
+		xlabel={},
+		ylabel={},
+		typeset ticklabels with strut,
+		legend pos=south west,
+		ymajorgrids=true,
+		grid style=dashed,
+		height=5cm,
+		]
+		
+		\addplot[
+		color=blue,
+		mark=square,
+		]
+		coordinates {(2, 0.9286291953093408)(3, 0.9217134416543574)(4, 0.9455252918287937)(5, 0.9333333333333333)};
+		
+		\addplot[
+		color=red,
+		mark=square,
+		]
+		coordinates {(2, 0.9272139102304893)(3, 0.9197439684884293)(4, 0.9416342412451362)(5, 0.8666666666666667)};
 
-	\begin{axis}[
-	title={},
-	xlabel={BPE tokens per word},
-	ylabel={Accuracy},
-	xmin=2, xmax=7,
-	ymin=0.65, ymax=1,
-	xtick=data,
-	ytick={0.65,0.8,1.0},
-	typeset ticklabels with strut,
-	legend pos=outer north east,
-	ymajorgrids=true,
-	grid style=dashed,
-	width=12cm,
-	height=5cm
-	]
-	
-	\addplot[
-	color=blue,
-	mark=square,
-	]
-	coordinates {(2, 0.9163053722902922)(3, 0.9090291921249152)(4, 0.9081133919843597)(5, 0.9302325581395349)(6, 0.9074074074074074)(7, 0.875)};
-	\legend{Finnish}
-	
-	\addplot[
-	color=red,
-	mark=square,
-	]
-	coordinates {(2, 0.8662081900593935)(3, 0.7957794417971409)(4, 0.8051948051948052)(5, 0.7866666666666666)(6, 1.0)(7, 1.0)};
-	\legend{Basque}
-	
-	\addplot[
-	color=green,
-	mark=square,
-	]
-	coordinates {(2, 0.8173395102581072)(3, 0.8154981549815498)(4, 0.8313953488372093)(5, 0.7391304347826086)(6, 0.6923076923076923)(7, 1.0)};
-	\legend{Turskish}
-	
-	\addplot[
-	color=purple,
-	mark=square,
-	]
-	coordinates {(2, 0.9207130730050934)(3, 0.9058250456667343)(4, 0.9142367066895368)(5, 0.9327433628318584)(6, 0.9276315789473685)(7, 0.925531914893617)};\legend{Estonian}
-	
-	\addplot[
-	color=orange,
-	mark=square,
-	]
-	coordinates {(2, 0.9375252729478366)(3, 0.930576070901034)(4, 0.9455252918287937)(5, 0.9333333333333333)};\legend{Arabic}
-	
-	\addplot[
-	color=cyan,
-	mark=square,
-	]
-	coordinates {(2, 0.9616295004360284)(3, 0.9546589018302829)(4, 0.9638242894056848)(5, 0.8867924528301887)(6, 0.96)(7, 0.75)};\legend{Spanish}
-	
-	\legend{
-		Finish,
-		Basque,
-		Turkish,
-		Estonian,
-		Spanish,
-		Arabic
-	}
-	
-	\end{axis}
-	\end{tikzpicture}
-\end{center}
+		\addplot[
+		color=green,
+		mark=square,
+		]
+		coordinates {(2, 0.9375252729478366)(3, 0.930576070901034)(4, 0.9455252918287937)(5, 0.9333333333333333)};
+		\end{axis}
+		\end{tikzpicture}
+		\begin{tikzpicture}
+		\begin{axis}[
+		name=polish,
+		title={Polish},
+		xlabel={},
+		ylabel={},
+		typeset ticklabels with strut,
+		legend pos=south west,
+		ymajorgrids=true,
+		grid style=dashed,
+		height=5cm
+		]
+		
+		\addplot[
+		color=blue,
+		mark=square,
+		]
+		coordinates {(2, 0.8453280318091452)(3, 0.8180535966149506)(4, 0.8272357723577236)(5, 0.8026315789473685)(6, 0.8888888888888888)};
+		
+		\addplot[
+		color=red,
+		mark=square,
+		]
+		coordinates {(2, 0.8465208747514911)(3, 0.8138222849083215)(4, 0.8252032520325203)(5, 0.8289473684210527)(6, 0.8888888888888888)};
+		
+		\addplot[
+		color=green,
+		mark=square,
+		]
+		coordinates {(2, 0.8878727634194831)(3, 0.8589562764456982)(4, 0.8739837398373984)(5, 0.868421052631579)(6, 0.8888888888888888)};
+		\end{axis}
+		\end{tikzpicture}
+		\begin{tikzpicture}
+		\begin{axis}[
+		name=czech,
+		title={Czech},
+		xlabel={},
+		ylabel={},
+		typeset ticklabels with strut,
+		legend pos=south west,
+		ymajorgrids=true,
+		grid style=dashed,
+		height=5cm,
+		]
+		
+		\addplot[
+		color=blue,
+		mark=square,
+		]
+		coordinates {(2, 0.9222981315334595)(3, 0.9050979008643499)(4, 0.9044406970207982)(5, 0.8847457627118644)(6, 0.9574468085106383)(7, 1.0)};
+		
+		\addplot[
+		color=red,
+		mark=square,
+		]
+		coordinates {(2, 0.9251790270804181)(3, 0.9005115540659728)(4, 0.9106239460370995)(5, 0.8847457627118644)(6, 0.9148936170212766)(7, 1.0)};
+		
+		\addplot[
+		color=green,
+		mark=square,
+		]
+		coordinates {(2, 0.9361264301588608)(3, 0.9220321044275887)(4, 0.9224283305227656)(5, 0.8983050847457628)(6, 0.9787234042553191)(7, 1.0)};
+		\end{axis}
+		\end{tikzpicture}
+		\caption{\label{fig:bpe_lens} Per language accuracy of tokens composed of more than two BPE tokens. The x-axis indicate how many BPE tokens a word is composed of and the y-axis the accuracy. The different methods are distinguished by color, where Blue is the summation method, red the mean and green RNN.}
+	\end{figure}
 
 	
 	
