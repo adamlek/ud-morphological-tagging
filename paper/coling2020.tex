@@ -47,7 +47,7 @@
 	Centre for Linguistic Theory and Studies in Probability,\\
 	Department of Philosophy, Linguistics and Theory of Science,\\
 	University of Gothenburg,\\
-	\texttt{adam.ek@gu.se}}
+	\texttt{\{adam.ek, jean-philippe.bernardy\}@gu.se}}
 
 \date{}
 
@@ -77,21 +77,21 @@
 	
 	\textbf{Things to add:}
 	\begin{itemize}
-		\item (results) More detailed accuracy for len(BPE)$>2$
 		\item (results) With fine-tuning/without fine-tuning
 		\item (data) Data statistics: number of MSD-tags 
 		\item (data) Pick other datasets, try to match dataset sizes better (100k-150k train examples, turkish very small atm)
 	\end{itemize}
 
-        Since its introduction \cite{todo}, the transformer model has
-        emerged as the dominant architecture for statistical language
-        model, gradually displacing recurrent neural networks, in
-        particular the LSTM and its variants. The transformer owes its
-        success to several factors, including the availability of
-        pretrained models, which effectively yield rich contextual
-        word embeddings. Such embeddings can be used as is (for
-        so-called feature extraction), or the pre-trained models can
-        be fine-tuned to specific applications.
+            Since its introduction [CITE:TODO], the transformer model
+     \citep{vaswani2017attention} has emerged as the dominant
+     architecture for statistical language model, gradually displacing
+     recurrent neural networks, in particular the LSTM and its
+     variants. The transformer owes its success to several factors,
+     including the availability of pretrained models, which
+     effectively yield rich contextual word embeddings. Such
+     embeddings can be used as is (for so-called feature extraction),
+     or the pre-trained models can be fine-tuned to specific
+     applications.
 
 	At the same time as transformer models became popular, the
         tokenization of natural language texts have shifted away from
@@ -103,37 +103,39 @@
         composed of the tokens: "scient", "ifical", "ly" --- here the
         central token does not correspond to a morpheme.
         %
-        Rather than identifying complete words or morphemes, it aims
-        to find sub-word units occurring significantly often. Typical
-        approaches to composing tokens from sub-token units have
-        focused on combining character n-grams \cite{TODO:bojanowski},
-        while other approaches have looked at splitting words into
-        \textit{roots} and \textit{morphs}\jp{morphemes?}, and then
-        combining them. In this paper, we consider in particular
-        Byte-Pair Encodings (BPE) \citep{sennrich2015neural}, which take another approach. One does not
-        specifically look for either character n-grams or morphs, but
-        rather it aim to split a corpus $\mathcal{C}$ into $N$ tokens,
-        where $N$ is user defined. [EXPAND]
+            Rather than identifying complete words or morphemes, it
+     aims to find sub-word units occurring significantly
+     often. Typical approaches to composing tokens from sub-token
+     units have focused on combining character n-grams
+     \citep{bojanowski2017enriching}, while other approaches have
+     looked at splitting words into \textit{roots} and
+     \textit{morphemes}, and then combining them. In this paper, we
+     consider in particular Byte-Pair Encodings (BPE)
+     \citep{sennrich2015neural}, which take another approach. One does
+     not specifically look for either character n-grams or morphs, but
+     rather it aim to split a corpus $\mathcal{C}$ into $N$ tokens,
+     where $N$ is user defined. [EXPAND]
 
         One issue with statistical tokenization is that one is seldom
         interested in the encoding, but rather in the semantically
         meaningful units in the original texts. Thus the question of
         mapping data about the token back to the original text arises.
-
-	In this paper we explore how to combine Byte-Pair Encodings
-        from a transformer model to perform sequence
-        classification, which is used in particular in the popular BERT model \citep{devlin2018bert}. For our purposes, the goal in sequence
-        classification is to assign a label to every word in a
-        sentence. When we are using byte-pair encoding (or similar
-        sub-token representations) we must then find some way of
-        combining the units that build the word, before it is
-        eventually assigned a label. Coming back to our example, we
-        must map the feature-set assigned (depending on the context)
-        to "scient", "ifical", "ly". Then this combined feature set is
-        mapped to a class for the whole word ``scientifically''.
+        
+    	In this paper we explore how to combine Byte-Pair Encodings
+     from a transformer model to perform sequence classification,
+     which is used in particular in the popular BERT model
+     \citep{devlin2018bert}. For our purposes, the goal in sequence
+     classification is to assign a label to every word in a
+     sentence. When we are using byte-pair encoding (or similar
+     sub-token representations) we must then find some way of
+     combining the units that build the word, before it is eventually
+     assigned a label. Coming back to our example, we must map the
+     feature-set assigned (depending on the context) to "scient",
+     "ifical", "ly". Then this combined feature set is mapped to a
+     class for the whole word ``scientifically''.
 
 	To our knownledge, this is a little-studied
-        problem. \citet{todo} have only brushed the surface by
+        problem. [citet:TODO] have only brushed the surface by
         reporting that few differences are found between different
         methods. In this paper we wish to explore the problem in
         further detail and identify what effect different methods have
@@ -210,7 +212,7 @@
         method may be the BPE per token ratio.  By having both
         fusional and agglutinative languages with similar BPE per
         token ratio we can take this variable into account properly in
-        our analysis. \jp{Is this what you meant?}
+        our analysis.
 
 	\section{Method}
 	\label{method}
@@ -233,11 +235,6 @@
         shared vocabulary. In this experiment we use
         \textsc{XLMR}$_{base}$ model. It has 12 encoder layers, 16 (?)
         attention heads and use 768 dimensions for its hidden size.
-	
-	\subsection{Byte-pair combination methods}
-	
-
-
 	
 	\subsection{Model}
 	For morphological tagging we use the XLMR base model with a
@@ -266,60 +263,83 @@
 	
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[scale=0.2]{model_outline-5.pdf}
+		\includegraphics[scale=0.5]{model-outline.pdf}
 		\caption{\label{fig:model} Procedure outline}
 	\end{figure}
 	
-	\subsubsection{BPE features} 	
+	\subsubsection{BPE features}
+
+        As mentioned previously, we look at methods for composing
+     embeddings of BPE tokens into word embeddings. The XLMR model use
+     12 layers to compute an embedding for a BPE token, and it has
+     been shown in previous research [CITATIONS, straka, manning, ...]
+     that the different layers of the transformer model encode
+     different types of information. To take advantage of this we
+     compute BPE embeddings as a weighted sum of layer
+     representations.  That is, we initialize a parameter from a
+     standard normal distribution $w$ (also tried with a parameter of
+     only 1's, but random was better) of size $l$, where $l$ is the
+     number of laters in the transformer model. Where $r_{ji}$ is the
+     layer representation at layer $j$ and token position $i$, we
+     calculate the weighted sum as follows:
+
+    \begin{equation}
+		x_i = \sum_{1}^{J} softmax(w)_j r_{ji}
+	\end{equation}
+
+        Where $softmax(w)_j$ indicate the softmax of the learned
+     importance of layer $j$. After we have computed weighted sum for
+     each BPE token we proceed to combine them into the tokens as they
+     appear in the data. To align BPE tokens to tokens in the text we
+     use a simple alignment algorithm [It's super simple...].
+    
+%	When extracting features from XLMR we compute a weighted sum
+%        of the layer representations. This is inspired by previous
+%        work showing that the different layers in language models
+%        encode different kinds of information \jp{citation
+%          needed}. That is, we use a parameter $w$ of dimension $l$
+%        \jp{where l is the number of layers in the transformer
+%          model?}, such that $w_i$ indicates the importance of the
+%        layer $i$. We calculate the weighted sum for each bpe
+%        representation layerwise:
 	
-	We obtain BPE features for a \textit{token} by combining the
-        BPE tokens that compose the token by combining their features
-        using three different methods:
-	
-	\paragraph{Sum:} For the sum method, we use an element-wise
-        sum. That is, we take the sum for each dimension of the BPE
-        embeddings separately. Thus, for dimension $i$ we add all the
-        values in all BPE embeddings $x_i^0 + ,..., + x_i^n$:
+%	\begin{equation}
+%		x_i = \sum_{1}^{J} softmax(c)_j l_{ji}
+%	\end{equation}
+%	\jp{How is $w$ initialised? How is it optimised? End-to-end
+%          training? Add a forward reference to the training section and explain it there.}
+
+
+        We look at three method in particular, summation and mean
+     along a dimension and using an RNN. Summation and mean have been
+     used in previous work, but using an RNN have not been explored
+     before to our knowledge.
+    
+    	\paragraph{Sum:} For the sum method, we use an element-wise
+     sum. That is, we take the sum for each dimension of the BPE
+     embeddings separately. Thus, for token $i$ we calculate a
+     composite embedding by summing over dimensions $0,\ldots,N$:
 	
 	\begin{equation}
 	f(x)_i = \sum_{j=1}^{n} x_i^j
 	\end{equation}
 	
 
-	\paragraph{Mean:} In the mean method we calculate the sum and
-        divide by the number of BPE embeddings in the word. Thus, for
-        dimension $i$ we calculate $\frac{x_i^0 + ,..., + x_i^n}{n}$:
+    	\paragraph{Mean:} In the mean method we calculate the sum and
+     divide by the number of BPE embeddings in the word. Thus, for
+     token $i$ we calculate a composite embedding by averaging over
+     dimensions $0,\ldots,N$:
 	
 	\begin{equation}
 	f(x)_{i} = \frac{1}{n}\sum_{j=1}^{n} x_i^j
 	\end{equation}
 	
 	
-	\paragraph{RNN:} For this method we employ a bidirectional RNN
+	\paragraph{RNN:} For this method we employ a bidirectional LSTM
         to compose the BPE embeddings. For each multi-BPE
-        token, we pass the sequence of BPE embeddings through an RNN
-        and use the final output as the word representation.
-        \jp{What is the cell? LSTM?}
-	
-	\subsubsection{XLMR features}
-        \jp{Probably this should go before, to follow computational order.}
-	
-	When extracting features from XLMR we compute a weighted sum
-        of the layer representations. This is inspired by previous
-        work showing that the different layers in language models
-        encode different kinds of information \jp{citation
-          needed}. That is, we use a parameter $w$ of dimension $l$
-        \jp{where l is the number of layers in the transformer
-          model?}, such that $w_i$ indicates the importance of the
-        layer $i$. We calculate the weighted sum for each bpe
-        representation layerwise:
-	
-	\begin{equation}
-		x_i = \sum_{1}^{J} softmax(c)_j l_{ji}
-	\end{equation}
-	\jp{How is $w$ initialised? How is it optimised? End-to-end
-          training? Add a forward reference to the training section and explain it there.}
-        
+        token, we pass the sequence of BPE embeddings through an LSTM
+        and use the final output as the word representation. 
+    
 	\subsubsection{Character features}
 	In addition to layer attention we use a character LSTM to
         extract a word representation based on characters. The final
@@ -330,24 +350,43 @@
         $w_i = \text{concat}(f(bpe_0,...,bpe_K), LSTM(c_0, ..., c_M))$
 	
 	\subsubsection{Label smoothing}
-	Given that many of the languages have a large number of
-        morphological tags, we want to prevent the model from growing
-        overconfident for certain classes. To address this issue we
-        introduce label smoothing \jp{citation?}, that is, instead of
-        the incorrect classes having 0 probability and the correct
-        class $100\%$ probability we let each of the incorrect classes
-        have a probability of $\alpha$. The correct class is then
-        assigned the probability $t$ by $(1-\alpha)t + \alpha / |C|$
-        where $|C|$ is the number of classes. \jp{I don't understand
-          this formula (and I botched the sentence trying to fix it :/
-          ... What is $t$? I was expecting that you'd give the formula
-          for the probability of the correct class, but apparently I
-          am mistaken.)}
+    	Given that many of the languages have a large number of
+     morphological tags, we want to prevent the model from growing
+     overconfident for certain classes. To address this issue we
+     introduce label smoothing \citep{szegedy2016rethinking}, that is,
+     instead of the incorrect classes having 0 probability and the
+     correct class $100\%$ probability we let each of the incorrect
+     classes have a small probability.
+
+        %The correct class is then assigned the probability $t$ by
+     %$(1-\alpha)t + \alpha / |C|$ where $|C|$ is the number of
+     %classes. \jp{I don't understand this formula (and I botched the
+     %sentence trying to fix it :/ ... What is $t$? I was expecting
+     %that you'd give the formula for the probability of the correct
+     %class, but apparently I am mistaken.)}
+
+                Let $\alpha$ be our smoothing value, then given a
+     one-hot encoded target vector $t$ of size $(N,C)$ where $N$ is
+     the number of examples and $C$ the number of classes we calculate
+     the smoothed probabilities as:
+
+    \begin{equation}
+        t_{smooth} = \frac{(1-\alpha)t + \alpha}{C}
+    \end{equation}
+
+                In esscense, we remove $\alpha$ from the correct
+     class, then assign a probability of $\frac{\alpha}{C}$ to all
+     incorrect classes in $t$. That is, after subtracting $\alpha$
+     from the correct class we distribute $\alpha$ uniformly among all
+     classes.
 
 	\subsection{Training}
 	
-	When fine-tuning the model we freeze the XLMR parameters for the first epoch.
-	When training the model we use cosine annealing learning rate with restarts every epoch, that is, the learning rate starts high then incrementally decrease to $1e-12$ during N steps, where N is the number of batches in an epoch.
+    	When fine-tuning the model we freeze the XLMR parameters for
+     the first epoch.  When training the model we use cosine annealing
+     learning rate with restarts every epoch, that is, the learning
+     rate starts high then incrementally decrease to $1e-12$ during N
+     steps, where N is the number of batches in an epoch.
 	
 	\begin{table}[h]
 		\centering
@@ -367,6 +406,13 @@
 		\end{tabular}
 		\caption{\label{tab:parameters} Hyperparameters used for training the model. Slashed indicate the value of a parameter when we finetune or extract features.}
 	\end{table}
+
+    \subsection{Experiments}
+
+        For completeness, we look at different composition methods
+     both when we fine-tune the transfomer (i.e. when we update the
+     parameters of the transfromer model) and when we only extract
+     features from the model. (maybe not a whole section, might add more things here tho)
 
 	
 	\section{Results}
@@ -390,12 +436,12 @@
 		Finnish-TDT & .751 & .965 & .963 & \textbf{.967} & .930 & .931 & \textbf{.942} \\ 
 		Basque-BDT & .676 & .910 & .909 & \textbf{.920} & .865 & .865 & \textbf{.888} \\
 		Turkish-IMST & .620 & .898 & .891 & \textbf{.905} & .856 & .849 & \textbf{.866}\\
-		Estonian-EDT & & & & & .931 & .934 & \textbf{.939} \\
+		Estonian-EDT & .740 & & & & .931 & .934 & \textbf{.939} \\
 		% fusional languages
 		Spanish-AnCora & .842 & .979 & .979 & \textbf{.980} & .968 & .967 & \textbf{.971} \\
 		Arabic-PADT & .770 & .952 & .953&\textbf{.954} & .941 & .939 & \textbf{.948} \\
 		Czech-CAC & .771 &  &  &  & .944 & .944 & \textbf{.952} \\
-		Polish-LFG & & & &  & .907 & .907 & \textbf{.928} \\
+		Polish-LFG & .657 & & &  & .907 & .907 & \textbf{.928} \\
 	\end{tabular}
 	\caption{\label{tab:results_tokens} Accuracy for morphological tagging. We evaluate both when we finetune the XLMR model and when we only extract BPE embeddings.}
 	\end{table}
@@ -417,11 +463,14 @@
 		Polish-LFG  & & 0 & 0 & 0  & 0.844 & 0.840 & 0.878 \\
 		
 	\end{tabular}
-	\caption{\label{tab:results_tokens_nochars} Without character LSTM}
+	\caption{\label{tab:results_tokens_nochars} Without character LSTM, much more prominent changes in accuracy as expected.}
 \end{table}
 
 	However, the results in \cref{tab:results_tokens} also include tokens which are only composed of one BPE token. To better evaluate our composition methods we compute the accuracy for tokens which are composed of two or more BPE tokens. The results can be seen in \cref{tab:results_large_tokens}.
+    We see again that RNN seem to work better than summation or averaging BPE embeddings. 
 
+    Given that the number of BPE tokens per text token varies, we also look at the accuracy of the different methods given different nmber of BPE tokens. We show per-language performance with the differnt methods in \cref{fig:bpe_lens}.
+    
 	\begin{table}[h]
 	%\small
 	\centering
@@ -448,7 +497,7 @@
 		\begin{tikzpicture}
 		\begin{axis}[
 		name=finnish,
-		title={Finnish},
+		title={Finnish-TDT},
 		xlabel={},
 		ylabel={},
 		typeset ticklabels with strut,
@@ -481,7 +530,7 @@
 		\begin{tikzpicture}
 		\begin{axis}[
 		name=basque,
-		title={Basque},
+		title={Basque-BDT},
 		xlabel={},
 		ylabel={},
 		typeset ticklabels with strut,
@@ -513,7 +562,7 @@
 		\begin{tikzpicture}
 		\begin{axis}[
 		name=turkish,
-		title={Turkish},
+		title={Turkish-IMST},
 		xlabel={},
 		ylabel={},
 		typeset ticklabels with strut,
@@ -545,7 +594,7 @@
 		\begin{tikzpicture}
 		\begin{axis}[
 		name=estonian,
-		title={Estonian},
+		title={Estonian-EDT},
 		xlabel={},
 		ylabel={},
 		typeset ticklabels with strut,
@@ -577,7 +626,7 @@
 		\begin{tikzpicture}
 		\begin{axis}[
 		name=spanish,
-		title={Spanish},
+		title={Spanish-AnCora},
 		xlabel={},
 		ylabel={},
 		typeset ticklabels with strut,
@@ -609,7 +658,7 @@
 		\begin{tikzpicture}
 		\begin{axis}[
 		name=arabic,
-		title={Arabic},
+		title={Arabic-PADT},
 		xlabel={},
 		ylabel={},
 		typeset ticklabels with strut,
@@ -641,7 +690,7 @@
 		\begin{tikzpicture}
 		\begin{axis}[
 		name=polish,
-		title={Polish},
+		title={Polish-LFG},
 		xlabel={},
 		ylabel={},
 		typeset ticklabels with strut,
@@ -673,7 +722,7 @@
 		\begin{tikzpicture}
 		\begin{axis}[
 		name=czech,
-		title={Czech},
+		title={Czech-CAC},
 		xlabel={},
 		ylabel={},
 		typeset ticklabels with strut,
@@ -723,7 +772,7 @@
 	
 	
 	% include your own bib file like this:
-	\bibliographystyle{plain}
+	\bibliographystyle{coling}
 	\bibliography{coling2020}
 	
 \end{document}

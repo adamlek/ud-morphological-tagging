@@ -1,56 +1,75 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{}
 
-\bibitem{conneau2019unsupervised}
+\bibitem[\protect\citename{Bojanowski \bgroup et al.\egroup
+  }2017]{bojanowski2017enriching}
+Piotr Bojanowski, Edouard Grave, Armand Joulin, and Tomas Mikolov.
+\newblock 2017.
+\newblock Enriching word vectors with subword information.
+\newblock {\em Transactions of the Association for Computational Linguistics},
+  5:135--146.
+
+\bibitem[\protect\citename{Conneau \bgroup et al.\egroup
+  }2019]{conneau2019unsupervised}
 Alexis Conneau, Kartikay Khandelwal, Naman Goyal, Vishrav Chaudhary, Guillaume
   Wenzek, Francisco Guzm{\'a}n, Edouard Grave, Myle Ott, Luke Zettlemoyer, and
   Veselin Stoyanov.
+\newblock 2019.
 \newblock Unsupervised cross-lingual representation learning at scale.
-\newblock {\em arXiv preprint arXiv:1911.02116}, 2019.
+\newblock {\em arXiv preprint arXiv:1911.02116}.
 
-\bibitem{devlin2018bert}
+\bibitem[\protect\citename{Devlin \bgroup et al.\egroup }2018]{devlin2018bert}
 Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova.
+\newblock 2018.
 \newblock Bert: Pre-training of deep bidirectional transformers for language
   understanding.
-\newblock {\em arXiv preprint arXiv:1810.04805}, 2018.
+\newblock {\em arXiv preprint arXiv:1810.04805}.
 
-\bibitem{liu2019roberta}
+\bibitem[\protect\citename{Liu \bgroup et al.\egroup }2019]{liu2019roberta}
 Yinhan Liu, Myle Ott, Naman Goyal, Jingfei Du, Mandar Joshi, Danqi Chen, Omer
   Levy, Mike Lewis, Luke Zettlemoyer, and Veselin Stoyanov.
+\newblock 2019.
 \newblock Roberta: A robustly optimized bert pretraining approach.
-\newblock {\em arXiv preprint arXiv:1907.11692}, 2019.
+\newblock {\em arXiv preprint arXiv:1907.11692}.
 
-\bibitem{mccarthy2018marrying}
+\bibitem[\protect\citename{McCarthy \bgroup et al.\egroup
+  }2018]{mccarthy2018marrying}
 Arya~D McCarthy, Miikka Silfverberg, Ryan Cotterell, Mans Hulden, and David
   Yarowsky.
-\newblock Marrying universal dependencies and universal morphology.
-\newblock {\em arXiv preprint arXiv:1810.06743}, 2018.
-
-\bibitem{mccarthy2019sigmorphon}
-Arya~D McCarthy, Ekaterina Vylomova, Shijie Wu, Chaitanya Malaviya, Lawrence
-  Wolf-Sonkin, Garrett Nicolai, Christo Kirov, Miikka Silfverberg, Sebastian~J
-  Mielke, Jeffrey Heinz, et~al.
-\newblock The sigmorphon 2019 shared task: Morphological analysis in context
-  and cross-lingual transfer for inflection.
-\newblock {\em arXiv preprint arXiv:1910.11493}, 2019.
-
-\bibitem{nivre2018}
-Joakim Nivre et~al.
-\newblock Universal dependencies 2.2.
 \newblock 2018.
+\newblock Marrying universal dependencies and universal morphology.
+\newblock {\em arXiv preprint arXiv:1810.06743}.
+
+\bibitem[\protect\citename{Nivre and others}2018]{nivre2018}
+Joakim Nivre et~al.
+\newblock 2018.
+\newblock Universal dependencies 2.2.
 \newblock {LINDAT}/{CLARIAH}-{CZ} digital library at the Institute of Formal
   and Applied Linguistics ({{\'U}FAL}), Faculty of Mathematics and Physics,
   Charles University.
 
-\bibitem{sennrich2015neural}
+\bibitem[\protect\citename{Sennrich \bgroup et al.\egroup
+  }2015]{sennrich2015neural}
 Rico Sennrich, Barry Haddow, and Alexandra Birch.
+\newblock 2015.
 \newblock Neural machine translation of rare words with subword units.
-\newblock {\em arXiv preprint arXiv:1508.07909}, 2015.
+\newblock {\em arXiv preprint arXiv:1508.07909}.
 
-\bibitem{vaswani2017attention}
+\bibitem[\protect\citename{Szegedy \bgroup et al.\egroup
+  }2016]{szegedy2016rethinking}
+Christian Szegedy, Vincent Vanhoucke, Sergey Ioffe, Jon Shlens, and Zbigniew
+  Wojna.
+\newblock 2016.
+\newblock Rethinking the inception architecture for computer vision.
+\newblock In {\em Proceedings of the IEEE conference on computer vision and
+  pattern recognition}, pages 2818--2826.
+
+\bibitem[\protect\citename{Vaswani \bgroup et al.\egroup
+  }2017]{vaswani2017attention}
 Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones,
   Aidan~N Gomez, {\L}ukasz Kaiser, and Illia Polosukhin.
+\newblock 2017.
 \newblock Attention is all you need.
 \newblock In {\em Advances in neural information processing systems}, pages
-  5998--6008, 2017.
+  5998--6008.
 
 \end{thebibliography}

@@ -1,48 +1,48 @@
 This is BibTeX, Version 0.99d (TeX Live 2017/Debian)
 Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
 The top-level auxiliary file: coling2020.aux
-The style file: plain.bst
+The style file: coling.bst
 Database file #1: coling2020.bib
 Warning--empty journal in nivre2018
-You've used 8 entries,
-            2118 wiz_defined-function locations,
-            533 strings with 6014 characters,
-and the built_in function-call counts, 3340 in all, are:
-= -- 288
-> -- 289
-< -- 1
-+ -- 115
-- -- 106
-* -- 265
-:= -- 611
-add.period$ -- 25
-call.type$ -- 8
-change.case$ -- 75
-chr.to.int$ -- 0
-cite$ -- 9
-duplicate$ -- 95
-empty$ -- 164
-format.name$ -- 106
-if$ -- 639
-int.to.chr$ -- 0
-int.to.str$ -- 8
-missing$ -- 8
-newline$ -- 44
-num.names$ -- 16
-pop$ -- 79
+You've used 9 entries,
+            2490 wiz_defined-function locations,
+            597 strings with 6600 characters,
+and the built_in function-call counts, 4414 in all, are:
+= -- 433
+> -- 282
+< -- 2
++ -- 102
+- -- 102
+* -- 352
+:= -- 750
+add.period$ -- 36
+call.type$ -- 9
+change.case$ -- 86
+chr.to.int$ -- 9
+cite$ -- 10
+duplicate$ -- 157
+empty$ -- 253
+format.name$ -- 112
+if$ -- 880
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 9
+newline$ -- 57
+num.names$ -- 27
+pop$ -- 91
 preamble$ -- 1
-purify$ -- 67
+purify$ -- 95
 quote$ -- 0
-skip$ -- 75
+skip$ -- 131
 stack$ -- 0
-substring$ -- 81
-swap$ -- 19
-text.length$ -- 1
+substring$ -- 150
+swap$ -- 41
+text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 32
+type$ -- 72
 warning$ -- 1
-while$ -- 19
-width$ -- 9
-write$ -- 84
+while$ -- 26
+width$ -- 13
+write$ -- 122
 (There was 1 warning)
