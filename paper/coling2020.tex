@@ -368,6 +368,7 @@
      one-hot encoded target vector $t$ of size $(N,C)$ where $N$ is
      the number of examples and $C$ the number of classes we calculate
      the smoothed probabilities as:
+     \jp{This formula still looks incorrect; let's discuss it next time.}
 
     \begin{equation}
         t_{smooth} = \frac{(1-\alpha)t + \alpha}{C}
@@ -377,8 +378,11 @@
      correct class then distribute $\alpha$ uniformly among all
      classes. 
 
-	\subsection{Training}
+     \subsection{Training}
+
+     \jp{add here a warning that we consider several possible training regimes}
 	
+<<<<<<< HEAD
         	When fine-tuning the model we freeze the XLMR parameters
      for the first epoch.  When training the model we use cosine
      annealing learning rate with restarts every epoch, that is, the
@@ -395,6 +399,14 @@
     %a_parser.add_argument('--char_dropout', type=float, default=0.4) # dropout on w after char rnn
     %a_parser.add_argument('--bpe_dropout', type=float, default=0.4) # dropout on w after bpe composition
     
+=======
+    	When fine-tuning the model we freeze the XLMR parameters for
+     the first epoch.  When training the model we use cosine annealing
+     learning rate with restarts every epoch, that is, the learning
+     rate starts high then incrementally decrease to $1e-12$ during $N$
+     steps, where $N$ is the number of batches in an epoch.
+	
+>>>>>>> 70b3b83f82dc07af8002bf6e460399e820a7986f
 	\begin{table}[h]
 		\centering
 		\begin{tabular}{lr}
@@ -446,14 +458,24 @@
 	\label{results}
 	
 	
+<<<<<<< HEAD
     	We present the accuracy of assigning morphological tags to all
      tokens in \cref{tab:results_tokens}. Both when we finetune and
      only extract BPE weights we see that using an RNN to compose BPE
      tokens yields slightly better performance.
 	%
+=======
+	
+	We present the accuracy of assigning morphological tags to all
+        tokens in \cref{tab:results_tokens}. Both when we finetune and
+        only extract BPE weights we see that using an RNN to compose
+        BPE tokens yields slightly better performance.
+	%
+	In general, our results are lower\jp{either results are worse/better, or accuracy/error-rate is lower. Which is it?} than the reported State-of-the-Art.
+>>>>>>> 70b3b83f82dc07af8002bf6e460399e820a7986f
 	
 
-	\begin{table}[h]
+	\begin{table} % [h]
 	%\small
 	\centering
 	\begin{tabular}{l|c|ccc|ccc}
@@ -496,10 +518,18 @@
 	\caption{\label{tab:results_tokens_nochars} Without character LSTM, much more prominent changes in accuracy as expected.}
 \end{table}
 
-	However, the results in \cref{tab:results_tokens} also include tokens which are only composed of one BPE token. To better evaluate our composition methods we compute the accuracy for tokens which are composed of two or more BPE tokens. The results can be seen in \cref{tab:results_large_tokens}.
-    We see again that RNN seem to work better than summation or averaging BPE embeddings. 
+\Cref{tab:results_tokens} reports average accuracy for every word,
+thus also including those which are only composed of a single BPE
+token. To highlight the strengths and weaknesses of each composition method, we also compute the
+accuracy for tokens which are composed of two BPE tokens or more. The
+results can be seen in \cref{tab:results_large_tokens}.  We see again
+that RNN seem to work better than summation or averaging BPE
+embeddings.
 
-    Given that the number of BPE tokens per text token varies, we also look at the accuracy of the different methods given different nmber of BPE tokens. We show per-language performance with the differnt methods in \cref{fig:bpe_lens}.
+Given that the number of BPE tokens per natural-language token varies, we also
+look at the accuracy of the different methods given a different number of
+BPE tokens. We show per-language performance with the differnt methods
+in \cref{fig:bpe_lens}.
     
 	\begin{table}[h]
 	%\small
@@ -793,13 +823,27 @@
         
         %In general, the agglutinative languages have a higher BPE-to-word ratio, with one exception, Czech. Czech have a BPE-to-word ratio of $1.77$, but still exhibit a lower difference between the RNN and mean method. Thus, from this small sample of treebanks it appears as if the method of combining BPE embeddings is more important for agglutinative languages than for fusional languages. 
         
-        Analogously to character embeddings, the RNN method seem to provide stronger results than using either Sum or Mean for combining BPE tokens. We hypothesize that this is because Sum or Mean don't respect the ordering of elements within a word, that is, we don't relate the values of $BPE_0$ to $BPE_{1:N}$ with respect to the morphological tags. 
+        Analogously to character embeddings, the RNN method seem to
+        provide stronger results than using either Sum or Mean for
+        combining BPE tokens. We conjecture that this discrepancy is
+        can be attributed to the commutativity of the Sum and Mean
+        operations. That is, the ordering of elements within a word
+        does not affect the result of applying Sum or Mean.
+          
+        % that is, we don't relate the values of $BPE_0$ to $BPE_{1:N}$
+        % with respect to the morphological tags.
+        \jp{In particular, the position of an affix is lost if the
+          word which includes it is split in several tokens.}
     
     \section{Conclusions}
+<<<<<<< HEAD
         	As a general summary of our work, show that using an LSTM
      to combine BPE embeddings consistently, and across different
      languages, show better performance than summing or averaging the
      BPE embeddings.
+=======
+    	As a general summary of our work, we highlight that language typology is not irrelevant when working with models that employ byte-pair encoding.
+>>>>>>> 70b3b83f82dc07af8002bf6e460399e820a7986f
 	
 	%\section*{Acknowledgments}
 	
