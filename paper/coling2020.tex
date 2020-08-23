@@ -168,24 +168,32 @@
         many cases, the context of the sentence will affect which
         class should be assigned to a word.
 
-        \paragraph{Data:} For the task we will use the Universal
-        Dependencies dataset \citep{nivre2018} annotated with the
-        UniMorph schema \citep{mccarthy2018marrying}. We are
-        interested both in the general effects of using different
-        composition methods, and whether some methods favor languages
-        with certain typologies. To explore this, we take a sample of
-        eight languages from the Universal Dependencies dataset. Four
-        of them use a \textit{fusional} morphology, meaning that an
-        affix may be indicative of one or more morphological
-        features. Four of them use an \textit{agglutinative}
-        morphology, meaning that each affix is mapped to one and only
-        one morphological feature.
+    \section{Data}
     
-   	The fusional languages that we consider are Arabic, Czech,
-        Polish and Spanish, and the agglutinative languages that we
-        consider are Finnish, Basque, Turkish and Estonian. The size
-        of the dataset \jp{in original words?}  and the average number
-        of BPE tokens per word are shown in \cref{tab:data}.
+        For the task we will use the Universal Dependencies dataset
+     \citep{nivre2018} annotated with the UniMorph schema
+     \citep{mccarthy2018marrying}. We are interested both in the
+     general effects of using different composition methods, and
+     whether some methods favor languages with certain typologies. To
+     explore this, we take a sample of eight languages from the
+     Universal Dependencies dataset. Four of them use a
+     \textit{fusional} morphology, meaning that an affix may be
+     indicative of one or more morphological features. Four of them
+     use an \textit{agglutinative} morphology, meaning that each affix
+     is mapped to one and only one morphological feature.
+
+    
+           	The fusional languages that we consider are Arabic, Czech,
+     Polish and Spanish, and the agglutinative languages that we
+     consider are Finnish, Basque, Turkish and Estonian.  We show the
+     size, average number of BPE tokens per text-token and number of
+     morphological tags for each treebank in \cref{tab:data}.
+    
+    %The size of
+    % the dataset \jp{in original words?}  and the average number of
+    % BPE tokens per word are shown in \cref{tab:data}.
+
+    
     
     	\begin{table} % JP it's better to leave placement to the tex engine and the style sheet. (unless there is a real problem doing so)
 		\centering
@@ -380,17 +388,22 @@
 
      \subsection{Training}
 
-     \jp{add here a warning that we consider several possible training regimes}
+    %\jp{add here a warning that we consider several possible training regimes}
 	
-<<<<<<< HEAD
-        	When fine-tuning the model we freeze the XLMR parameters
-     for the first epoch.  When training the model we use cosine
-     annealing learning rate with restarts every epoch, that is, the
-     learning rate starts high then incrementally decrease to $1e-12$
-     during N steps, where N is the number of batches in an epoch. We
-     use a learning rate of $0.001$ for the word LSTM, classification
-     layer and BPE combination module (when an RNN is used), for the
-     transformer we use a lower learning rate of $1e-06$.
+         In our experiments we consider two possible training
+     regimes. In the first regime we finetune the XLMR models
+     parameters, in the second regime we only extract weights for BPE
+     tokens, that is, we use the model as a \emph{feature extractor}.
+     
+            	When fine-tuning the model we freeze the XLMR
+     parameters for the first epoch.  When training the model we use
+     cosine annealing learning rate with restarts every epoch, that
+     is, the learning rate starts high then incrementally decrease to
+     $1e-12$ during N steps, where N is the number of batches in an
+     epoch. We use a learning rate of $0.001$ for the word LSTM,
+     classification layer and BPE combination module (when an RNN is
+     used), for the transformer we use a lower learning rate of
+     $1e-06$.
 
     %a_parser.add_argument('--xlmr_dropout', type=float, default=0.2) # number of input tokens changed to <unk>
     %a_parser.add_argument('--layer_dropout', type=float, default=0.1) # p that layer j is set to 0.
@@ -398,15 +411,7 @@
     %a_parser.add_argument('--transform_dropout', type=float, default=0.5) # dropout before predict(w)
     %a_parser.add_argument('--char_dropout', type=float, default=0.4) # dropout on w after char rnn
     %a_parser.add_argument('--bpe_dropout', type=float, default=0.4) # dropout on w after bpe composition
-    
-=======
-    	When fine-tuning the model we freeze the XLMR parameters for
-     the first epoch.  When training the model we use cosine annealing
-     learning rate with restarts every epoch, that is, the learning
-     rate starts high then incrementally decrease to $1e-12$ during $N$
-     steps, where $N$ is the number of batches in an epoch.
-	
->>>>>>> 70b3b83f82dc07af8002bf6e460399e820a7986f
+   
 	\begin{table}[h]
 		\centering
 		\begin{tabular}{lr}
@@ -457,22 +462,12 @@
 	\section{Results}
 	\label{results}
 	
-	
-<<<<<<< HEAD
-    	We present the accuracy of assigning morphological tags to all
-     tokens in \cref{tab:results_tokens}. Both when we finetune and
-     only extract BPE weights we see that using an RNN to compose BPE
-     tokens yields slightly better performance.
-	%
-=======
-	
 	We present the accuracy of assigning morphological tags to all
         tokens in \cref{tab:results_tokens}. Both when we finetune and
         only extract BPE weights we see that using an RNN to compose
         BPE tokens yields slightly better performance.
 	%
 	In general, our results are lower\jp{either results are worse/better, or accuracy/error-rate is lower. Which is it?} than the reported State-of-the-Art.
->>>>>>> 70b3b83f82dc07af8002bf6e460399e820a7986f
 	
 
 	\begin{table} % [h]
@@ -836,14 +831,7 @@ in \cref{fig:bpe_lens}.
           word which includes it is split in several tokens.}
     
     \section{Conclusions}
-<<<<<<< HEAD
-        	As a general summary of our work, show that using an LSTM
-     to combine BPE embeddings consistently, and across different
-     languages, show better performance than summing or averaging the
-     BPE embeddings.
-=======
     	As a general summary of our work, we highlight that language typology is not irrelevant when working with models that employ byte-pair encoding.
->>>>>>> 70b3b83f82dc07af8002bf6e460399e820a7986f
 	
 	%\section*{Acknowledgments}
 	
