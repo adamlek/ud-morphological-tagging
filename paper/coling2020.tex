@@ -805,7 +805,18 @@
 		coordinates {(2, 0.9361264301588608)(3, 0.9220321044275887)(4, 0.9224283305227656)(5, 0.8983050847457628)(6, 0.9787234042553191)(7, 1.0)};
 		\end{axis}
 		\end{tikzpicture}
-		\caption{\label{fig:bpe_lens} Per language accuracy of tokens composed of more than two BPE tokens. The x-axis indicate how many BPE tokens a word is composed of and the y-axis the accuracy. The different methods are distinguished by color, where Blue is the summation method, red the mean and green RNN.}
+		\caption{\label{fig:bpe_lens} Per language accuracy of
+                  tokens composed of more than two BPE tokens\jp{it is
+                    the case that the methods always coincide at 1
+                    token? Either say so, or this graph could also
+                    include this data. }. The x-axis indicates how
+                  many BPE tokens a word is composed of; and the
+                  y-axis shows the accuracy. The different methods are
+                  distinguished by color, where blue is the summation
+                  method, red the mean and green RNN. \jp{? The number
+                    of samples for 6-bpe token is probably low and not
+                    that ``accurate''. Perhaps you could show (indicative) error
+                    bars? https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval}}
 	\end{figure}
 
 	
