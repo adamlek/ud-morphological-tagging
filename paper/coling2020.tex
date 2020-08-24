@@ -29,7 +29,9 @@
 \usepackage{subcaption}
 \usepackage{pgfplots}
 
+
 \newcommand\jp[1]{(\textbf{JP:} #1)}
+\newcommand\citet{\cite}
 %\setlength\titlebox{5cm}
 %\colingfinalcopy % Uncomment this line for the final submission
 
@@ -73,7 +75,7 @@
      variants. The transformer owes its success to several factors,
      including the availability of pretrained models, which
      effectively yield rich contextual word embeddings. Such
-     embeddings can be used as is (for so-called feature extraction),
+     embeddings can be used as is (for so-called \emph{feature extraction}),
      or the pre-trained models can be fine-tuned to specific
      applications.
 
@@ -260,7 +262,8 @@
 		\caption{\label{fig:model} Procedure outline}
 	\end{figure}
 	
-	\subsubsection{BPE features}
+	\subsubsection{BPE features}b
+        \label{sec:bpe-features}
 
                         As mentioned previously, we look at methods
      for composing embeddings of BPE tokens into word embeddings. The
@@ -271,11 +274,10 @@
      encode different types of information. To take advantage of this
      we compute BPE embeddings as a weighted sum of layer
      representations \cite{kondratyukstraka}.  That is, we initialize
-     a parameter from a standard normal distribution $w$ of size $l$,
-     where $l$ is the number of laters in the transformer model. Where
+     a parameter $w$ of dimension $l$, each from a normal distribution of mean $0$ and standard deviation $1$,
+     where $l$ is the number of layers in the transformer model. If
      $r_{ji}$ is the layer representation at layer $j$ and token
      position $i$, we calculate the weighted sum as follows:
-
     \begin{equation}
 		x_i = \sum_{1}^{J} softmax(w)_j r_{ji}
 	\end{equation}
@@ -297,9 +299,6 @@
 %        layer $i$. We calculate the weighted sum for each bpe
 %        representation layerwise:
 	
-%	\begin{equation}
-%		x_i = \sum_{1}^{J} softmax(c)_j l_{ji}
-%	\end{equation}
 %	\jp{How is $w$ initialised? How is it optimised? End-to-end
 %          training? Add a forward reference to the training section and explain it there.}
 
@@ -347,7 +346,7 @@
      morphological tags, we want to prevent the model from growing
      overconfident for certain classes. To address this issue we
      introduce label smoothing \cite{szegedy2016rethinking}, that is,
-     instead of the incorrect classes having 0 probability and the
+     instead of the incorrect classes having $0\%$ probability and the
      correct class $100\%$ probability we let each of the incorrect
      classes have a small probability.
 
@@ -358,38 +357,36 @@
      %that you'd give the formula for the probability of the correct
      %class, but apparently I am mistaken.)}
 
-                Let $\alpha$ be our smoothing value, then given a
-     one-hot encoded target vector $t$ of size $(N,C)$ where $N$ is
-     the number of examples and $C$ the number of classes we calculate
-     the smoothed probabilities as:
-     \jp{This formula still looks incorrect; let's discuss it next time.}
-
+     Let $\alpha$ be our smoothing value and $C$ the number of
+     classes, then given a one-hot encoded target vector $t$ of size
+     $C$, we calculate the smoothed probabilities as:
     \begin{equation}
         t_{smooth} = (1-\alpha)t + \frac{\alpha}{C}
     \end{equation}
-
-            The intuition is that we remove $1-\alpha$ from the
-     correct class then distribute $\alpha$ uniformly among all
-     classes. 
+    In words, we remove $\alpha$ from the correct class then
+    distribute $\alpha$ uniformly among all classes.
 
      \subsection{Training}
 
     %\jp{add here a warning that we consider several possible training regimes}
 	
-         In our experiments we consider two possible training
-     regimes. In the first regime we finetune the XLMR models
-     parameters, in the second regime we only extract weights for BPE
-     tokens, that is, we use the model as a \emph{feature extractor}.
+     In our experiments we consider two possible training regimes. In
+     the first regime we finetune the XLMR models parameters, in the
+     second regime we only extract weights for BPE tokens, that is, we
+     use the model as a feature extractor. In all cases, we use
+     end-to-end training.
      
-            	When fine-tuning the model we freeze the XLMR
-     parameters for the first epoch.  When training the model we use
-     cosine annealing learning rate with restarts every epoch, that
-     is, the learning rate starts high then incrementally decrease to
-     $1e-12$ during N steps, where N is the number of batches in an
-     epoch. We use a learning rate of $0.001$ for the word LSTM,
-     classification layer and BPE combination module (when an RNN is
-     used), for the transformer we use a lower learning rate of
-     $1e-06$.
+     When fine-tuning the model we freeze the XLMR parameters for the
+     first epoch, (effectively not fine-tuning for the first epoch).
+     When training the model we use cosine annealing learning rate
+     with restarts every epoch, that is, the learning rate starts high
+     then incrementally decreases to $1\mathrm{e}{-12}$ during $N$
+     steps, where $N$ is the number of batches in an epoch. We use the
+     Adam optimizer with a learning rate of $0.001$ for layer
+     importance parameter ($w$ in \cref{sec:bpe-features}), the
+     parameters of the word LSTM, classification layer, and BPE
+     combination module (when an RNN is used). For the transformer
+     parmeters, we use a lower learning rate of $1\mathrm{e}{-06}$.
 
     %a_parser.add_argument('--xlmr_dropout', type=float, default=0.2) # number of input tokens changed to <unk>
     %a_parser.add_argument('--layer_dropout', type=float, default=0.1) # p that layer j is set to 0.
@@ -426,29 +423,37 @@
 		\caption{\label{tab:parameters} Hyperparameters used for training the model. Slashed indicate the value of a parameter when we finetune or extract features.}
 	\end{table}
 
-        We use dropout thrughout the model, we apply dropout on the
-     input to the transformer, replacing $0.2$ of the tokens with
-     \texttt{<UNK>}. After we have extracted layer features from the
-     transformer we apply a dropout of $0.4$, and before computing the
-     weighted sum of layers we apply full dropout on a layers with a
-     probability of $0.1$. After the word LSTM have processed the
-     sequence, before the final prediction we apply a dropout of
-     $0.5$.
+        We use dropout throughout the model. We apply dropout on the
+        input to the transformer, replacing 20 percent of the BPE tokens
+        with \texttt{<UNK>}. After we have extracted layer features
+        from the transformer we apply a dropout of $0.4$, and before
+        computing the weighted sum of layers we apply full dropout on
+        a layers with a probability of $0.1$. After the word LSTM have
+        processed the sequence, but before the final prediction, we
+        apply a dropout of $0.5$.
 
 	
 	\section{Results}
 	\label{results}
 
-                We compare our results against the baseline reported
-     in \cite{mccarthy2019sigmorphon} to make sure our system works in
-     general. Our results are not directly comparable to those of the
-     shared task as many system employ treebank concatenation.
-    %
-        The accuracy of our system in assigning morphological tags,
-     using the three different methods, and two trainning regimes are
-     presented in \cref{tab:results_tokens}.
+        Even though our aim is to compare the relative performance of
+        various BPE combination methods rather than to improve on the
+        state of the art in absolute terms, we compare our results
+        against the baseline reported by
+        \citet{mccarthy2019sigmorphon}. This comparison serves the
+        purpose of checking that our system is generally sound.  In
+        particular, the actual state of the art, as reported by
+        \citet{mccarthy2019sigmorphon}, use tree-bank concatenation,
+        which means that results are not reported on a per-treebank
+        basis.
 
-	\begin{table}[h]
+    %
+        The accuracy of our system computed by checking the prediction
+        of morphological tags. We report in \cref{tab:results_tokens}
+        the result for each of the three different methods, and the
+        two training regimes.
+
+	\begin{table} % [h]
 	%\small
 	\centering
 	\begin{tabular}{l|c|ccc|ccc}
@@ -471,24 +476,23 @@
 	\caption{\label{tab:results_tokens} Accuracy for morphological tagging. We evaluate both when we finetune the XLMR model and when we only extract BPE embeddings.}
 	\end{table}
 
-        As expected our system perform better than the baseline. As a
-     general trend we can see that the RNN method tend to perform
+        Our system performs better than the baseline. As a
+     general trend we can see that the RNN method tends to perform
      better than the summation or averaging methods. This is
      consistent across both languages and training regimes, showing
      that while the changes are small, they are there consistenty.
     %
         Perhaps not surprisingly, we find that in general finetuning
      yields stronger performance than feature extraction. However, the
-     difference is negligeble, increasing by $3.1\%$ for summation and
-     averaging and $2.4\%$ for RNN.
+     difference is negligeble, increasing by $3.1$ percentage points for summation and
+     averaging and $2.4$ points for RNN.
 
-            When fineuning we see the largest changes in Basque and
-     Turkish, with an increased performance of $1.45\%$ and $.7\%$
-     when finetuning and using RNN over using mean or averaging. When
-     only extracting features the see a larger increase when using an
-     RNN of $2.3\%$ and $1.35\%$ respectively.
-
-    
+     When finetuning we see the largest changes occur for Basque and
+     Turkish, with an increased performance of $1.45$ points and $.7$
+     points when finetuning and using RNN over using mean or
+     averaging. When only extracting features the see a larger
+     increase when using an RNN, of $2.3$ points and $1.35$ points
+     respectively.
 
 	\begin{table}[h]
 	%\small
@@ -510,13 +514,13 @@
 	\caption{\label{tab:results_tokens_nochars} Without character LSTM, much more prominent changes in accuracy as expected.}
     \end{table}
 
-    \cref{tab:results_tokens} reports average accuracy for every word,
-     thus also including those which are only composed of a single BPE
-     token. To highlight the strengths and weaknesses of each
-     composition method, we also compute the accuracy for tokens which
-     are composed of two BPE tokens or more. The results can be seen
-     in \cref{tab:results_large_tokens}.  We see again that RNN seem
-     to work better than summation or averaging BPE embeddings.
+    \Cref{tab:results_tokens} reports average accuracy for every word,
+    thus also including those which are only composed of a single BPE
+    token. To highlight the strengths and weaknesses of each
+    composition method, we also compute the accuracy for tokens which
+    are composed of two BPE tokens or more. The results can be seen in
+    \cref{tab:results_large_tokens}.  We see again that RNN works
+    better than summation or averaging BPE embeddings.
 
     
 	\begin{table}[h]
