@@ -154,6 +154,12 @@
      cases, the context of the sentence will affect which class should
      be assigned to a word.
 
+         For the task, we have to identify $k$ different tags for a
+     word, making the task a multi-class classification problem. We
+     simplify the classification problem by instead of having $K$
+     prediction layers we combine the different tags into a composite
+     tag.
+
     \section{Data}
     
         For the task we will use the Universal Dependencies dataset
@@ -262,19 +268,19 @@
 	
 	\subsubsection{BPE features}
 
-                        As mentioned previously, we look at methods
-     for composing embeddings of BPE tokens into word embeddings. The
-     XLMR model use 12 layers to compute an embedding for a BPE token,
-     and it has been shown in previous research
+             As mentioned previously, we look at methods for composing
+     embeddings of BPE tokens into word embeddings. The XLMR model use
+     12 layers to compute an embedding for a BPE token, and it has
+     been shown in previous research
      \cite{kondratyukstraka,raganato2018analysis} [Find 1 or 2 more
      citations] that the different layers of the transformer model
      encode different types of information. To take advantage of this
      we compute BPE embeddings as a weighted sum of layer
-     representations \cite{kondratyukstraka}.  That is, we initialize
-     a parameter from a standard normal distribution $w$ of size $l$,
-     where $l$ is the number of laters in the transformer model. Where
-     $r_{ji}$ is the layer representation at layer $j$ and token
-     position $i$, we calculate the weighted sum as follows:
+     representations (similar to \cite{kondratyukstraka}).  That is,
+     we initialize a parameter from a standard normal distribution $w$
+     of size $l$, where $l$ is the number of layers in the transformer
+     model. Where $r_{ji}$ is the layer representation at layer $j$
+     and token position $i$, we calculate the weighted sum as follows:
 
     \begin{equation}
 		x_i = \sum_{1}^{J} softmax(w)_j r_{ji}
@@ -284,48 +290,29 @@
      importance of layer $j$. After we have computed a weighted sum for
      each BPE token we proceed to combine them into the tokens as they
      appear in the data.
-    %To align BPE tokens to tokens in the text we
-     %use a simple alignment algorithm [It's super simple...]. (mentioned before)
-    
-%	When extracting features from XLMR we compute a weighted sum
-%        of the layer representations. This is inspired by previous
-%        work showing that the different layers in language models
-%        encode different kinds of information \jp{citation
-%          needed}. That is, we use a parameter $w$ of dimension $l$
-%        \jp{where l is the number of layers in the transformer
-%          model?}, such that $w_i$ indicates the importance of the
-%        layer $i$. We calculate the weighted sum for each bpe
-%        representation layerwise:
-	
-%	\begin{equation}
-%		x_i = \sum_{1}^{J} softmax(c)_j l_{ji}
-%	\end{equation}
-%	\jp{How is $w$ initialised? How is it optimised? End-to-end
-%          training? Add a forward reference to the training section and explain it there.}
 
-
-        We look at three method in particular, summation and averaging
-     along a dimension, and using an RNN. Summation and averaging have been
-     used in previous work, but using an RNN have not been explored
-     before to our knowledge.
+            We look at three method in particular, summation and
+     averaging along a dimension, and using an RNN. Summation and
+     averaging have been used in previous work [CITATIONS], but using
+     an RNN have not been explored before to our knowledge.
     
     	\paragraph{Sum:} For the sum method, we use an element-wise
      sum. That is, we take the sum for each dimension of the BPE
      embeddings separately. Thus, for token $i$ we calculate a
-     composite embedding by summing over dimensions $0,\ldots,N$:
+     composite embedding by summing over dimensions $1,\ldots,D$:
 	
 	\begin{equation}
-	f(x)_i = \sum_{j=1}^{n} x_i^j
+	f(x)_i = \sum_{j=1}^{D} x_i^j
 	\end{equation}
 	
 
     	\paragraph{Mean:} In the mean method we calculate the sum and
      divide by the number of BPE embeddings in the word. Thus, for
      token $i$ we calculate a composite embedding by averaging over
-     dimensions $0,\ldots,N$:
+     dimensions $1,\ldots,D$:
 	
 	\begin{equation}
-	f(x)_{i} = \frac{1}{n}\sum_{j=1}^{n} x_i^j
+	f(x)_{i} = \frac{1}{D}\sum_{j=1}^{D} x_i^j
 	\end{equation}
 	
 	
