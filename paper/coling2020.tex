@@ -29,7 +29,9 @@
 \usepackage{subcaption}
 \usepackage{pgfplots}
 
+
 \newcommand\jp[1]{(\textbf{JP:} #1)}
+\newcommand\citet{\cite}
 %\setlength\titlebox{5cm}
 %\colingfinalcopy % Uncomment this line for the final submission
 
@@ -73,7 +75,7 @@
      variants. The transformer owes its success to several factors,
      including the availability of pretrained models, which
      effectively yield rich contextual word embeddings. Such
-     embeddings can be used as is (for so-called feature extraction),
+     embeddings can be used as is (for so-called \emph{feature extraction}),
      or the pre-trained models can be fine-tuned to specific
      applications.
 
@@ -260,13 +262,14 @@
         the outline $f$ represents the different methods we use to
         combine BPE embeddings.
 	
-	\begin{figure}[h!]
+	\begin{figure}%[h!]
 		\centering
 		\includegraphics[scale=0.5]{model-outline.pdf}
 		\caption{\label{fig:model} Procedure outline}
 	\end{figure}
 	
-	\subsubsection{BPE features}
+	\subsubsection{BPE features}b
+        \label{sec:bpe-features}
 
              As mentioned previously, we look at methods for composing
      embeddings of BPE tokens into word embeddings. The XLMR model use
@@ -276,12 +279,11 @@
      citations] that the different layers of the transformer model
      encode different types of information. To take advantage of this
      we compute BPE embeddings as a weighted sum of layer
-     representations (similar to \cite{kondratyukstraka}).  That is,
-     we initialize a parameter from a standard normal distribution $w$
-     of size $l$, where $l$ is the number of layers in the transformer
-     model. Where $r_{ji}$ is the layer representation at layer $j$
-     and token position $i$, we calculate the weighted sum as follows:
-
+     representations \cite{kondratyukstraka}.  That is, we initialize
+     a parameter $w$ of dimension $l$, each from a normal distribution of mean $0$ and standard deviation $1$,
+     where $l$ is the number of layers in the transformer model. If
+     $r_{ji}$ is the layer representation at layer $j$ and token
+     position $i$, we calculate the weighted sum as follows:
     \begin{equation}
 		x_i = \sum_{1}^{J} softmax(w)_j r_{ji}
 	\end{equation}
@@ -290,7 +292,7 @@
      importance of layer $j$. After we have computed a weighted sum for
      each BPE token we proceed to combine them into the tokens as they
      appear in the data.
-
+    
             We look at three method in particular, summation and
      averaging along a dimension, and using an RNN. Summation and
      averaging have been used in previous work [CITATIONS], but using
@@ -334,7 +336,7 @@
      morphological tags, we want to prevent the model from growing
      overconfident for certain classes. To address this issue we
      introduce label smoothing \cite{szegedy2016rethinking}, that is,
-     instead of the incorrect classes having 0 probability and the
+     instead of the incorrect classes having $0\%$ probability and the
      correct class $100\%$ probability we let each of the incorrect
      classes have a small probability.
 
@@ -345,38 +347,36 @@
      %that you'd give the formula for the probability of the correct
      %class, but apparently I am mistaken.)}
 
-                Let $\alpha$ be our smoothing value, then given a
-     one-hot encoded target vector $t$ of size $(N,C)$ where $N$ is
-     the number of examples and $C$ the number of classes we calculate
-     the smoothed probabilities as:
-     \jp{This formula still looks incorrect; let's discuss it next time.}
-
+     Let $\alpha$ be our smoothing value and $C$ the number of
+     classes, then given a one-hot encoded target vector $t$ of size
+     $C$, we calculate the smoothed probabilities as:
     \begin{equation}
         t_{smooth} = (1-\alpha)t + \frac{\alpha}{C}
     \end{equation}
-
-            The intuition is that we remove $1-\alpha$ from the
-     correct class then distribute $\alpha$ uniformly among all
-     classes. 
+    In words, we remove $\alpha$ from the correct class then
+    distribute $\alpha$ uniformly among all classes.
 
      \subsection{Training}
 
     %\jp{add here a warning that we consider several possible training regimes}
 	
-         In our experiments we consider two possible training
-     regimes. In the first regime we finetune the XLMR models
-     parameters, in the second regime we only extract weights for BPE
-     tokens, that is, we use the model as a \emph{feature extractor}.
+     In our experiments we consider two possible training regimes. In
+     the first regime we finetune the XLMR models parameters, in the
+     second regime we only extract weights for BPE tokens, that is, we
+     use the model as a feature extractor. In all cases, we use
+     end-to-end training.
      
-            	When fine-tuning the model we freeze the XLMR
-     parameters for the first epoch.  When training the model we use
-     cosine annealing learning rate with restarts every epoch, that
-     is, the learning rate starts high then incrementally decrease to
-     $1e-12$ during N steps, where N is the number of batches in an
-     epoch. We use a learning rate of $0.001$ for the word LSTM,
-     classification layer and BPE combination module (when an RNN is
-     used), for the transformer we use a lower learning rate of
-     $1e-06$.
+     When fine-tuning the model we freeze the XLMR parameters for the
+     first epoch, (effectively not fine-tuning for the first epoch).
+     When training the model we use cosine annealing learning rate
+     with restarts every epoch, that is, the learning rate starts high
+     then incrementally decreases to $1\mathrm{e}{-12}$ during $N$
+     steps, where $N$ is the number of batches in an epoch. We use the
+     Adam optimizer with a learning rate of $0.001$ for layer
+     importance parameter ($w$ in \cref{sec:bpe-features}), the
+     parameters of the word LSTM, classification layer, and BPE
+     combination module (when an RNN is used). For the transformer
+     parameters, we use a lower learning rate of $1\mathrm{e}{-06}$.
 
     %a_parser.add_argument('--xlmr_dropout', type=float, default=0.2) # number of input tokens changed to <unk>
     %a_parser.add_argument('--layer_dropout', type=float, default=0.1) # p that layer j is set to 0.
@@ -385,7 +385,7 @@
     %a_parser.add_argument('--char_dropout', type=float, default=0.4) # dropout on w after char rnn
     %a_parser.add_argument('--bpe_dropout', type=float, default=0.4) # dropout on w after bpe composition
    
-	\begin{table}[h]
+	\begin{table}%[h]
 		\centering
 		\begin{tabular}{lr}
 			Parameter & Value \\
@@ -413,29 +413,37 @@
 		\caption{\label{tab:parameters} Hyperparameters used for training the model. Slashed indicate the value of a parameter when we finetune or extract features.}
 	\end{table}
 
-        We use dropout thrughout the model, we apply dropout on the
-     input to the transformer, replacing $0.2$ of the tokens with
-     \texttt{<UNK>}. After we have extracted layer features from the
-     transformer we apply a dropout of $0.4$, and before computing the
-     weighted sum of layers we apply full dropout on a layers with a
-     probability of $0.1$. After the word LSTM have processed the
-     sequence, before the final prediction we apply a dropout of
-     $0.5$.
+        We use dropout throughout the model. We apply dropout on the
+        input to the transformer, replacing 20 percent of the BPE tokens
+        with \texttt{<UNK>}. After we have extracted layer features
+        from the transformer we apply a dropout of $0.4$, and before
+        computing the weighted sum of layers we apply full dropout on
+        a layers with a probability of $0.1$. After the word LSTM have
+        processed the sequence, but before the final prediction, we
+        apply a dropout of $0.5$.
 
 	
 	\section{Results}
 	\label{results}
 
-                We compare our results against the baseline reported
-     in \cite{mccarthy2019sigmorphon} to make sure our system works in
-     general. Our results are not directly comparable to those of the
-     shared task as many system employ treebank concatenation.
-    %
-        The accuracy of our system in assigning morphological tags,
-     using the three different methods, and two trainning regimes are
-     presented in \cref{tab:results_tokens}.
+        Even though our aim is to compare the relative performance of
+        various BPE combination methods rather than to improve on the
+        state of the art in absolute terms, we compare our results
+        against the baseline reported by
+        \citet{mccarthy2019sigmorphon}. This comparison serves the
+        purpose of checking that our system is generally sound.  In
+        particular, the actual state of the art, as reported by
+        \citet{mccarthy2019sigmorphon}, use tree-bank concatenation,
+        which means that results are not reported on a per-treebank
+        basis.
 
-	\begin{table}[h]
+    %
+        The accuracy of our system computed by checking the prediction
+        of morphological tags. We report in \cref{tab:results_tokens}
+        the result for each of the three different methods, and the
+        two training regimes.
+
+	\begin{table} % [h]
 	%\small
 	\centering
 	\begin{tabular}{l|c|ccc|ccc}
@@ -458,55 +466,56 @@
 	\caption{\label{tab:results_tokens} Accuracy for morphological tagging. We evaluate both when we finetune the XLMR model and when we only extract BPE embeddings.}
 	\end{table}
 
-        As expected our system perform better than the baseline. As a
-     general trend we can see that the RNN method tend to perform
+        Our system performs better than the baseline. As a
+     general trend we can see that the RNN method tends to perform
      better than the summation or averaging methods. This is
      consistent across both languages and training regimes, showing
      that while the changes are small, they are there consistenty.
     %
-        Perhaps not surprisingly, we find that in general finetuning
-     yields stronger performance than feature extraction. However, the
-     difference is negligeble, increasing by $3.1\%$ for summation and
-     averaging and $2.4\%$ for RNN.
+            Perhaps not surprisingly, we find that in general
+     finetuning yields stronger performance than feature
+     extraction. However, the difference is negligeble, increasing by
+     $3.1$ percentage points for summation and averaging and $2.4$
+     points for RNN.
 
-            When fineuning we see the largest changes in Basque and
-     Turkish, with an increased performance of $1.45\%$ and $.7\%$
-     when finetuning and using RNN over using mean or averaging. When
-     only extracting features the see a larger increase when using an
-     RNN of $2.3\%$ and $1.35\%$ respectively.
+     When finetuning we see the largest changes occur for Basque and
+     Turkish, with an increased performance of $1.45$ points and $0.7$
+     points when finetuning and using RNN over using mean or
+     averaging. When only extracting features we see a larger
+     increase when using an RNN, of $2.3$ points and $1.35$ points
+     respectively.
 
-    
-
-	\begin{table}[h]
+	\begin{table}%[h]
 	%\small
 	\centering
 	\begin{tabular}{l|c|ccc|ccc}
 		& & \multicolumn{3}{c}{Finetuning} & \multicolumn{3}{c}{Feature extraction} \\
 		Treebank & Baseline & Sum & Mean & RNN & Sum & Mean & RNN \\
 		\hline
-		Basque-BDT      & & .884 & .877 & \textbf{.901} & 0.789 & 0.780 & \textbf{0.834} \\
-		Finnish-TDT     & & .958 & .960 & \textbf{.965} & 0.856 & 0.847 & \textbf{0.899} \\
-		Turkish-IMST    & & .859 & .855 & \textbf{.884} & 0.741 & 0.735 & \textbf{0.775} \\
-		Estonian-EDT    & & 0 & 0 & 0 & 0.856 & 0.853 & \textbf{0.901} \\
-		Spanish-AnCora  & & 0 & 0 & 0 & 0.954 & 0.952 & \textbf{0.962} \\
-		Arabic-PADT     & & 0 & 0 & 0 & 0.923 & 0.902 & \textbf{0.936} \\
-		Czech-CAC       & & 0 & 0 & 0 & 0.887 & 0.881 & \textbf{0.924} \\
-		Polish-LFG      & & 0 & 0 & 0 & 0.844 & 0.840 & \textbf{0.878} \\
-		
+		Basque-BDT      & & .884 & .877 & \textbf{.901} & .789 & .780 & \textbf{.834} \\
+		Finnish-TDT     & & .958 & .960 & \textbf{.965} & .856 & .847 & \textbf{.899} \\
+		Turkish-IMST    & & .859 & .855 & \textbf{.884} & .741 & .735 & \textbf{.775} \\
+		Estonian-EDT    & & .955 & 0 & 0 & .856 & .853 & \textbf{.901} \\
+		Spanish-AnCora  & & 0 & 0 & 0 & .954 & .952 & \textbf{.962} \\
+		Arabic-PADT     & & 0 & 0 & 0 & .923 & .902 & \textbf{.936} \\
+		Czech-CAC       & & 0 & 0 & 0 & .887 & .881 & \textbf{.924} \\
+		Polish-LFG      & & 0 & 0 & 0 & .844 & .840 & \textbf{.878} \\
+        \hline
+        Average         & .728 &  &  &  & .856 & .848 & \textbf{.888} \\
 	\end{tabular}
 	\caption{\label{tab:results_tokens_nochars} Without character LSTM, much more prominent changes in accuracy as expected.}
     \end{table}
 
-    \cref{tab:results_tokens} reports average accuracy for every word,
-     thus also including those which are only composed of a single BPE
-     token. To highlight the strengths and weaknesses of each
-     composition method, we also compute the accuracy for tokens which
-     are composed of two BPE tokens or more. The results can be seen
-     in \cref{tab:results_large_tokens}.  We see again that RNN seem
-     to work better than summation or averaging BPE embeddings.
+    \Cref{tab:results_tokens} reports average accuracy for every word,
+    thus also including those which are only composed of a single BPE
+    token. To highlight the strengths and weaknesses of each
+    composition method, we also compute the accuracy for tokens which
+    are composed of two BPE tokens or more. The results can be seen in
+    \cref{tab:results_large_tokens}.  We see again that RNN works
+    better than summation or averaging BPE embeddings.
 
     
-	\begin{table}[h]
+	\begin{table}%[h]
 	%\small
 	\centering
 	\begin{tabular}{l|ccc|ccc}
@@ -523,9 +532,18 @@
 		Arabic-PADT     & .906 & .904 & \textbf{.913} & .927 & .925 & \textbf{.935}\\
 		Czech-CAC       & .958 & .959 & \textbf{.962} & .915 & .916 & \textbf{.930} \\
 		Polish-LFG      & .924 & .924 & \textbf{.933} & .834 & .833 & \textbf{.876} \\
+        \hline
+        Average         & .913 & .914 & \textbf{.923} & .891 & .878 & \textbf{.898} \\
 	\end{tabular}
 	\caption{\label{tab:results_large_tokens} Accuracy for morphological tagging on all tokens that are composed of 2 or more BPE tokens (with char-lstm).}
 \end{table}
+
+            We see the same trend for accuracy on tokens that are
+     composed of two or more BPE tokens, as in the overall accuracy,
+     where the RNN outperform both the sum and averaging methods. We
+     can also see that the average increase in accuracy when using an
+     RNN is larger. This holds for both when we only finetune the
+     model and extract features.
 
     
     Given that the number of BPE tokens per natural-language token
@@ -533,288 +551,572 @@
      given a different number of BPE tokens. We show per-language
      performance with the differnt methods in \cref{fig:bpe_lens}.
 
-	\begin{figure}[h!]
-		\centering
-		\begin{tikzpicture}
-		\begin{axis}[
-		name=basque,
-		title={Basque-BDT},
-		xlabel={},
-		ylabel={},
-		typeset ticklabels with strut,
-		legend pos=south west,
-		ymajorgrids=true,
-		grid style=dashed,
-				height=5cm
-		]
-		
+	\begin{figure}%[h!]
+  	\centering
+    \begin{tikzpicture} 
+	\begin{axis}[
+	name=,
+	title={Finnish-TDT},
+        xtick style={draw=none},
+        ytick style={draw=none},
+        xtick={1,2,3,3,4,5,6,7},
+	typeset ticklabels with strut,
+	legend pos=south west,
+	ymajorgrids=false,
+	grid style=dashed,
+	height=5cm
+	]
 		\addplot[
 		color=blue,
-		mark=square,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
 		]
-		coordinates {(2, 0.8243201000312598)(3, 0.7692307692307693)(4, 0.7662337662337663)(5, 0.72)(6, 0.8333333333333334)(7, 1.0)};
-		
+		coordinates {
+			(1, 0.978788725)
+			(2, 0.954759661)
+			(3, 0.951459606)
+			(4, 0.920821114)
+			(5, 0.959302326)
+			(6, 0.953703704)
+			(7, 0.95)
+};
 		\addplot[
 		color=red,
-		mark=square,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
 		]
-		coordinates {(2, 0.8233823069709284)(3, 0.7705922396187883)(4, 0.7532467532467533)(5, 0.84)(6, 0.9166666666666666)(7, 1.0)};
-		
+		coordinates {
+			(1, 0.97711415)
+			(2, 0.950989632)
+			(3, 0.944331297)
+			(4, 0.931573803)
+			(5, 0.962209302)
+			(6, 0.944444444)
+			(7, 0.95)
+};
 		\addplot[
 		color=green,
-		mark=square,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
 		]
-		coordinates {(2, 0.8662081900593935)(3, 0.7957794417971409)(4, 0.8051948051948052)(5, 0.7866666666666666)(6, 1.0)(7, 1.0)};
-		\end{axis}
-		\end{tikzpicture}
-        \begin{tikzpicture} 
-		\begin{axis}[
-		name=finnish,
-		title={Finnish-TDT},
-		xlabel={},
-		ylabel={},
-		typeset ticklabels with strut,
-		legend pos=south west,
-		ymajorgrids=true,
-		grid style=dashed,
-		height=5cm
-		]
-		
-		\addplot[
-		color=blue,
-		mark=square,
-		]
-		coordinates {(2, 0.8967012252591895)(3, 0.8906992532247114)(4, 0.8787878787878788)(5, 0.9127906976744186)(6, 0.8981481481481481)(7, 0.875)};
-		
-		\addplot[
-		color=red,
-		mark=square,
-		]
-		coordinates {(2, 0.8983977379830349)(3, 0.8985064494229463)(4, 0.8856304985337243)(5, 0.9156976744186046)(6, 0.9259259259259259)(7, 0.875)};
-		
-		\addplot[
-		color=green,
-		mark=square,
-		]
-		coordinates {(2, 0.9163053722902922)(3, 0.9090291921249152)(4, 0.9081133919843597)(5, 0.9302325581395349)(6, 0.9074074074074074)(7, 0.875)};
-	
-		\end{axis}
-		\end{tikzpicture}
-		\begin{tikzpicture}
-		\begin{axis}[
-		name=turkish,
-		title={Turkish-IMST},
-		xlabel={},
-		ylabel={},
-		typeset ticklabels with strut,
-		legend pos=south west,
-		ymajorgrids=true,
-		grid style=dashed,
-		height=5cm
-		]
-		
-		\addplot[
-		color=blue,
-		mark=square,
-		]
-		coordinates {(2, 0.8054268696227663)(3, 0.8191881918819188)(4, 0.8081395348837209)(5, 0.6956521739130435)(6, 0.6923076923076923)(7, 1.0)};
-		
-		\addplot[
-		color=red,
-		mark=square,
-		]
-		coordinates {(2, 0.8034414295168762)(3, 0.7878228782287823)(4, 0.7848837209302325)(5, 0.7391304347826086)(6, 0.6153846153846154)(7, 1.0)};
-		
-		\addplot[
-		color=green,
-		mark=square,
-		]
-		coordinates {(2, 0.8173395102581072)(3, 0.8154981549815498)(4, 0.8313953488372093)(5, 0.7391304347826086)(6, 0.6923076923076923)(7, 1.0)};
-		\end{axis}
-		\end{tikzpicture}
-		\begin{tikzpicture}
-		\begin{axis}[
-		name=estonian,
-		title={Estonian-EDT},
-		xlabel={},
-		ylabel={},
-		typeset ticklabels with strut,
-		legend pos=south west,
-		ymajorgrids=true,
-		grid style=dashed,
-		height=5cm
-		]
-		
-		\addplot[
-		color=blue,
-		mark=square,
-		]
-		coordinates {(2, 0.9061969439728353)(3, 0.8942561396387254)(4, 0.9136649514008005)(5, 0.9221238938053097)(6, 0.9210526315789473)(7, 0.9148936170212766)};
-		
-		\addplot[
-		color=red,
-		mark=square,
-		]
-		coordinates {(2, 0.9132427843803056)(3, 0.8934442865841282)(4, 0.9073756432246999)(5, 0.9256637168141593)(6, 0.9342105263157895)(7, 0.9148936170212766)};
-		
-		\addplot[
-		color=green,
-		mark=square,
-		]
-		coordinates {(2, 0.9207130730050934)(3, 0.9058250456667343)(4, 0.9142367066895368)(5, 0.9327433628318584)(6, 0.9276315789473685)(7, 0.925531914893617)};
-		\end{axis}
-		\end{tikzpicture}
-		\begin{tikzpicture}
-		\begin{axis}[
-		name=spanish,
-		title={Spanish-AnCora},
-		xlabel={},
-		ylabel={},
-		typeset ticklabels with strut,
-		legend pos=south west,
-		ymajorgrids=true,
-		grid style=dashed,
-		height=5cm
-		]
-		
-		\addplot[
-		color=blue,
-		mark=square,
-		]
-		coordinates {(2, 0.955400523234085)(3, 0.9459234608985025)(4, 0.958656330749354)(5, 0.8679245283018868)(6, 0.96)(7, 0.75)};
-		
-		\addplot[
-		color=red,
-		mark=square,
-		]
-		coordinates {(2, 0.9547776255138907)(3, 0.9421797004991681)(4, 0.937984496124031)(5, 0.8867924528301887)(6, 0.96)(7, 0.75)};
-		
-		\addplot[
-		color=green,
-		mark=square,
-		]
-		coordinates {(2, 0.9616295004360284)(3, 0.9546589018302829)(4, 0.9638242894056848)(5, 0.8867924528301887)(6, 0.96)(7, 0.75)};
-		\end{axis}
-		\end{tikzpicture}
-		\begin{tikzpicture}
-		\begin{axis}[
-		name=arabic,
-		title={Arabic-PADT},
-		xlabel={},
-		ylabel={},
-		typeset ticklabels with strut,
-		legend pos=south west,
-		ymajorgrids=true,
-		grid style=dashed,
-		height=5cm,
-		]
-		
-		\addplot[
-		color=blue,
-		mark=square,
-		]
-		coordinates {(2, 0.9286291953093408)(3, 0.9217134416543574)(4, 0.9455252918287937)(5, 0.9333333333333333)};
-		
-		\addplot[
-		color=red,
-		mark=square,
-		]
-		coordinates {(2, 0.9272139102304893)(3, 0.9197439684884293)(4, 0.9416342412451362)(5, 0.8666666666666667)};
+		coordinates {
+			(1, 0.978695693)
+			(2, 0.956833176)
+			(3, 0.954854039)
+			(4, 0.929618768)
+			(5, 0.962209302)
+			(6, 0.962962963)
+			(7, 0.975)
+};
+		\node[scale=0.5] at (1,-6) {10749};
+		\node[scale=0.5] at (100,-6) {5305};
+		\node[scale=0.5] at (200,-6) {2946};
+		\node[scale=0.5] at (300,-6) {1023};
+		\node[scale=0.5] at (400,-6) {344};
+		\node[scale=0.5] at (500,-6) {108};
+		\node[scale=0.5] at (600,-6) {40};
 
-		\addplot[
-		color=green,
-		mark=square,
-		]
-		coordinates {(2, 0.9375252729478366)(3, 0.930576070901034)(4, 0.9455252918287937)(5, 0.9333333333333333)};
-		\end{axis}
-		\end{tikzpicture}
-		\begin{tikzpicture}
-		\begin{axis}[
-		name=polish,
-		title={Polish-LFG},
-		xlabel={},
-		ylabel={},
-		typeset ticklabels with strut,
-		legend pos=south west,
-		ymajorgrids=true,
-		grid style=dashed,
-		height=5cm
-		]
-		
+        \end{axis}
+	\end{tikzpicture}
+\begin{tikzpicture} 
+	\begin{axis}[
+	name=,
+	title={Basque-BDT},
+        xtick style={draw=none},
+        ytick style={draw=none},
+        xtick={1,2,3,3,4,5,6,7},
+	typeset ticklabels with strut,
+	legend pos=south west,
+	ymajorgrids=false,
+	grid style=dashed,
+	height=5cm
+	]
 		\addplot[
 		color=blue,
-		mark=square,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
 		]
-		coordinates {(2, 0.8453280318091452)(3, 0.8180535966149506)(4, 0.8272357723577236)(5, 0.8026315789473685)(6, 0.8888888888888888)};
-		
+		coordinates {
+			(1, 0.955423477)
+			(2, 0.860581432)
+			(3, 0.811436351)
+			(4, 0.768831169)
+			(5, 0.746666667)
+			(6, 0.833333333)
+			(7, 1.0)
+};
 		\addplot[
 		color=red,
-		mark=square,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
 		]
-		coordinates {(2, 0.8465208747514911)(3, 0.8138222849083215)(4, 0.8252032520325203)(5, 0.8289473684210527)(6, 0.8888888888888888)};
-		
+		coordinates {
+			(1, 0.957800892)
+			(2, 0.865582995)
+			(3, 0.803948264)
+			(4, 0.755844156)
+			(5, 0.693333333)
+			(6, 0.916666667)
+			(7, 1.0)
+};
 		\addplot[
 		color=green,
-		mark=square,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
 		]
-		coordinates {(2, 0.8878727634194831)(3, 0.8589562764456982)(4, 0.8739837398373984)(5, 0.868421052631579)(6, 0.8888888888888888)};
-		\end{axis}
-		\end{tikzpicture}
-		\begin{tikzpicture}
-		\begin{axis}[
-		name=czech,
-		title={Czech-CAC},
-		xlabel={},
-		ylabel={},
-		typeset ticklabels with strut,
-		legend pos=south west,
-		ymajorgrids=true,
-		grid style=dashed,
-		height=5cm,
-		]
-		
+		coordinates {
+			(1, 0.962109955)
+			(2, 0.889340419)
+			(3, 0.827093261)
+			(4, 0.8)
+			(5, 0.76)
+			(6, 1.0)
+			(7, 1.0)
+};
+		\node[scale=0.5] at (1,-6) {6730};
+		\node[scale=0.5] at (100,-6) {3199};
+		\node[scale=0.5] at (200,-6) {1469};
+		\node[scale=0.5] at (300,-6) {385};
+		\node[scale=0.5] at (400,-6) {75};
+		\node[scale=0.5] at (500,-6) {12};
+		\node[scale=0.5] at (600,-6) {5};
+
+        \end{axis}
+	\end{tikzpicture}
+\begin{tikzpicture} 
+	\begin{axis}[
+	name=,
+	title={Turkish-IMST},
+        xtick style={draw=none},
+        ytick style={draw=none},
+        xtick={1,2,3,3,4,5,6,7},
+	typeset ticklabels with strut,
+	legend pos=south west,
+	ymajorgrids=false,
+	grid style=dashed,
+	height=5cm
+	]
 		\addplot[
 		color=blue,
-		mark=square,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
 		]
-		coordinates {(2, 0.9222981315334595)(3, 0.9050979008643499)(4, 0.9044406970207982)(5, 0.8847457627118644)(6, 0.9574468085106383)(7, 1.0)};
-		
+		coordinates {
+			(1, 0.943162147)
+			(2, 0.849106552)
+			(3, 0.756457565)
+			(4, 0.819767442)
+			(5, 0.913043478)
+			(6, 0.769230769)
+			(7, 0.75)
+};
 		\addplot[
 		color=red,
-		mark=square,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
 		]
-		coordinates {(2, 0.9251790270804181)(3, 0.9005115540659728)(4, 0.9106239460370995)(5, 0.8847457627118644)(6, 0.9148936170212766)(7, 1.0)};
-		
+		coordinates {
+			(1, 0.939122908)
+			(2, 0.841826605)
+			(3, 0.745387454)
+			(4, 0.802325581)
+			(5, 0.739130435)
+			(6, 0.692307692)
+			(7, 1.0)
+};
 		\addplot[
 		color=green,
-		mark=square,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
 		]
-		coordinates {(2, 0.9361264301588608)(3, 0.9220321044275887)(4, 0.9224283305227656)(5, 0.8983050847457628)(6, 0.9787234042553191)(7, 1.0)};
-		\end{axis}
-		\end{tikzpicture}
-		\caption{\label{fig:bpe_lens} Per language accuracy of tokens composed of more than two BPE tokens. The x-axis indicate how many BPE tokens a word is composed of and the y-axis the accuracy. The different methods are distinguished by color, where Blue is the summation method, red the mean and green RNN.}
+		coordinates {
+			(1, 0.94287363)
+			(2, 0.870946393)
+			(3, 0.776752768)
+			(4, 0.843023256)
+			(5, 0.869565217)
+			(6, 0.846153846)
+			(7, 0.75)
+};
+		\node[scale=0.5] at (1,-6) {3466};
+		\node[scale=0.5] at (100,-6) {1511};
+		\node[scale=0.5] at (200,-6) {542};
+		\node[scale=0.5] at (300,-6) {172};
+		\node[scale=0.5] at (400,-6) {23};
+		\node[scale=0.5] at (500,-6) {13};
+		\node[scale=0.5] at (600,-6) {4};
+
+        \end{axis}
+	\end{tikzpicture}
+\begin{tikzpicture} 
+	\begin{axis}[
+	name=,
+	title={Estonian-EDT},
+        xtick style={draw=none},
+        ytick style={draw=none},
+        xtick={1,2,3,3,4,5,6,7},
+	typeset ticklabels with strut,
+	legend pos=south west,
+	ymajorgrids=false,
+	grid style=dashed,
+	height=5cm
+	]
+		\addplot[
+		color=blue,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.970751181)
+			(2, 0.948556876)
+			(3, 0.94276436)
+			(4, 0.938250429)
+			(5, 0.962831858)
+			(6, 0.940789474)
+			(7, 0.946808511)
+};
+		\addplot[
+		color=red,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.970914127)
+			(2, 0.94991511)
+			(3, 0.942967323)
+			(4, 0.939965695)
+			(5, 0.957522124)
+			(6, 0.947368421)
+			(7, 0.946808511)
+};
+		\addplot[
+		color=green,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.970791918)
+			(2, 0.951952462)
+			(3, 0.945605845)
+			(4, 0.947398513)
+			(5, 0.968141593)
+			(6, 0.947368421)
+			(7, 0.936170213)
+};
+		\node[scale=0.5] at (1,-6) {24548};
+		\node[scale=0.5] at (100,-6) {11780};
+		\node[scale=0.5] at (200,-6) {4927};
+		\node[scale=0.5] at (300,-6) {1749};
+		\node[scale=0.5] at (400,-6) {565};
+		\node[scale=0.5] at (500,-6) {152};
+		\node[scale=0.5] at (600,-6) {94};
+
+        \end{axis}
+	\end{tikzpicture}
+\begin{tikzpicture} 
+	\begin{axis}[
+	name=,
+	title={Arabic-PADT},
+        xtick style={draw=none},
+        ytick style={draw=none},
+        xtick={1,2,3,3,4,5,6,7},
+	typeset ticklabels with strut,
+	legend pos=south west,
+	ymajorgrids=false,
+	grid style=dashed,
+	height=5cm
+	]
+		\addplot[
+		color=blue,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.967134623)
+			(2, 0.912252325)
+			(3, 0.892663712)
+			(4, 0.883268482)
+			(5, 0.866666667)
+};
+		\addplot[
+		color=red,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.968529193)
+			(2, 0.909017388)
+			(3, 0.893648449)
+			(4, 0.898832685)
+			(5, 0.933333333)
+};
+		\addplot[
+		color=green,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.967971365)
+			(2, 0.91589163)
+			(3, 0.907434761)
+			(4, 0.906614786)
+			(5, 0.933333333)
+};
+		\node[scale=0.5] at (1,-6) {21512};
+		\node[scale=0.5] at (100,-6) {4946};
+		\node[scale=0.5] at (200,-6) {2031};
+		\node[scale=0.5] at (300,-6) {257};
+		\node[scale=0.5] at (400,-6) {15};
+
+        \end{axis}
+	\end{tikzpicture}
+\begin{tikzpicture} 
+	\begin{axis}[
+	name=,
+	title={Spanish-ANCORA},
+        xtick style={draw=none},
+        ytick style={draw=none},
+        xtick={1,2,3,3,4,5,6,7},
+	typeset ticklabels with strut,
+	legend pos=south west,
+	ymajorgrids=false,
+	grid style=dashed,
+	height=5cm
+	]
+		\addplot[
+		color=blue,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.983232268)
+			(2, 0.967484739)
+			(3, 0.958818636)
+			(4, 0.937984496)
+			(5, 0.905660377)
+			(6, 0.92)
+			(7, 0.75)
+};
+		\addplot[
+		color=red,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.982910695)
+			(2, 0.966986421)
+			(3, 0.956738769)
+			(4, 0.935400517)
+			(5, 0.905660377)
+			(6, 0.92)
+			(7, 0.75)
+};
+		\addplot[
+		color=green,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.983416024)
+			(2, 0.968730534)
+			(3, 0.956322795)
+			(4, 0.937984496)
+			(5, 0.943396226)
+			(6, 0.92)
+			(7, 0.75)
+};
+		\node[scale=0.5] at (1,-6) {43536};
+		\node[scale=0.5] at (100,-6) {8027};
+		\node[scale=0.5] at (200,-6) {2404};
+		\node[scale=0.5] at (300,-6) {387};
+		\node[scale=0.5] at (400,-6) {53};
+		\node[scale=0.5] at (500,-6) {25};
+		\node[scale=0.5] at (600,-6) {4};
+
+        \end{axis}
+	\end{tikzpicture}
+\begin{tikzpicture} 
+	\begin{axis}[
+	name=,
+	title={Polish-LFG},
+        xtick style={draw=none},
+        ytick style={draw=none},
+        xtick={1,2,3,3,4,5,6,7},
+	typeset ticklabels with strut,
+	legend pos=south west,
+	ymajorgrids=false,
+	grid style=dashed,
+	height=5cm
+	]
+		\addplot[
+		color=blue,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.976847521)
+			(2, 0.934393638)
+			(3, 0.913963329)
+			(4, 0.902439024)
+			(5, 0.894736842)
+			(6, 0.888888889)
+};
+		\addplot[
+		color=red,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.972754911)
+			(2, 0.930815109)
+			(3, 0.921015515)
+			(4, 0.912601626)
+			(5, 0.855263158)
+			(6, 0.888888889)
+};
+		\addplot[
+		color=green,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.974158092)
+			(2, 0.943936382)
+			(3, 0.921720733)
+			(4, 0.916666667)
+			(5, 0.881578947)
+			(6, 0.888888889)
+};
+		\node[scale=0.5] at (1,-6) {8552};
+		\node[scale=0.5] at (100,-6) {2515};
+		\node[scale=0.5] at (200,-6) {1418};
+		\node[scale=0.5] at (300,-6) {492};
+		\node[scale=0.5] at (400,-6) {76};
+		\node[scale=0.5] at (500,-6) {9};
+
+        \end{axis}
+	\end{tikzpicture}
+\begin{tikzpicture} 
+	\begin{axis}[
+	name=,
+	title={Czech-CAC},
+        xtick style={draw=none},
+        ytick style={draw=none},
+        xtick={1,2,3,3,4,5,6,7},
+	typeset ticklabels with strut,
+	legend pos=south west,
+	ymajorgrids=false,
+	grid style=dashed,
+	height=5cm
+	]
+		\addplot[
+		color=blue,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.987536707)
+			(2, 0.963371471)
+			(3, 0.949902981)
+			(4, 0.958403598)
+			(5, 0.905084746)
+			(6, 0.957446809)
+			(7, 1.0)
+};
+		\addplot[
+		color=red,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.987809875)
+			(2, 0.963618405)
+			(3, 0.950608573)
+			(4, 0.960089938)
+			(5, 0.901694915)
+			(6, 0.957446809)
+			(7, 1.0)
+};
+		\addplot[
+		color=green,
+		mark=o,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.987400123)
+			(2, 0.967240102)
+			(3, 0.953254542)
+			(4, 0.960089938)
+			(5, 0.898305085)
+			(6, 0.957446809)
+			(7, 1.0)
+};
+		\node[scale=0.5] at (1,-6) {29286};
+		\node[scale=0.5] at (100,-6) {12149};
+		\node[scale=0.5] at (200,-6) {5669};
+		\node[scale=0.5] at (300,-6) {1779};
+		\node[scale=0.5] at (400,-6) {295};
+		\node[scale=0.5] at (500,-6) {47};
+		\node[scale=0.5] at (600,-6) {3};
+
+        \end{axis}
+	\end{tikzpicture}
+
+                \caption{\label{fig:bpe_lens} Per-language accuracy on
+     tokens with different number of BPE components. Values of seven
+     of the $x$-axis also include all tokens who are composed of seven
+     or more BPE tokens. We indicate the method by encoding summation
+     as blue, averaging as red and RNN as green. The accuracy is given
+     on the $y$-axis. The number above the $x$-axis indicate the
+     support for the result, i.e. how many samples the accuracy was
+     calculated on. The confidence interval is calculated using the
+     Agresti-Coull interval.}
+		%\caption{\label{fig:bpe_lens} Per language accuracy of
+        %          tokens composed of more than two BPE tokens\jp{it is
+        %            the case that the methods always coincide at 1
+        %            token? Either say so, or this graph could also
+        %            include this data. }. The x-axis indicates how
+        %          many BPE tokens a word is composed of; and the
+        %          y-axis shows the accuracy. The different methods are
+        %          distinguished by color, where blue is the summation
+        %          method, red the mean and green RNN. \jp{? The number
+        %            of samples for 6-bpe token is probably low and not
+        %            that ``accurate''. Perhaps you could show (indicative) error
+        %            bars? https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval}}
 	\end{figure}
 
 	
 	
 	\section{Discussion}
-        %We can observe an interesting trend for the treebank samples. For the languages with agglutinative morphology\footnote{1-to-1 correspondence between morphemes and grammatical/syntactic features.} the average increase using RNN compared to Mean is 4.3\%. For the fusional\footnote{1-to-many correspondence between morphemes and grammatical/syntactic features.} languages, the difference between RNN and Mean is only 1.1\%. 
-        
-        %Interestingly, this observation seem task-dependant rather than BPE dependant. We can see in \cref{tab:data} that Czech is a fusional language, but with a BPE-to-word ratio ($1.77$) comparable to the agglutinative languages. But, Czech also exhibit the pattern of benefiting less from RNN than from Mean, indicating that fusional languages\footnote{In our language/treebank sample.} regardless of BPE-to-word ratio is less affected by the composition method than agglutinative languages. 
-        
-        %In general, the agglutinative languages have a higher BPE-to-word ratio, with one exception, Czech. Czech have a BPE-to-word ratio of $1.77$, but still exhibit a lower difference between the RNN and mean method. Thus, from this small sample of treebanks it appears as if the method of combining BPE embeddings is more important for agglutinative languages than for fusional languages. 
-        
+
+        \subsection{BPE composition methods}
         Analogously to character embeddings, the RNN method seem to
         provide stronger results than using either Sum or Mean for
         combining BPE tokens. We conjecture that this discrepancy is
         can be attributed to the commutativity of the Sum and Mean
         operations. That is, the ordering of elements within a word
         does not affect the result of applying Sum or Mean.
-          
-        % that is, we don't relate the values of $BPE_0$ to $BPE_{1:N}$
-        % with respect to the morphological tags.
-        \jp{In particular, the position of an affix is lost if the
-          word which includes it is split in several tokens.}
+
+              Intuitively, when using the Sum or Mean method the
+     system won't be aware of, for example, split affixes. For example
+     if the word "derivable" is split into ``deriv'' + ``ab'' + ``le''
+     the system won't be aware that ``able'' is a meaningful unit in
+     terms of morphology (and by extension, semantics).
+
+        %\jp{In particular, the position of an affix is lost if the
+     %word which includes it is split in several tokens.}
+        
+    (len1 about the same for all languages)
+
+    \subsection{Language typology}
+    With regards to the performance of the different methods for
+     different language typologies we see in [main-results, figure]
+     that the gap between the RNN methods and the Sum and Mean method
+     is larger. This is expecially prominent in \cref{fig:bpe_lens}
+     where the green line is above the red and blue for most lengths.
+
+    
+
     
     \section{Conclusions}
     	As a general summary of our work, we highlight that language typology is not irrelevant when working with models that employ byte-pair encoding.
