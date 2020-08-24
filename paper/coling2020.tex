@@ -447,10 +447,10 @@
         particular, the actual state of the art, as reported by
         \citet{mccarthy2019sigmorphon}, use tree-bank concatenation,
         which means that results are not reported on a per-treebank
-        basis.
+        basis --- contrary to what we do here.
 
     %
-        The accuracy of our system computed by checking the prediction
+        The accuracy of our system is computed by checking the prediction
         of morphological tags. We report in \cref{tab:results_tokens}
         the result for each of the three different methods, and the
         two training regimes.
@@ -478,24 +478,28 @@
 	\caption{\label{tab:results_tokens} Accuracy for morphological tagging. We evaluate both when we finetune the XLMR model and when we only extract BPE embeddings.}
 	\end{table}
 
-        Our system performs better than the baseline. As a
-     general trend we can see that the RNN method tends to perform
-     better than the summation or averaging methods. This is
-     consistent across both languages and training regimes, showing
-     that while the changes are small, they are there consistenty.
+        Our system performs better than the baseline. As a general
+        trend we can see that the RNN method tends to perform better
+        than the summation or averaging methods. This is consistent
+        across both languages families (agglutinative and fusional),
+        and training regimes, showing that while the differences between each methods are
+        small, they occur consistenty.
     %
-            Perhaps not surprisingly, we find that in general
-     finetuning yields stronger performance than feature
-     extraction. However, the difference is negligeble, increasing by
-     $3.1$ percentage points for summation and averaging and $2.4$
-     points for RNN.
+        We find that in general finetuning yields higher accuracy than
+        feature extraction, which is understandable given that more
+        parameters are tuned to the task. However, the difference is
+        negligible \jp{to say so requires statistical analysis in such
+          a paper}, increasing by $3.1$ percentage points for
+        summation and averaging and $2.4$ points for RNN.
 
-     When finetuning we see the largest changes occur for Basque and
-     Turkish, with an increased performance of $1.45$ points and $0.7$
-     points when finetuning and using RNN over using mean or
-     averaging. When only extracting features we see a larger
-     increase when using an RNN, of $2.3$ points and $1.35$ points
-     respectively.
+        When finetuning we see the largest changes for Basque with an
+        increased performance of $1.45$ points, and Turkish ($0.7$
+        points) using RNN over using mean or averaging. When only
+        extracting features we see a larger increase when using an
+        RNN, of $2.3$ points (Turkish) and $1.35$ points
+        (Basque). Again, this is not unexpected: when fine-tuning the
+        smaller error rate is overall smaller and therefore there is a
+        smaller margin for a subsequent phase to yield an improvement.
 
 	\begin{table}%[h]
 	%\small
@@ -523,9 +527,8 @@
     token. To highlight the strengths and weaknesses of each
     composition method, we also compute the accuracy for tokens which
     are composed of two BPE tokens or more. The results can be seen in
-    \cref{tab:results_large_tokens}.  We see again that RNN works
+    \cref{tab:results_large_tokens}.  We see again that the RNN works
     better than summation or averaging BPE embeddings.
-
     
 	\begin{table}%[h]
 	%\small
@@ -1124,8 +1127,8 @@
     With regards to the performance of the different methods for
      different language typologies we see in [main-results, figure]
      that the gap between the RNN methods and the Sum and Mean method
-     is larger. This is expecially prominent in \cref{fig:bpe_lens}
-     where the green line is above the red and blue for most lengths.
+     is larger. \jp{than what?} This is expecially prominent in \cref{fig:bpe_lens}
+     where the green line is above the red and blue for most word lengths.
 
     
 
