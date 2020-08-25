@@ -264,8 +264,15 @@
 	
 	\begin{figure}%[h!]
 		\centering
-		\includegraphics[scale=0.5]{model-outline.pdf}
-		\caption{\label{fig:model} Procedure outline}
+		\includegraphics[scale=0.5]{single_step.pdf}
+    		\caption{\label{fig:model} Procedure outline for one
+     input. For an input $w_n$ we extract features $k$ BPE tokens (in
+     this case three) and compute a weigted sum based on the
+     transformer layers with the function $g(\cdot)$. We then combine
+     them with some method $x_n = f(\cdot)$. We then concatenate $x_n$
+     with the final hidden state from a character RNN. This is our
+     word representation which is passed to a LSTM, followed by a
+     prediction layer.}
 	\end{figure}
 	
 	\subsubsection{BPE features}b
@@ -495,7 +502,7 @@
 		Basque-BDT      & & .884 & .877 & \textbf{.901} & .789 & .780 & \textbf{.834} \\
 		Finnish-TDT     & & .958 & .960 & \textbf{.965} & .856 & .847 & \textbf{.899} \\
 		Turkish-IMST    & & .859 & .855 & \textbf{.884} & .741 & .735 & \textbf{.775} \\
-		Estonian-EDT    & & .955 & 0 & 0 & .856 & .853 & \textbf{.901} \\
+		Estonian-EDT    & & .955 & .955 & \textbf{.961} & .856 & .853 & \textbf{.901} \\
 		Spanish-AnCora  & & 0 & 0 & 0 & .954 & .952 & \textbf{.962} \\
 		Arabic-PADT     & & 0 & 0 & 0 & .923 & .902 & \textbf{.936} \\
 		Czech-CAC       & & 0 & 0 & 0 & .887 & .881 & \textbf{.924} \\
