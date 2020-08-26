@@ -71,7 +71,7 @@
 	\label{intro}
 
             Since its introduction [CITE:TODO], the transformer model
-     \citep{vaswani2017attention} has emerged as the dominant
+     \citet{vaswani2017attention} has emerged as the dominant
      architecture for statistical language models, gradually displacing
      recurrent neural networks, in particular the LSTM and its
      variants. The transformer owes its success to several factors,
@@ -95,11 +95,11 @@
      aims to find sub-word units occurring significantly
      often. Typical approaches to composing tokens from sub-token
      units have focused on combining character n-grams
-     \citep{bojanowski2017enriching}, while other approaches have
+     \citet{bojanowski2017enriching}, while other approaches have
      looked at splitting words into \textit{roots} and
      \textit{morphemes} [CITATION], and then combining them. In this paper, we
      consider in particular Byte-Pair Encodings (BPE)
-     \citep{sennrich2015neural}, which take another approach. It does
+     \citet{sennrich2015neural}, which take another approach. It does
      not specifically look for either character n-grams or morphs, but
      rather it aims at splitting a corpus $\mathcal{C}$ into $N$ tokens,
      where $N$ is user defined. [EXPAND]
@@ -109,18 +109,18 @@
      meaningful units in the original texts. Thus the question of
      mapping results back to the original text arises.
         
-    	In this paper we explore how to combine Byte-Pair Encodings
-     from a transformer model to perform sequence classification,
-     which is used in particular in the popular BERT model
-     \citep{devlin2018bert}. For our purposes, the goal in sequence
+        	In this paper we explore how to combine Byte-Pair
+     Encodings from a transformer model to perform sequence
+     classification, which is used in the popular BERT model
+     \citet{devlin2018bert}. For our purposes, the goal in sequence
      classification is to assign a label to every word in a
      sentence. When we are using byte-pair encoding (or similar
      sub-token representations) we must then find some way of
-     combining the units that compose the word, before it is eventually
-     assigned a label. Coming back to our example, we must map the
-     feature-set assigned (depending on the context) to "scient",
-     "ifical" and "ly". Then this combined feature set is mapped to a
-     class for the whole word ``scientifically''. [ADD NOTE ABOUT word/sentence-piece]
+     combining the units that compose the word, before it is
+     eventually assigned a label. Coming back to our example, we must
+     map the feature-set assigned (depending on the context) to
+     "scient", "ifical" and "ly". Then this combined feature set is
+     mapped to a class for the whole word ``scientifically''.
 
     	To our knownledge, this is a little-studied
      problem. [citet:TODO] have only brushed the surface by reporting
@@ -129,23 +129,22 @@
      identify the effect that different methods have on the final
      performance of a model.
 
-    %In this paper we explore the transformer model applied to sequence classification. In sequence classification a dataset is split into words (or tokens) and each word is assigned a label. 
-    %Neural model can predict the label of a word by assigning it a representation and passing it through the network. However, the transformer model use byte-pair encoding (BPE) \cite{sennrich2015neural}, or some variation of it \cite{devlin2018bert}, to tokenize text. 
-    %BPE tokens are sub-strings that occur significantly often in the corpus, and does not correspond directly to words. 
-    %
-    %In sequence classification, we need to assign a label to the word "scientifically". But the word is now composed of three BPE embeddings, so to predict a label for the word we need to compose all of the BPE embeddings into one representation.
-    
-    %In this project is to explore six different methods of creating word representations from multiple BPE embeddings.
-	
-%%%
-    %Typically, the transformer model use some variation of byte-pair endings (BPE)  to split sentences into tokens. For non-bpe tokenization schemas typically words are selected based on white-space. This is convenient in sequence classification or parsing where for each word some label is assigned. 
-    %In the BPE schema on the other hand a word (which has a label attached to it in some dataset) may be split into two or more BPE-tokens. 
-    %The BPE vocabulary is usually selected such that significantly common sub-strings are saved. To create words using a BPE vocabulary, sub-strings are combined with each other.
-    
-    %In this project we explore how to compose embeddings of BPE tokens into word representations. More specifically, in cases when a word is associated with several BPE embeddings (for example: the word "scientifically" may be composed of the the BPE tokens: ["scient", "ifical", "ly"]) how do we combine the BPE embeddings to create a word representation ("scientifically") which we assign a label to.
-    
-    %\paragraph{Task:} We explore combination of BPE embeddings with the task of Morphological-Tagging-in-Context \cite{mccarthy2019sigmorphon}. 
-    %The task is simply to predict the morphological features (such as case, number person, ...) of each word (as defined in the dataset) given the sentence which the word occur in.
+                 (some brainstorming... might be good to have
+     something like this to motivate language typologies) With the
+     increased interest in multilingual NLP it becomes important to
+     explore how ``universal'' different computational methods are,
+     that is, since languages are different orthographically and
+     grammatically, the methods we use to derive information will most
+     likely not be uniformly efficient. It would ofcourse be desirable
+     if there was ``one method to rule them all'',... .  A common
+     mantra in NLP is typically that ``more data is better'', that is,
+     if a system performs poorly typically we solve this by trying to
+     find more data. More data is usually good, because language is
+     infinite and exhibit a large variance in it's usage. But this
+     also means that a small dataset contain alot of information, and
+     the main question that have to be asked is if the methods we use
+     to build system efficiently extract the variety of information
+     present in the data.
 
     \section{Task}
              In this paper we further focus on the task of
@@ -166,17 +165,17 @@
 
     \section{Data}
     
-        For the task we will use the Universal Dependencies dataset
-     \citep{nivre2018} annotated with the UniMorph schema
-     \citep{mccarthy2018marrying}. We are interested both in the
+            For the task we will use the Universal Dependencies
+     dataset \citet{nivre2018} annotated with the UniMorph schema
+     \citet{mccarthy2018marrying}. We are interested both in the
      general effects of using different composition methods, and
      whether some methods favor languages with certain typologies. To
      explore this, we take a sample of eight languages from the
-     Universal Dependencies dataset. Four of them use a
+     Universal Dependencies dataset. Four languages use a
      \textit{fusional} morphology, meaning that an affix may be
-     indicative of one or more morphological features. Four of them
-     use an \textit{agglutinative} morphology, meaning that each affix
-     is mapped to one and only one morphological feature.
+     indicative of one or more morphological features. the other four
+     languages use an \textit{agglutinative} morphology, meaning that
+     each affix is mapped to one and only one morphological feature.
 
     
            	The fusional languages that we consider are Arabic, Czech,
@@ -215,14 +214,15 @@
         method may be the BPE per token ratio.  By having both
         fusional and agglutinative languages with similar BPE per
         token ratio we can take this variable into account properly in
-        our analysis.\jp{But we never come back to this point? AE: as of yet, the current experiments do not seem to yield same results as before}
+        our analysis.
+    %\jp{But we never come back to this point? AE: as of yet, the current experiments do not seem to yield same results as before}
 
 	\section{Method}
 	\label{method}
     	In this section we present the model used for sequence
      classification, the methods that we use to compose BPE
      embeddings, and how we trained the model. \footnote{Our code is
-     available at: [ANONYMIZED]}
+     available at: \url{https://github.com/ANONYMIZED}}
 
 	\subsection{Model}
 
@@ -240,16 +240,17 @@
         different methods we use to combine BPE embeddings.
 
 	\subsubsection{Underlying Transformer Model}
-            	To extract feature set for BPE tokens, we use the XLMR
-     \cite{conneau2019unsupervised} model\footnote{We use the
-     huggingface implementation [CITE/LINK]}. XLMR is a masked
-     language model based on the transformer (specifically, RoBERTa
-     \cite{liu2019roberta}), and trained on data from 100 different
-     languages, using a shared vocabulary of 250000 BPE tokens. All
-     the languages that we test are included in XLMR model. In this
-     experiment we use the \textsc{XLMR}$_{base}$ model. It has 12
-     encoder layers, 12 attention heads and use 768 dimensions for its
-     hidden size.
+     To extract feature set for BPE tokens, we use the
+     XLM-RoBERTa \cite{conneau2019unsupervised} model\footnote{We use the
+     huggingface implementation
+     \url{https://huggingface.co/transformers/model_doc/xlmroberta.html}}. XLMR
+     is a masked language model based on the transformer
+     (specifically, RoBERTa \cite{liu2019roberta}), and trained on
+     data from 100 different languages, using a shared vocabulary of
+     250000 BPE tokens. All the languages that we test are included in
+     XLMR model. In this experiment we use the \textsc{XLMR}$_{base}$
+     model. It has 12 encoder layers, 12 attention heads and use 768
+     dimensions for its hidden size.
 	
 
 	\subsubsection{BPE feature extraction}
@@ -259,11 +260,11 @@
 
             The XLMR model use 12 layers to compute an embedding for a
      BPE token, and it has been shown in previous research
-     \citep{kondratyukstraka,raganato2018analysis} [Find 1 or 2 more
+     \citet{kondratyukstraka,raganato2018analysis} [Find 1 or 2 more
      citations] that the different layers of the transformer model
      encode different types of information. To take advantage of this
      we compute BPE embeddings as a weighted sum of layer
-     representations \citep{kondratyukstraka}.  That is, we initialize
+     representations \citet{kondratyukstraka}.  That is, we initialize
      a parameter $w$ of dimension $l$, each from a normal distribution
      of mean $0$ and standard deviation $1$, where $l$ is the number
      of layers in the transformer model. If $r_{ji}$ is the layer
@@ -273,8 +274,9 @@
 		x_i = \sum_{1}^{J} softmax(w)_j r_{ji}
 	\end{equation}
 
-        Where $softmax(w)_j$ indicate the softmax of the learned
-     importance of layer $j$.
+            We train $w$ such that $softmax(w)_j$ will learn to
+     identify from which layer to extract information such that the
+     performance increase.
 
      \subsubsection{Composition of BPE feature sets}
       After we have computed a weighted sum for
@@ -320,8 +322,11 @@
         and use the final output as the word representation. 
         
         \subsubsection{Word-level feature sets and classification}
-           The above produces one embedding per word that is passed to
-        an LSTM, to take into account the context.
+                   The above produces one embedding per word that is
+     passed to an LSTM, to take into account the context. In the model
+     we opted not to include character features as these would
+     obfuscate the effect of the compoition method and may mask some
+     of the effects of the different methods.
 
         We pass the combined representations to LSTM outputs to a
         dense layers with GELU activation, that computes scores
@@ -512,7 +517,7 @@
         small, they occur consistenty.
     %
         We find that in general finetuning yields higher accuracy than
-        feature extraction, on average the difference is about $3.1\%$
+        feature extraction, on average the difference is about $5.8$
         percentage points.  This difference is to be expected when the
         finetuning have 250M more parameters tuned to the task than the
         feature extraction. % less than expected...
@@ -525,10 +530,10 @@
     %    summation and averaging and $2.4$ points for RNN.
 
         When finetuning we see the largest changes for Basque with an
-        increased performance of $1.45$ points, and Turkish ($0.7$
+        increased performance of $3.25$ points, and Turkish ($2.7$
         points) using RNN over using mean or averaging. When only
         extracting features we see a larger increase when using an
-        RNN, of $2.3$ points (Turkish) and $1.35$ points
+        RNN, of $3.7$ points (Turkish) and $4.95$ points
         (Basque). Again, this is not unexpected: when fine-tuning the
         smaller error rate is overall smaller and therefore there is a
         smaller margin for a subsequent phase to yield an improvement.
@@ -577,7 +582,7 @@
     Given that the number of BPE tokens per natural-language token
      varies, we also look at the accuracy of the different methods
      given a different number of BPE tokens. We show per-language
-     performance with the differnt methods in \cref{fig:bpe_lens}.
+     performance with the different methods in \cref{fig:bpe_lens}.
     
 	\begin{figure}%[h!]
   	\centering
@@ -1141,6 +1146,38 @@
      performance of the RNN align very closely to that of the Sum or
      Mean method.
 
+    \subsubsection{Sum and Mean}
+
+        Our analysis and experiments have primarily foused on the
+     effects of using an RNN over summation or averaging. Previous
+     work have reported not finding any large differences between
+     summation or averaging and, on a global scale, our experiments
+     support these findings.
+
+        However, looking closer at some of the results we obtained we
+     find that summation and averaging matter, more for some languages
+     than others. In general, these differences appear when we only
+     extract features from the transformer model, in this case we see
+     a difference of $1.2$ percentage points on average between the
+     methods, where summation often performs better. A particular
+     striking example is Arabic where the gain is $2.1$ percentage
+     points.
+
+             When we fine-tune the model, interestingly this effect
+     disapear. As such it seems to be the case that fine-tuning the
+     transformer model generally decrease the impact of BPE
+     combination methods. Thus, in work that employ the transformer
+     this is something to consider, especially when doing probing
+     experiments (that is, the embeddings extracted from a transformer
+     model are probed for linguistic knowledge). Relatedly, a
+     published resource using the transformer will most likely be
+     trained using finetuning, however, as it receive new data ``in
+     the wild'' this cannot be incorporated into the base-model and
+     must be analysed with feature extraction. And when this is the
+     case we have shown that the composition method do matter, whether
+     it's summation, averaging or using an RNN.
+    
+
     \subsection{Language typology}
 
             With regards to the performance of the different
@@ -1174,8 +1211,8 @@
      \label{tab:typology_performace}
     \end{table}
 
-        When comparing the agglutinative and fusional languages we see
-     that the tagging is more difficult for the agglutinative
+         When comparing the agglutinative and fusional languages we
+     see that the tagging is more difficult for the agglutinative
      languages. Another interesting trend we see is that combining BPE
      tokens with an RNN yields stronger gains for the agglutinative
      languages. When we compare using RNN over Sum/Mean we see an
@@ -1185,57 +1222,68 @@
      smaller increase of $.5$ percentage points for finetuning and and
      $2.3$/$2.7$ points for feature extraction.
 
-        Looking at the cases most relevant to the present study,
+         Looking at the cases most relevant to the present study,
      namely text-tokens composed of two or more BPE tokens the gain
      from using an RNN is in general more noticable. But the same
      pattern of agglutinative languages receiving a larger benefit
-     from using an RNN over the Sum or Mean methods is still there, yielding
-     an increase of $1.2$/$2.4$ percentage points for finetuning and
-     $5.1$/$6.2$ percentage points for feature extraction. For the
-     fusional languages the gain is also larger, yielding an increase
-     of $.8$/$.9$ percentage points for finetuning and $3.2$/$3.9$
-     points for feature extraction.
+     from using an RNN over the Sum or Mean methods is still there,
+     yielding an increase of $1.2$/$2.4$ percentage points for
+     finetuning and $5.1$/$6.2$ percentage points for feature
+     extraction. For the fusional languages the gain is also larger,
+     yielding an increase of $.8$/$.9$ percentage points for
+     finetuning and $3.2$/$3.9$ points for feature extraction.
      
 
-    \subsubsection{Work in Progress}
+    %\subsubsection{Work in Progress}
 
-        Basque and Turkish is the two languages we see the largest
-     improvements for, one explanation here may be that words in these
-     languages typically contain many BPE tokens, or that they have a
-     large number of possible morphologial feature tags.  However,
-     neither of these two factors appear to explain the behaviourt if
-     we consider Czech, which also have a large number of
-     morphological tags, and a high BPE ratio. We note that Czech is a
-     fusional language and not agglutinative like Basque and Turkish.
+    %    Basque and Turkish is the two languages we see the largest
+    % improvements for, one explanation here may be that words in these
+    % languages typically contain many BPE tokens, or that they have a
+    % large number of possible morphologial feature tags.  However,
+    % neither of these two factors appear to explain the behaviourt if
+    % we consider Czech, which also have a large number of
+    % morphological tags, and a high BPE ratio. We note that Czech is a
+    % fusional language and not agglutinative like Basque and Turkish.
 
-            Another notable difference between Basque and Turkish, and
-     Czech is the available training data for Czech is about 7 times
-     the size of Turkish and 3 times the size of Basque.  While we see
-     a larger difference for feature extraction for Czech, it's still
-     smaller than for Turkish and Basque.
+    %        Another notable difference between Basque and Turkish, and
+    % Czech is the available training data for Czech is about 7 times
+    % the size of Turkish and 3 times the size of Basque.  While we see
+    % a larger difference for feature extraction for Czech, it's still
+    % smaller than for Turkish and Basque.
 
-        Q1: So, why do the largest changes happen in Basque and
-     Turkish? Is it agglutination? That is: we can form roughly
-     complete sentences with inflection.
+    %    Q1: So, why do the largest changes happen in Basque and
+    % Turkish? Is it agglutination? That is: we can form roughly
+    % complete sentences with inflection.
     
     
     
 
     
     \section{Conclusions and Future Work}
-        	As a general summary of our work, we highlight that
-     language typology is not irrelevant when working with models that
-     employ byte-pair encoding.
-
-            For future work we want to continue experiments with the
-     different BPE composition methods, specifically looking at more
-     complex syntactic tasks such as dependency and/or constituency
-     parsing. Additionally, an interesting avenue for future work is
-     to also to explore BPE compositions both in terms of syntactic
-     and semantic tasks.
     
-	%\section*{Acknowledgments}
-	
+        We find evidence that combining sub-word tokens for sequence
+     classification using the transformer models with BPE tokenization
+     performs better when BPE tokens are combined with a Recurrent
+     Neural Network compared to summing or averaging the BPE tokens.
+    %
+         Additionally, experimental results show that effect of using
+     an RNN is more prominent for agglutinative languages than for
+     fusional languages. [Expand]
+
+                For future work we want to continue experiments with
+     the different BPE composition methods, specifically looking at
+     more complex syntactic tasks such as dependency and/or
+     constituency parsing. Another thing we wish to explore is adding
+     the remaining UD treebanks to our experiments.  Additionally, an
+     interesting avenue for future work is to also to explore BPE
+     compositions both in terms of syntactic and semantic tasks.
+    
+	\section*{Acknowledgments}
+    	Something goes here roughly of this length. Something goes
+     here roughly of this length. Something goes here roughly of this
+     length. Something goes here roughly of this length. Something
+     goes here roughly of this length. Something goes here roughly of
+     this length.
 	
 	% include your own bib file like this:
 	\bibliographystyle{coling}
