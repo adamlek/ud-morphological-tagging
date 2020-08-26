@@ -28,8 +28,8 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{pgfplots}
+\usepackage{wrapfig}
 \pgfplotsset{every tick label/.append style={font=\small}}
-
 
 \newcommand\jp[1]{(\textbf{JP:} #1)}
 \newcommand\citet{\cite}
@@ -91,18 +91,20 @@
      composed of the tokens: "scient", "ifical", "ly" --- here the
      central token does not correspond to a morpheme.
         %
-            That is, rather than identifying complete words or morphemes, one
+    That is, rather than identifying complete words or morphemes, one
      aims to find sub-word units occurring significantly
      often. Typical approaches to composing tokens from sub-token
      units have focused on combining character n-grams
      \citet{bojanowski2017enriching}, while other approaches have
      looked at splitting words into \textit{roots} and
-     \textit{morphemes} [CITATION], and then combining them. In this paper, we
-     consider in particular Byte-Pair Encodings (BPE)
-     \citet{sennrich2015neural}, which take another approach. It does
-     not specifically look for either character n-grams or morphs, but
-     rather it aims at splitting a corpus $\mathcal{C}$ into $N$ tokens,
-     where $N$ is user defined. [EXPAND]
+     \textit{morphemes}
+     \citet{el2012orthographic,chaudhary2018adapting,xu2017implicitly},
+     and then combining them. In this paper, we consider in particular
+     Byte-Pair Encodings (BPE) \citet{sennrich2015neural}, which take
+     another approach. It does not specifically look for either
+     character n-grams or morphs, but rather it aims at splitting a
+     corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user
+     defined. [EXPAND]
 
             One issue with statistical tokenization is that one is
      seldom interested in the encoding, but rather in the semantically
@@ -122,12 +124,12 @@
      "scient", "ifical" and "ly". Then this combined feature set is
      mapped to a class for the whole word ``scientifically''.
 
-    	To our knownledge, this is a little-studied
-     problem. [citet:TODO] have only brushed the surface by reporting
-     that few differences are found between different methods. In this
-     paper we wish to explore the problem in further detail and
-     identify the effect that different methods have on the final
-     performance of a model.
+            	To our knownledge, this is a little-studied
+     problem. \newcite{kondratyukstraka} only reports that few
+     differences are found between summing and averaging BPE
+     embeddings, with no further details. In this paper we wish to
+     explore the problem in further detail and identify the effect
+     that different methods have on the final performance of a model.
 
                  (some brainstorming... might be good to have
      something like this to motivate language typologies) With the
@@ -316,11 +318,12 @@
 	\end{equation}
 	
 	
-	\paragraph{RNN:} For this method we employ a bidirectional LSTM
-        to compose the BPE embeddings. For each multi-BPE
-        token, we pass the sequence of BPE embeddings through an LSTM
-        and use the final output as the word representation. 
-        
+        	\paragraph{RNN:} For this method we employ a bidirectional
+     LSTM to compose the BPE embeddings. For each multi-BPE token, we
+     pass the sequence of BPE embeddings through an LSTM and use the
+     final output as our word representation.
+
+       
         \subsubsection{Word-level feature sets and classification}
                    The above produces one embedding per word that is
      passed to an LSTM, to take into account the context. In the model
@@ -396,15 +399,15 @@
      with restarts every epoch, that is, the learning rate starts high
      then incrementally decreases to $1\mathrm{e}{-12}$ during $N$
      steps, where $N$ is the number of batches in an epoch. We use the
-     Adam optimizer with a learning rate of $0.001$ for layer
+     Adam optimizer, using standard parameters, with a learning rate of $0.001$ for layer
      importance parameter ($w$ in \cref{sec:bpe-features}), the
      parameters of the word LSTM, classification layer, and BPE
      combination module (when an RNN is used). For the transformer
      parameters, we use a lower learning rate of $1\mathrm{e}{-06}$.
 
-	\begin{table}%[h]
+	\begin{table}%{r}{5cm}
 		\centering
-		\begin{tabular}{lr}
+		\begin{tabular}{lr} \\
 			Parameter & Value \\
 			\hline
 			Epochs & 15 \\
@@ -427,7 +430,9 @@
             %BPE dropout & 0.4 \\
             %Character dropout & 0.4 \\
 		\end{tabular}
-		\caption{\label{tab:parameters} Hyperparameters used for training the model. Slashed indicate the value of a parameter when we finetune or extract features.}
+    		\caption{\label{tab:parameters} Hyperparameters used for
+     training the model. Slashed indicate the value of a parameter
+     when we finetune or extract features.}
 	\end{table}
 
         We use dropout throughout the model. We apply dropout on the
@@ -497,11 +502,11 @@
 		Turkish-IMST    & .620 & .859 & .855 & \textbf{.884} & .741 & .735 & \textbf{.775} \\
 		Estonian-EDT    & .740 & .955 & .955 & \textbf{.961} & .856 & .853 & \textbf{.901} \\
 		Spanish-AnCora  & .842 & .977 & .977 & \textbf{.979} & .954 & .952 & \textbf{.962} \\
-		Arabic-PADT     & .770 & .946 & .947 & \textbf{.951} & .923 & .902 & \textbf{.936} \\
+		Arabic-PADT     & .770 & .946 & .947 & \textbf{.951} & .923 & .920 & \textbf{.936} \\
 		Czech-CAC       & .771 & .968 & .968 & \textbf{.975} & .887 & .881 & \textbf{.924} \\
 		Polish-LFG      & .657 & .953 & .953 & \textbf{.959} & .844 & .840 & \textbf{.878} \\
         \hline
-        Average         & .728 & .937 & .936 & .946  & .856 & .848 & \textbf{.888} \\
+        Average         & .728 & .937 & .936 & .946  & .856 & .851 & \textbf{.888} \\
 	\end{tabular}
     	\caption{\label{tab:results_tokens} Accuracy for morphological
         tagging. We evaluate both when we finetune the XLMR model and
@@ -586,7 +591,7 @@
     
 	\begin{figure}%[h!]
   	\centering
-\begin{tikzpicture} 
+    \begin{tikzpicture} 
 	\begin{axis}[
 	name=,
 	title={Finnish-TDT},
@@ -605,13 +610,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.895711229)
-			(2, 0.807728558)
-			(3, 0.803462322)
-			(4, 0.792766373)
-			(5, 0.813953488)
-			(6, 0.787037037)
-			(7, 0.775)
+			(1, 0.969671597)
+			(2, 0.94797361)
+			(3, 0.945349627)
+			(4, 0.926686217)
+			(5, 0.959302326)
+			(6, 0.972222222)
+			(7, 0.95)
 };
 		\addplot[
 		color=red,
@@ -619,13 +624,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.887245325)
-			(2, 0.8)
-			(3, 0.794297352)
-			(4, 0.761485826)
-			(5, 0.816860465)
-			(6, 0.777777778)
-			(7, 0.725)
+			(1, 0.972648618)
+			(2, 0.950801131)
+			(3, 0.94263408)
+			(4, 0.926686217)
+			(5, 0.968023256)
+			(6, 0.953703704)
+			(7, 0.95)
 };
 		\addplot[
 		color=green,
@@ -633,13 +638,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.927621174)
-			(2, 0.86804901)
-			(3, 0.847929396)
-			(4, 0.8514174)
-			(5, 0.886627907)
-			(6, 0.851851852)
-			(7, 0.825)
+			(1, 0.976369895)
+			(2, 0.954759661)
+			(3, 0.950441276)
+			(4, 0.933528837)
+			(5, 0.970930233)
+			(6, 0.972222222)
+			(7, 0.95)
 };
 		\node[scale=0.4] at (1,-6) {10749};
 		\node[scale=0.4] at (100,-6) {5305};
@@ -670,13 +675,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.843387816)
-			(2, 0.729915599)
-			(3, 0.68550034)
-			(4, 0.714285714)
-			(5, 0.64)
-			(6, 0.666666667)
-			(7, 1.0)
+			(1, 0.945468053)
+			(2, 0.823694905)
+			(3, 0.775357386)
+			(4, 0.748051948)
+			(5, 0.68)
+			(6, 0.833333333)
+			(7, 0.8)
 };
 		\addplot[
 		color=red,
@@ -684,12 +689,12 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.837295691)
-			(2, 0.71897468)
-			(3, 0.675289312)
-			(4, 0.683116883)
-			(5, 0.653333333)
-			(6, 0.75)
+			(1, 0.942496285)
+			(2, 0.814004376)
+			(3, 0.755616065)
+			(4, 0.742857143)
+			(5, 0.68)
+			(6, 0.833333333)
 			(7, 1.0)
 };
 		\addplot[
@@ -698,13 +703,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.878008915)
-			(2, 0.793685527)
-			(3, 0.73791695)
-			(4, 0.774025974)
-			(5, 0.666666667)
-			(6, 0.666666667)
-			(7, 1.0)
+			(1, 0.95141159)
+			(2, 0.863394811)
+			(3, 0.796460177)
+			(4, 0.761038961)
+			(5, 0.746666667)
+			(6, 0.75)
+			(7, 0.8)
 };
 		\node[scale=0.4] at (1,-6) {6730};
 		\node[scale=0.4] at (100,-6) {3199};
@@ -735,13 +740,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.771494518)
-			(2, 0.69358041)
-			(3, 0.656826568)
-			(4, 0.674418605)
-			(5, 0.695652174)
-			(6, 0.538461538)
-			(7, 1.0)
+			(1, 0.909405655)
+			(2, 0.806088683)
+			(3, 0.697416974)
+			(4, 0.796511628)
+			(5, 0.869565217)
+			(6, 0.769230769)
+			(7, 0.75)
 };
 		\addplot[
 		color=red,
@@ -749,13 +754,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.77322562)
-			(2, 0.675711449)
-			(3, 0.632841328)
-			(4, 0.674418605)
-			(5, 0.652173913)
-			(6, 0.461538462)
-			(7, 0.75)
+			(1, 0.903346797)
+			(2, 0.802117803)
+			(3, 0.70295203)
+			(4, 0.796511628)
+			(5, 0.826086957)
+			(6, 0.769230769)
+			(7, 1.0)
 };
 		\addplot[
 		color=green,
@@ -763,13 +768,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.807559146)
-			(2, 0.711449371)
-			(3, 0.70295203)
-			(4, 0.720930233)
-			(5, 0.869565217)
-			(6, 0.538461538)
-			(7, 1.0)
+			(1, 0.924985574)
+			(2, 0.846459298)
+			(3, 0.743542435)
+			(4, 0.808139535)
+			(5, 0.826086957)
+			(6, 0.769230769)
+			(7, 0.75)
 };
 		\node[scale=0.4] at (1,-6) {3466};
 		\node[scale=0.4] at (100,-6) {1511};
@@ -800,13 +805,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.893840639)
-			(2, 0.822410866)
-			(3, 0.773898924)
-			(4, 0.776443682)
-			(5, 0.803539823)
-			(6, 0.782894737)
-			(7, 0.744680851)
+			(1, 0.966596057)
+			(2, 0.94286927)
+			(3, 0.93281916)
+			(4, 0.925671812)
+			(5, 0.957522124)
+			(6, 0.921052632)
+			(7, 0.946808511)
 };
 		\addplot[
 		color=red,
@@ -814,13 +819,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.890378035)
-			(2, 0.816977929)
-			(3, 0.775928557)
-			(4, 0.783876501)
-			(5, 0.801769912)
-			(6, 0.782894737)
-			(7, 0.787234043)
+			(1, 0.96667753)
+			(2, 0.941765705)
+			(3, 0.932007307)
+			(4, 0.936535163)
+			(5, 0.955752212)
+			(6, 0.927631579)
+			(7, 0.946808511)
 };
 		\addplot[
 		color=green,
@@ -828,13 +833,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.924311553)
-			(2, 0.874533107)
-			(3, 0.850416075)
-			(4, 0.86049171)
-			(5, 0.899115044)
-			(6, 0.868421053)
-			(7, 0.840425532)
+			(1, 0.970506762)
+			(2, 0.951867572)
+			(3, 0.944793992)
+			(4, 0.94053745)
+			(5, 0.959292035)
+			(6, 0.940789474)
+			(7, 0.936170213)
 };
 		\node[scale=0.4] at (1,-6) {24548};
 		\node[scale=0.4] at (100,-6) {11780};
@@ -865,11 +870,11 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.923809967)
-			(2, 0.909219571)
-			(3, 0.907434761)
-			(4, 0.922178988)
-			(5, 0.933333333)
+			(1, 0.96220714)
+			(2, 0.903356247)
+			(3, 0.880846873)
+			(4, 0.871595331)
+			(5, 0.8)
 };
 		\addplot[
 		color=red,
@@ -877,10 +882,10 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.921997025)
-			(2, 0.906186818)
-			(3, 0.90201871)
-			(4, 0.926070039)
+			(1, 0.962904425)
+			(2, 0.90578245)
+			(3, 0.88183161)
+			(4, 0.883268482)
 			(5, 0.933333333)
 };
 		\addplot[
@@ -889,11 +894,11 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.937244329)
-			(2, 0.923776789)
-			(3, 0.917774495)
-			(4, 0.945525292)
-			(5, 0.933333333)
+			(1, 0.965600595)
+			(2, 0.910230489)
+			(3, 0.90201871)
+			(4, 0.894941634)
+			(5, 0.866666667)
 };
 		\node[scale=0.4] at (1,-6) {21512};
 		\node[scale=0.4] at (100,-6) {4946};
@@ -922,11 +927,11 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.958585998)
-			(2, 0.943440887)
-			(3, 0.920965058)
-			(4, 0.925064599)
-			(5, 0.867924528)
+			(1, 0.981325799)
+			(2, 0.96449483)
+			(3, 0.954242928)
+			(4, 0.943152455)
+			(5, 0.905660377)
 			(6, 0.92)
 			(7, 0.75)
 };
@@ -936,11 +941,11 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.957805035)
-			(2, 0.936464433)
-			(3, 0.916389351)
-			(4, 0.909560724)
-			(5, 0.830188679)
+			(1, 0.981233921)
+			(2, 0.962999875)
+			(3, 0.952163062)
+			(4, 0.932816537)
+			(5, 0.886792453)
 			(6, 0.92)
 			(7, 0.75)
 };
@@ -950,11 +955,11 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.965867328)
-			(2, 0.951289398)
-			(3, 0.938019967)
-			(4, 0.940568475)
-			(5, 0.830188679)
+			(1, 0.982267549)
+			(2, 0.967360159)
+			(3, 0.957154742)
+			(4, 0.943152455)
+			(5, 0.905660377)
 			(6, 0.92)
 			(7, 0.75)
 };
@@ -987,12 +992,12 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.886810103)
-			(2, 0.778131213)
-			(3, 0.7348378)
-			(4, 0.754065041)
-			(5, 0.75)
-			(6, 0.777777778)
+			(1, 0.969714687)
+			(2, 0.930019881)
+			(3, 0.905500705)
+			(4, 0.912601626)
+			(5, 0.921052632)
+			(6, 0.888888889)
 };
 		\addplot[
 		color=red,
@@ -1000,12 +1005,12 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.884237605)
-			(2, 0.764214712)
-			(3, 0.736953456)
-			(4, 0.733739837)
-			(5, 0.763157895)
-			(6, 0.777777778)
+			(1, 0.971468662)
+			(2, 0.926838966)
+			(3, 0.907616361)
+			(4, 0.914634146)
+			(5, 0.828947368)
+			(6, 0.888888889)
 };
 		\addplot[
 		color=green,
@@ -1013,12 +1018,12 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.911131899)
-			(2, 0.826242545)
-			(3, 0.791960508)
-			(4, 0.802845528)
-			(5, 0.802631579)
-			(6, 0.777777778)
+			(1, 0.975444341)
+			(2, 0.942345924)
+			(3, 0.910437236)
+			(4, 0.908536585)
+			(5, 0.842105263)
+			(6, 0.888888889)
 };
 		\node[scale=0.4] at (1,-6) {8552};
 		\node[scale=0.4] at (100,-6) {2515};
@@ -1048,13 +1053,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.911766714)
-			(2, 0.861799325)
-			(3, 0.827835597)
-			(4, 0.840921866)
-			(5, 0.786440678)
-			(6, 0.872340426)
-			(7, 0.666666667)
+			(1, 0.983029434)
+			(2, 0.952917936)
+			(3, 0.937731522)
+			(4, 0.943788645)
+			(5, 0.874576271)
+			(6, 0.957446809)
+			(7, 1.0)
 };
 		\addplot[
 		color=red,
@@ -1062,13 +1067,13 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.907191149)
-			(2, 0.854391308)
-			(3, 0.816898924)
-			(4, 0.826306914)
-			(5, 0.786440678)
-			(6, 0.914893617)
-			(7, 0.666666667)
+			(1, 0.982858704)
+			(2, 0.953082558)
+			(3, 0.937202328)
+			(4, 0.943226532)
+			(5, 0.888135593)
+			(6, 0.957446809)
+			(7, 1.0)
 };
 		\addplot[
 		color=green,
@@ -1076,12 +1081,12 @@
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.939185959)
-			(2, 0.907729031)
-			(3, 0.889574881)
-			(4, 0.889263631)
-			(5, 0.86440678)
-			(6, 0.914893617)
+			(1, 0.986000137)
+			(2, 0.964029961)
+			(3, 0.951490563)
+			(4, 0.95727937)
+			(5, 0.905084746)
+			(6, 0.957446809)
 			(7, 1.0)
 };
 		\node[scale=0.4] at (1,-6) {29286};
@@ -1094,6 +1099,7 @@
 
         \end{axis}
 	\end{tikzpicture}
+
     \caption{\label{fig:bpe_lens} Per-language accuracy on tokens with
      different number of BPE components of the funetuning training
      regime. Values of seven of the $x$-axis also include all tokens
@@ -1146,51 +1152,74 @@
      performance of the RNN align very closely to that of the Sum or
      Mean method.
 
+    \subsubsection{RNN parameters}
+                In general, we see that the RNN perform better than
+     summation or averaging, but one question that arise when we look
+     at \cref{fig:bpe_lens}, specifically looking at the performance
+     on tokens composed of one BPE token, is whether this is because
+     of the additional parameters in the model. We would expect that
+     for these tokens, the performance of the model would be the same
+     for all methods. But for practical reasons we push all tokens
+     through an RNN, effectively doing a non-linear transfromation
+     with tanh activations on the tokens composed of only one BPE token.
+
+        Typically, the effect is small, but for example in Finnish we
+     see a larger differance. Although, in general if we perform
+     better on longer tokens consisting of BPE tokens that also appear
+     as words in the data, we could also expect that the performance
+     would be better for tokens of BPE length one. Specifically,
+     because better performance on longer BPE tokens hopefully map a
+     subset of the composite tag to the BPE token.
+
     \subsubsection{Sum and Mean}
 
         Our analysis and experiments have primarily foused on the
      effects of using an RNN over summation or averaging. Previous
      work have reported not finding any large differences between
-     summation or averaging and, on a global scale, our experiments
+     summation or averaging and, over all languages, our experiments
      support these findings.
 
-        However, looking closer at some of the results we obtained we
-     find that summation and averaging matter, more for some languages
-     than others. In general, these differences appear when we only
-     extract features from the transformer model, in this case we see
-     a difference of $1.2$ percentage points on average between the
-     methods, where summation often performs better. A particular
-     striking example is Arabic where the gain is $2.1$ percentage
-     points.
+            However, looking closer at the results we obtained
+     we find that summation and averaging matter, more for some
+     languages than others. In general, these differences appear when
+     we only extract features from the transformer model, in this case
+     we see a difference of $.5$ percentage points on average between
+     the methods, where summation performs better. We see the
+     same pattern when looking at the accuracy of tokens composed of
+     two or more BPE tokens, where the Sum method is $.9$ percentage
+     points better than averaging.
 
              When we fine-tune the model, interestingly this effect
      disapear. As such it seems to be the case that fine-tuning the
      transformer model generally decrease the impact of BPE
      combination methods. Thus, in work that employ the transformer
      this is something to consider, especially when doing probing
-     experiments (that is, the embeddings extracted from a transformer
-     model are probed for linguistic knowledge). Relatedly, a
-     published resource using the transformer will most likely be
-     trained using finetuning, however, as it receive new data ``in
-     the wild'' this cannot be incorporated into the base-model and
-     must be analysed with feature extraction. And when this is the
-     case we have shown that the composition method do matter, whether
-     it's summation, averaging or using an RNN.
+     experiments, that is, the embeddings extracted from a transformer
+     model are probed for linguistic knowledge.
+    %Relatedly, a
+    % published resource using the transformer will most likely be
+    % trained using finetuning, however, as it receive new data ``in
+    % the wild'' this cannot be incorporated into the training and
+    % must be analysed with feature extraction. 
     
 
     \subsection{Language typology}
 
-            With regards to the performance of the different
-     methodsfor different language typologies we see in [main-results,
-     figure] that the gap between the RNN methods and the Sum and Mean
-     method is larger for the agglutinative languages than the
-     fusional.  Looking at \cref{fig:bpe_lens} we can see that for the
-     fusional languages (Arabic, Spanish, Polish and Czech) the
-     performance of three methods align relatively closely when
-     compared against the agglutinative languages. For the
-     agglutinative languages the performance of the different BPE
-     combination methods appear to be quite different, while this is
-     only the case for Arabic and Polish among the fusional languages.
+    %        With regards to the performance of the different
+    % methodsfor different language typologies we see in [main-results,
+    % figure] that the gap between the RNN methods and the Sum and Mean
+    % method is larger for the agglutinative languages than the
+    % fusional.  Looking at \cref{fig:bpe_lens} we can see that for the
+    % fusional languages (Arabic, Spanish, Polish and Czech) the
+    % performance of three methods align relatively closely when
+    % compared against the agglutinative languages. For the
+    % agglutinative languages the performance of the different BPE
+    % combination methods appear to be quite different, while this is
+    % only the case for Arabic and Polish among the fusional languages.
+    
+        With regards to the performance of the different methods on
+     languages with different typology we have summarised the results
+     in \cref{tab:typology_performace}. 
 
     \begin{table}
         \centering  
@@ -1219,7 +1248,7 @@
      increase of $1.1$/$1.6$ percentage points and $4.1$/$4.8$ points
      for fine-tuning and feature extraction respectively on the
      agglutinative languages. For the fusional languages we see a
-     smaller increase of $.5$ percentage points for finetuning and and
+     smaller increase of $.5$ percentage points for finetuning and
      $2.3$/$2.7$ points for feature extraction.
 
          Looking at the cases most relevant to the present study,
@@ -1232,6 +1261,23 @@
      extraction. For the fusional languages the gain is also larger,
      yielding an increase of $.8$/$.9$ percentage points for
      finetuning and $3.2$/$3.9$ points for feature extraction.
+
+     \subsubsection{Work in progress}
+
+        If we consider that in fusional languages a morpheme can be
+     mapped to two or more grammatical features we can see that
+     solving one morpheme will typically yield a larger portion of the
+     target label than in agglutinative languages (where solving a
+     morpheme only gets us one of the labels in the composite tag).
+
+    We hypothesize that this is one of the reasons for fusional languages having a higher accuracy. 
+
+    It's also ...
+        
+    For this reason, having more information about the order of
+     elements yields a larger increase in accuracy. 
+
+     
      
 
     %\subsubsection{Work in Progress}
@@ -1268,7 +1314,7 @@
     %
          Additionally, experimental results show that effect of using
      an RNN is more prominent for agglutinative languages than for
-     fusional languages. [Expand]
+     fusional languages.
 
                 For future work we want to continue experiments with
      the different BPE composition methods, specifically looking at
@@ -1278,13 +1324,8 @@
      interesting avenue for future work is to also to explore BPE
      compositions both in terms of syntactic and semantic tasks.
     
-	\section*{Acknowledgments}
-    	Something goes here roughly of this length. Something goes
-     here roughly of this length. Something goes here roughly of this
-     length. Something goes here roughly of this length. Something
-     goes here roughly of this length. Something goes here roughly of
-     this length.
-	
+%	\section*{Acknowledgments}
+
 	% include your own bib file like this:
 	\bibliographystyle{coling}
 	\bibliography{coling2020}
