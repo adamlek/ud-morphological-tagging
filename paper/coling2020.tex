@@ -94,8 +94,8 @@
      composed of the tokens: "scient", "ifical", "ly" --- here the
      central token does not correspond to a morpheme.
         %
-     That is, rather than identifying complete words or morphemes, one
-     aims to find relatively large sub-word units occurring
+         That is, rather than identifying complete words or morphemes,
+     one aims to find relatively large sub-word units occurring
      significantly often, while maximizing the coverage of the corpus
      (the presence of the ``out of vocabulary'' token is
      minimized). Typical approaches to composing tokens from sub-token
@@ -103,13 +103,13 @@
      \citep{bojanowski2017enriching}, while other approaches have
      looked at splitting words into \textit{roots} and
      \textit{morphemes}
-     \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},\jp{missing
-       citations?}  and then combining them. In this paper, we
-     consider in particular Byte-Pair Encodings (BPE)
-     \citep{sennrich2015neural}, which take another approach. It does
-     not specifically look for either character n-grams or morphs, but
-     rather it aims at splitting a corpus $\mathcal{C}$ into $N$
-     tokens, where $N$ is user defined. [EXPAND]
+     \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},
+     and then combining them. In this paper, we consider in particular
+     Byte-Pair Encodings (BPE) \citep{sennrich2015neural}, which take
+     another approach. It does not specifically look for either
+     character n-grams or morphs, but rather it aims at splitting a
+     corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user
+     defined. 
 
             One issue with statistical tokenization is that one is
      seldom interested in the encoding, but rather in the semantically
@@ -610,8 +610,7 @@
      performance with the different methods in \cref{fig:bpe_lens}.
     
 	\begin{figure}%[h!]
-  	\centering
-    \begin{tikzpicture} 
+  	\centering\begin{tikzpicture} 
 	\begin{axis}[
 	name=,
 	title={Finnish-TDT},
@@ -625,8 +624,9 @@
 	height=4cm
 	]
 		\addplot[
-		color=blue,
-		mark=o,
+		color=green,
+		mark=circle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -639,8 +639,9 @@
 			(7, 0.95)
 };
 		\addplot[
-		color=red,
-		mark=o,
+		color=blue,
+		mark=triangle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -653,18 +654,19 @@
 			(7, 0.95)
 };
 		\addplot[
-		color=green,
-		mark=o,
+		color=red,
+		mark=square*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.976369895)
-			(2, 0.954759661)
-			(3, 0.950441276)
-			(4, 0.933528837)
-			(5, 0.970930233)
-			(6, 0.972222222)
-			(7, 0.95)
+			(1, 0.976369895)+=(0,0.00288107757099608)-=(0,0.00288107757099608)
+			(2, 0.954759661)+=(0,0.005610028700870861)-=(0,0.005610028700870861)
+			(3, 0.950441276)+=(0,0.007875906986290072)-=(0,0.007875906986290072)
+			(4, 0.933528837)+=(0,0.01540785138661897)-=(0,0.01540785138661897)
+			(5, 0.970930233)+=(0,0.019118549510097702)-=(0,0.019118549510097702)
+			(6, 0.972222222)+=(0,0.03801018391614076)-=(0,0.03801018391614076)
+			(7, 0.95)+=(0,0.08447212917485333)-=(0,0.08447212917485333)
 };
 		\node[scale=0.4] at (1,-6) {10749};
 		\node[scale=0.4] at (100,-6) {5305};
@@ -690,8 +692,9 @@
 	height=4cm
 	]
 		\addplot[
-		color=blue,
-		mark=o,
+		color=green,
+		mark=circle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -704,8 +707,9 @@
 			(7, 0.8)
 };
 		\addplot[
-		color=red,
-		mark=o,
+		color=blue,
+		mark=triangle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -718,18 +722,19 @@
 			(7, 1.0)
 };
 		\addplot[
-		color=green,
-		mark=o,
+		color=red,
+		mark=square*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.95141159)
-			(2, 0.863394811)
-			(3, 0.796460177)
-			(4, 0.761038961)
-			(5, 0.746666667)
-			(6, 0.75)
-			(7, 0.8)
+			(1, 0.95141159)+=(0,0.005148305118481129)-=(0,0.005148305118481129)
+			(2, 0.863394811)+=(0,0.01190991764618752)-=(0,0.01190991764618752)
+			(3, 0.796460177)+=(0,0.020591939005449287)-=(0,0.020591939005449287)
+			(4, 0.761038961)+=(0,0.0425432420184802)-=(0,0.0425432420184802)
+			(5, 0.746666667)+=(0,0.09746065981141003)-=(0,0.09746065981141003)
+			(6, 0.75)+=(0,0.22787810036435233)-=(0,0.22787810036435233)
+			(7, 0.8)+=(0,0.31002797388117415)-=(0,0.31002797388117415)
 };
 		\node[scale=0.4] at (1,-6) {6730};
 		\node[scale=0.4] at (100,-6) {3199};
@@ -755,8 +760,9 @@
 	height=4cm
 	]
 		\addplot[
-		color=blue,
-		mark=o,
+		color=green,
+		mark=circle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -769,8 +775,9 @@
 			(7, 0.75)
 };
 		\addplot[
-		color=red,
-		mark=o,
+		color=blue,
+		mark=triangle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -783,18 +790,19 @@
 			(7, 1.0)
 };
 		\addplot[
-		color=green,
-		mark=o,
+		color=red,
+		mark=square*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.924985574)
-			(2, 0.846459298)
-			(3, 0.743542435)
-			(4, 0.808139535)
-			(5, 0.826086957)
-			(6, 0.769230769)
-			(7, 0.75)
+			(1, 0.924985574)+=(0,0.008789990590271397)-=(0,0.008789990590271397)
+			(2, 0.846459298)+=(0,0.018197041939921957)-=(0,0.018197041939921957)
+			(3, 0.743542435)+=(0,0.03671374756645732)-=(0,0.03671374756645732)
+			(4, 0.808139535)+=(0,0.058966217953330555)-=(0,0.058966217953330555)
+			(5, 0.826086957)+=(0,0.15686382857803416)-=(0,0.15686382857803416)
+			(6, 0.769230769)+=(0,0.21719589193854613)-=(0,0.21719589193854613)
+			(7, 0.75)+=(0,0.3383902260894284)-=(0,0.3383902260894284)
 };
 		\node[scale=0.4] at (1,-6) {3466};
 		\node[scale=0.4] at (100,-6) {1511};
@@ -820,8 +828,9 @@
 	height=4cm
 	]
 		\addplot[
-		color=blue,
-		mark=o,
+		color=green,
+		mark=circle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -834,8 +843,9 @@
 			(7, 0.946808511)
 };
 		\addplot[
-		color=red,
-		mark=o,
+		color=blue,
+		mark=triangle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -848,18 +858,19 @@
 			(7, 0.946808511)
 };
 		\addplot[
-		color=green,
-		mark=o,
+		color=red,
+		mark=square*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.970506762)
-			(2, 0.951867572)
-			(3, 0.944793992)
-			(4, 0.94053745)
-			(5, 0.959292035)
-			(6, 0.940789474)
-			(7, 0.936170213)
+			(1, 0.970506762)+=(0,0.002118846172644754)-=(0,0.002118846172644754)
+			(2, 0.951867572)+=(0,0.0038703455288459482)-=(0,0.0038703455288459482)
+			(3, 0.944793992)+=(0,0.006393466972485876)-=(0,0.006393466972485876)
+			(4, 0.94053745)+=(0,0.011154986451904374)-=(0,0.011154986451904374)
+			(5, 0.959292035)+=(0,0.01681968549237994)-=(0,0.01681968549237994)
+			(6, 0.940789474)+=(0,0.04007961692831919)-=(0,0.04007961692831919)
+			(7, 0.936170213)+=(0,0.05404871299247627)-=(0,0.05404871299247627)
 };
 		\node[scale=0.4] at (1,-6) {24548};
 		\node[scale=0.4] at (100,-6) {11780};
@@ -885,8 +896,9 @@
 	height=4cm
 	]
 		\addplot[
-		color=blue,
-		mark=o,
+		color=green,
+		mark=circle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -897,8 +909,9 @@
 			(5, 0.8)
 };
 		\addplot[
-		color=red,
-		mark=o,
+		color=blue,
+		mark=triangle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -909,16 +922,17 @@
 			(5, 0.933333333)
 };
 		\addplot[
-		color=green,
-		mark=o,
+		color=red,
+		mark=square*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.965600595)
-			(2, 0.910230489)
-			(3, 0.90201871)
-			(4, 0.894941634)
-			(5, 0.866666667)
+			(1, 0.965600595)+=(0,0.0024381283986652067)-=(0,0.0024381283986652067)
+			(2, 0.910230489)+=(0,0.007976150815817857)-=(0,0.007976150815817857)
+			(3, 0.90201871)+=(0,0.012961727810939487)-=(0,0.012961727810939487)
+			(4, 0.894941634)+=(0,0.03810358069342934)-=(0,0.03810358069342934)
+			(5, 0.866666667)+=(0,0.18330014190315588)-=(0,0.18330014190315588)
 };
 		\node[scale=0.4] at (1,-6) {21512};
 		\node[scale=0.4] at (100,-6) {4946};
@@ -942,8 +956,9 @@
 	height=4cm
 	]
 		\addplot[
-		color=blue,
-		mark=o,
+		color=green,
+		mark=circle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -956,8 +971,9 @@
 			(7, 0.75)
 };
 		\addplot[
-		color=red,
-		mark=o,
+		color=blue,
+		mark=triangle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -970,18 +986,19 @@
 			(7, 0.75)
 };
 		\addplot[
-		color=green,
-		mark=o,
+		color=red,
+		mark=square*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.982267549)
-			(2, 0.967360159)
-			(3, 0.957154742)
-			(4, 0.943152455)
-			(5, 0.905660377)
-			(6, 0.92)
-			(7, 0.75)
+			(1, 0.982267549)+=(0,0.0012411463013903851)-=(0,0.0012411463013903851)
+			(2, 0.967360159)+=(0,0.0038992019513958173)-=(0,0.0038992019513958173)
+			(3, 0.957154742)+=(0,0.008154258951432975)-=(0,0.008154258951432975)
+			(4, 0.943152455)+=(0,0.023764512705614565)-=(0,0.023764512705614565)
+			(5, 0.905660377)+=(0,0.08501108280383891)-=(0,0.08501108280383891)
+			(6, 0.92)+=(0,0.1250821627692161)-=(0,0.1250821627692161)
+			(7, 0.75)+=(0,0.3383902260894284)-=(0,0.3383902260894284)
 };
 		\node[scale=0.4] at (1,-6) {43536};
 		\node[scale=0.4] at (100,-6) {8027};
@@ -1007,8 +1024,9 @@
 	height=4cm
 	]
 		\addplot[
-		color=blue,
-		mark=o,
+		color=green,
+		mark=circle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -1020,8 +1038,9 @@
 			(6, 0.888888889)
 };
 		\addplot[
-		color=red,
-		mark=o,
+		color=blue,
+		mark=triangle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -1033,17 +1052,18 @@
 			(6, 0.888888889)
 };
 		\addplot[
-		color=green,
-		mark=o,
+		color=red,
+		mark=square*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.975444341)
-			(2, 0.942345924)
-			(3, 0.910437236)
-			(4, 0.908536585)
-			(5, 0.842105263)
-			(6, 0.888888889)
+			(1, 0.975444341)+=(0,0.0032933193579321087)-=(0,0.0032933193579321087)
+			(2, 0.942345924)+=(0,0.009152642925086161)-=(0,0.009152642925086161)
+			(3, 0.910437236)+=(0,0.014925424898063413)-=(0,0.014925424898063413)
+			(4, 0.908536585)+=(0,0.025763757285900076)-=(0,0.025763757285900076)
+			(5, 0.842105263)+=(0,0.08322533572401784)-=(0,0.08322533572401784)
+			(6, 0.888888889)+=(0,0.22927231782530055)-=(0,0.22927231782530055)
 };
 		\node[scale=0.4] at (1,-6) {8552};
 		\node[scale=0.4] at (100,-6) {2515};
@@ -1068,8 +1088,9 @@
 	height=4cm
 	]
 		\addplot[
-		color=blue,
-		mark=o,
+		color=green,
+		mark=circle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -1082,8 +1103,9 @@
 			(7, 1.0)
 };
 		\addplot[
-		color=red,
-		mark=o,
+		color=blue,
+		mark=triangle*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -1096,18 +1118,19 @@
 			(7, 1.0)
 };
 		\addplot[
-		color=green,
-		mark=o,
+		color=red,
+		mark=square*,
+                mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
-			(1, 0.986000137)
-			(2, 0.964029961)
-			(3, 0.951490563)
-			(4, 0.95727937)
-			(5, 0.905084746)
-			(6, 0.957446809)
-			(7, 1.0)
+			(1, 0.986000137)+=(0,0.00134856026285523)-=(0,0.00134856026285523)
+			(2, 0.964029961)+=(0,0.003317290752570475)-=(0,0.003317290752570475)
+			(3, 0.951490563)+=(0,0.005607453201193778)-=(0,0.005607453201193778)
+			(4, 0.95727937)+=(0,0.009489989645509947)-=(0,0.009489989645509947)
+			(5, 0.905084746)+=(0,0.03403245585016136)-=(0,0.03403245585016136)
+			(6, 0.957446809)+=(0,0.07333263763454309)-=(0,0.07333263763454309)
+			(7, 1.0)+=(0,0.3367274202349047)-=(0,0.3367274202349047)
 };
 		\node[scale=0.4] at (1,-6) {29286};
 		\node[scale=0.4] at (100,-6) {12149};
@@ -1119,14 +1142,16 @@
 
         \end{axis}
 	\end{tikzpicture}
-
-    \caption{\label{fig:bpe_lens} Per-language accuracy on tokens with
-     different number of BPE components of the funetuning training
-     regime. Values of seven of the $x$-axis also include all tokens
-     who are composed of seven or more BPE tokens. We indicate the
-     method by encoding summation as blue, averaging as red and RNN as
-     green. The accuracy is given on the $y$-axis. The number above
-     the $x$-axis indicate how many samples the accuracy was calculated on. }
+        \caption{\label{fig:bpe_lens} Per-language accuracy on tokens
+     with different number of BPE components of the funetuning
+     training regime. Values of seven of the $x$-axis also include all
+     tokens who are composed of seven or more BPE tokens. We indicate
+     the method by encoding summation as green, averaging as blue and
+     RNN as red. The accuracy is given on the $y$-axis. The number
+     above the $x$-axis indicate how many samples the accuracy was
+     calculated on. We calculate the confidence interval for the RNN
+     method via the Agresti-Coull interval
+     \citep{agresti1998approximate}.}
     %The confidence interval is calculated using the Agresti-Coull interval.
     
 		%\caption{\label{fig:bpe_lens} Per language accuracy of
