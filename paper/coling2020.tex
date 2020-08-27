@@ -98,7 +98,7 @@
      one aims to find relatively large sub-word units occurring
      significantly often, while maximizing the coverage of the corpus
      (the presence of the ``out of vocabulary'' token is
-     minimized). Typical approaches to composing tokens from sub-token
+     minimized). Approaches for composing tokens from sub-token
      units have focused on combining character $n$-grams
      \citep{bojanowski2017enriching}, while other approaches have
      looked at splitting words into \textit{roots} and
@@ -111,10 +111,10 @@
      corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user
      defined. 
 
-            One issue with statistical tokenization is that one is
-     seldom interested in the encoding, but rather in the semantically
-     meaningful units in the original texts. Thus the question of
-     mapping results back to the original text arises.
+                One issue with statistical tokenization, such as BPE,
+     is that one is seldom interested in the encoding, but rather in
+     the semantically meaningful units in the original texts. Thus the
+     question of mapping results back to the original text arises.
         
         	In this paper we explore how to combine Byte-Pair
      Encodings from a transformer model to perform sequence
@@ -129,11 +129,25 @@
      "scient", "ifical" and "ly". Then this combined feature set is
      mapped to a class for the whole word ``scientifically''.
 
-            	To our knownledge, this is a little-studied
-     problem. \citet{kondratyukstraka} only reports that few
-     differences are found between summing and averaging BPE
-     embeddings, with no further details. In this paper we wish to
-     explore the problem in further detail and identify the effect
+    %\begin{table}   
+    %\centering  
+    %\begin{tabular}{lllll}
+    %Wordform & \multicolumn{4}{l}{teyzelerin} \\
+    %Segmentation & teyze & ler in \\
+    %BPE segmentation & te & y & ze & lerin \\
+    %\end{tabular}
+    %\caption{Turkish example}
+    %\label{tab:t_example}
+    %\end{table}
+
+                	To our knownledge, this is a little-studied
+     problem. In the original BERT model \citep{devlin2018bert} simply
+     state that for named entity recognition the first sub-word token
+     is used as a representation for the word to be tagged.  For
+     morphological sequence classification \citet{kondratyuk2019cross}
+     report that only few differences were found between averaging,
+     taking the first or last sub-word token.  In this paper we wish
+     to explore the problem in further detail and identify the effect
      that different methods have on the final performance of a model.
 
      Even though BPE is not grounded in morphosyntactic theory, the
@@ -163,7 +177,7 @@
      in various contexts.
 
     \section{Task}
-             In this paper we further focus on the task of
+             In this paper we focus on the task of
      morphological sequence classification. Morphological tagging
      involves identifying a set of morphological features that a word
      possesses, such as number, person, case, etc. In many languages,
@@ -181,7 +195,7 @@
 
     \section{Data}
     
-    For both training and testing data, we will use the Universal
+    For both training and testing data, we will the Universal
     Dependencies dataset \citep{nivre2018} annotated with the UniMorph
     schema \citep{mccarthy2018marrying}. We are interested in how
     accuracy is influenced by different composition methods, and by
@@ -222,7 +236,10 @@
 			Polish-LFG      & Fusional & 1.75 & 634 & 104730 & 13161 & 13076 \\
 			Spanish-AnCora  & Fusional & 1.25 & 177 & 439925 & 55196 & 54449 \\
         \end{tabular}
-		\caption{\label{tab:data} Treebank statistics showing the language typology, average number of BPE tokens per word, the number of morphological tags and the size of the datasets.}
+    		\caption{\label{tab:data} Treebank statistics showing the
+     language typology, average number of BPE tokens per word, the
+     number of morphological tags and the size of the datasets in
+     terms of text tokens.}
 	\end{table}
     
         The fusional languages where chosen such that two of them
@@ -246,7 +263,7 @@
 
         Our model is composed of three components, each of them
         detailed below. First, the input sequence of BPE tokens is fed
-        to the XLMR base model, which yields a feature set for each
+        to a transformer model, which yields a feature set for each
         BPE token. Then, the BPE tokens are combined using a
         composition module, which we vary for the purpose of
         evaluating each variant. This component yield one feature set
@@ -276,18 +293,18 @@
 
         % As mentioned previously, we look at methods for composing embeddings of BPE tokens into word embeddings.
 
-            The XLMR model use 12 layers to compute an embedding for a
-     BPE token, and it has been shown in previous research
-     \citep{kondratyukstraka,raganato2018analysis} [Find 1 or 2 more
-     citations] that the different layers of the transformer model
-     encode different types of information. To take advantage of this
-     we compute BPE embeddings as a weighted sum of layer
-     representations \citep{kondratyukstraka}.  That is, we initialize
-     a parameter $w$ of dimension $l$, each from a normal distribution
-     of mean $0$ and standard deviation $1$, where $l$ is the number
-     of layers in the transformer model. If $r_{ji}$ is the layer
-     representation at layer $j$ and token position $i$, we calculate
-     the weighted sum as follows:
+                The XLMR model use 12 layers to compute an embedding
+     for a BPE token, and it has been shown in previous research
+     \citep{kondratyukstraka,raganato2018analysis,liu2019linguistic}
+     [Find 1 or 2 more citations] that the different layers of the
+     transformer model encode different types of information. To take
+     advantage of this we compute BPE embeddings as a weighted sum of
+     layer representations \citep{kondratyukstraka}.  That is, we
+     initialize a parameter $w$ of dimension $l$, each from a normal
+     distribution of mean $0$ and standard deviation $1$, where $l$ is
+     the number of layers in the transformer model. If $r_{ji}$ is the
+     layer representation at layer $j$ and token position $i$, we
+     calculate the weighted sum as follows:
     \begin{equation}
 		x_i = \sum_{j=1}^{J} \softmax(w)_j r_{ji}
 	\end{equation}
@@ -468,16 +485,18 @@
 	\section{Results}
 	\label{results}
 
-     Even though our aim is to compare the relative performance
-     of various BPE combination methods rather than to improve on the
+         Even though our aim is to compare the relative performance of
+     various BPE combination methods rather than to improve on the
      state of the art in absolute terms, we compare our results
      against the baseline reported by
      \citet{mccarthy2019sigmorphon}. This comparison serves the
      purpose of checking that our system is generally sound.  In
      particular, the actual state of the art, as reported by
-     \citet{mccarthy2019sigmorphon,kondratyukstraka}, use tree-bank
-     concatenation, which means that results are not reported on a
-     per-treebank basis --- contrary to what we do here.
+     \citet{mccarthy2019sigmorphon,kondratyuk2019cross}, use treebank
+     concatenation or other methods to incorporate information from
+     all treebanks available in a language, which means that results
+     are not reported on a strict per-treebank basis --- contrary to
+     what we do here.
         % get new ref from shared task to kondratyukstraka, and perhaps other systems
     %
         The accuracy of our system is computed by checking the prediction
@@ -591,7 +610,7 @@
         \hline
         Average         & .899 & .897 & \textbf{.913} & .808 & .799 & \textbf{.849} \\
 	\end{tabular}
-    	\caption{\label{tab:results_large_tokens} Accuracy for
+    \caption{\label{tab:results_large_tokens} Accuracy for
      morphological tagging on all tokens that are composed of 2 or
      more BPE tokens.}
 \end{table}
@@ -1149,7 +1168,7 @@
      the method by encoding summation as green, averaging as blue and
      RNN as red. The accuracy is given on the $y$-axis. The number
      above the $x$-axis indicate how many samples the accuracy was
-     calculated on. We calculate the confidence interval for the RNN
+     calculated on. We calculate the confidence interval (95\%) for the RNN
      method via the Agresti-Coull interval
      \citep{agresti1998approximate}.}
     %The confidence interval is calculated using the Agresti-Coull interval.
@@ -1240,26 +1259,12 @@
      this is something to consider, especially when doing probing
      experiments, that is, the embeddings extracted from a transformer
      model are probed for linguistic knowledge.
-    %Relatedly, a
-    % published resource using the transformer will most likely be
-    % trained using finetuning, however, as it receive new data ``in
-    % the wild'' this cannot be incorporated into the training and
-    % must be analysed with feature extraction. 
-    
 
     \subsection{Language typology}
-
-    %        With regards to the performance of the different
-    % methodsfor different language typologies we see in [main-results,
-    % figure] that the gap between the RNN methods and the Sum and Mean
-    % method is larger for the agglutinative languages than the
-    % fusional.  Looking at \cref{fig:bpe_lens} we can see that for the
-    % fusional languages (Arabic, Spanish, Polish and Czech) the
-    % performance of three methods align relatively closely when
-    % compared against the agglutinative languages. For the
-    % agglutinative languages the performance of the different BPE
-    % combination methods appear to be quite different, while this is
-    % only the case for Arabic and Polish among the fusional languages.
+    %Possible explanatory factor: bpe-len,
+    %changes happen for czech/polish mostly?
+    % friday, how to structure?
+    % scatter + linear regression for [bpe_len, sum/averaging-RNN]
     
         With regards to the performance of the different methods on
      languages with different typology we have summarised the results
@@ -1305,49 +1310,6 @@
      extraction. For the fusional languages the gain is also larger,
      yielding an increase of $.8$/$.9$ percentage points for
      finetuning and $3.2$/$3.9$ points for feature extraction.
-
-     \subsubsection{Work in progress}
-
-        If we consider that in fusional languages a morpheme can be
-     mapped to two or more grammatical features we can see that
-     solving one morpheme will typically yield a larger portion of the
-     target label than in agglutinative languages (where solving a
-     morpheme only gets us one of the labels in the composite tag).
-
-    We hypothesize that this is one of the reasons for fusional languages having a higher accuracy. 
-
-    It's also ...
-        
-    For this reason, having more information about the order of
-     elements yields a larger increase in accuracy. 
-
-     
-     
-
-    %\subsubsection{Work in Progress}
-
-    %    Basque and Turkish is the two languages we see the largest
-    % improvements for, one explanation here may be that words in these
-    % languages typically contain many BPE tokens, or that they have a
-    % large number of possible morphologial feature tags.  However,
-    % neither of these two factors appear to explain the behaviourt if
-    % we consider Czech, which also have a large number of
-    % morphological tags, and a high BPE ratio. We note that Czech is a
-    % fusional language and not agglutinative like Basque and Turkish.
-
-    %        Another notable difference between Basque and Turkish, and
-    % Czech is the available training data for Czech is about 7 times
-    % the size of Turkish and 3 times the size of Basque.  While we see
-    % a larger difference for feature extraction for Czech, it's still
-    % smaller than for Turkish and Basque.
-
-    %    Q1: So, why do the largest changes happen in Basque and
-    % Turkish? Is it agglutination? That is: we can form roughly
-    % complete sentences with inflection.
-    
-    
-    
-
     
     \section{Conclusions and Future Work}
     
@@ -1366,7 +1328,7 @@
      constituency parsing. Another thing we wish to explore is adding
      the remaining UD treebanks to our experiments.  Additionally, an
      interesting avenue for future work is to also to explore BPE
-     compositions both in terms of syntactic and semantic tasks.
+     compositions both for syntactic and semantic tasks.
     
 %	\section*{Acknowledgments}
 
