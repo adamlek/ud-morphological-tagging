@@ -32,8 +32,9 @@
 \pgfplotsset{every tick label/.append style={font=\small}}
 
 \newcommand\jp[1]{(\textbf{JP:} #1)}
-\newcommand\citet{\cite}
-\newcommand\citep{\shortcite}
+\newcommand\citet{\newcite}
+\newcommand\citep{\cite}
+\newcommand\citeyear{\shortcite}
 %\setlength\titlebox{5cm}
 %\colingfinalcopy % Uncomment this line for the final submission
 
@@ -70,9 +71,9 @@
 	\section{Introduction}
 	\label{intro}
 
-            Since its introduction [CITE:TODO], the transformer model
-     \citet{vaswani2017attention} has emerged as the dominant
-     architecture for statistical language models, gradually displacing
+            After its introduction [CITE:TODO], the transformer model
+     \citep{vaswani2017attention} has emerged as the dominant
+     architecture for statistical language models, displacing
      recurrent neural networks, in particular the LSTM and its
      variants. The transformer owes its success to several factors,
      including the availability of pretrained models, which
@@ -92,15 +93,15 @@
      central token does not correspond to a morpheme.
         %
     That is, rather than identifying complete words or morphemes, one
-     aims to find sub-word units occurring significantly
-     often. Typical approaches to composing tokens from sub-token
-     units have focused on combining character n-grams
-     \citet{bojanowski2017enriching}, while other approaches have
+     aims to find \jp{relatively large(?)} sub-word units occurring significantly
+     often.\jp{yet all the corpus is covered by using small units (characters)?} Typical approaches to composing tokens from sub-token
+     units have focused on combining character $n$-grams
+     \citep{bojanowski2017enriching}, while other approaches have
      looked at splitting words into \textit{roots} and
      \textit{morphemes}
-     \citet{el2012orthographic,chaudhary2018adapting,xu2017implicitly},
+     \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},
      and then combining them. In this paper, we consider in particular
-     Byte-Pair Encodings (BPE) \citet{sennrich2015neural}, which take
+     Byte-Pair Encodings (BPE) \citep{sennrich2015neural}, which take
      another approach. It does not specifically look for either
      character n-grams or morphs, but rather it aims at splitting a
      corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user
@@ -114,7 +115,7 @@
         	In this paper we explore how to combine Byte-Pair
      Encodings from a transformer model to perform sequence
      classification, which is used in the popular BERT model
-     \citet{devlin2018bert}. For our purposes, the goal in sequence
+     \citep{devlin2018bert}. For our purposes, the goal in sequence
      classification is to assign a label to every word in a
      sentence. When we are using byte-pair encoding (or similar
      sub-token representations) we must then find some way of
@@ -125,7 +126,7 @@
      mapped to a class for the whole word ``scientifically''.
 
             	To our knownledge, this is a little-studied
-     problem. \newcite{kondratyukstraka} only reports that few
+     problem. \citet{kondratyukstraka} only reports that few
      differences are found between summing and averaging BPE
      embeddings, with no further details. In this paper we wish to
      explore the problem in further detail and identify the effect
@@ -168,8 +169,8 @@
     \section{Data}
     
             For the task we will use the Universal Dependencies
-     dataset \citet{nivre2018} annotated with the UniMorph schema
-     \citet{mccarthy2018marrying}. We are interested both in the
+     dataset \citep{nivre2018} annotated with the UniMorph schema
+     \citep{mccarthy2018marrying}. We are interested both in the
      general effects of using different composition methods, and
      whether some methods favor languages with certain typologies. To
      explore this, we take a sample of eight languages from the
@@ -262,11 +263,11 @@
 
             The XLMR model use 12 layers to compute an embedding for a
      BPE token, and it has been shown in previous research
-     \citet{kondratyukstraka,raganato2018analysis} [Find 1 or 2 more
+     \citep{kondratyukstraka,raganato2018analysis} [Find 1 or 2 more
      citations] that the different layers of the transformer model
      encode different types of information. To take advantage of this
      we compute BPE embeddings as a weighted sum of layer
-     representations \citet{kondratyukstraka}.  That is, we initialize
+     representations \citep{kondratyukstraka}.  That is, we initialize
      a parameter $w$ of dimension $l$, each from a normal distribution
      of mean $0$ and standard deviation $1$, where $l$ is the number
      of layers in the transformer model. If $r_{ji}$ is the layer
