@@ -32,6 +32,7 @@
 \pgfplotsset{every tick label/.append style={font=\small}}
 
 \newcommand\jp[1]{(\textbf{JP:} #1)}
+\newcommand\adam[1]{(\textbf{Adam:} #1)}
 \newcommand\citet{\newcite}
 \newcommand\citep{\cite}
 \newcommand\citeyear{\shortcite}
@@ -132,18 +133,18 @@
      explore the problem in further detail and identify the effect
      that different methods have on the final performance of a model.
 
-                 (some brainstorming... might be good to have
-     something like this to motivate language typologies) With the
+                 \adam{(some brainstorming... might be good to have
+     something like this to motivate language typologies)} With the
      increased interest in multilingual NLP it becomes important to
-     explore how ``universal'' different computational methods are,
-     that is, since languages are different orthographically and
+     explore how ``universal'' different computational methods are.
+     That is, because languages are different orthographically and
      grammatically, the methods we use to derive information will most
-     likely not be uniformly efficient. It would ofcourse be desirable
-     if there was ``one method to rule them all'',... .  A common
+     likely not be uniformly efficient. \adam{It would of course be desirable
+     if there was ``one method to rule them all'',... .}  A common
      mantra in NLP is typically that ``more data is better'', that is,
-     if a system performs poorly typically we solve this by trying to
-     find more data. More data is usually good, because language is
-     infinite and exhibit a large variance in it's usage. But this
+     if a system performs poorly, we typically try to
+     find more data. More data is often possible to find, because languages are
+     infinite, and exhibit a large variance in their usage. But this variability
      also means that a small dataset contain alot of information, and
      the main question that have to be asked is if the methods we use
      to build system efficiently extract the variety of information
@@ -168,17 +169,19 @@
 
     \section{Data}
     
-            For the task we will use the Universal Dependencies
-     dataset \citep{nivre2018} annotated with the UniMorph schema
-     \citep{mccarthy2018marrying}. We are interested both in the
-     general effects of using different composition methods, and
-     whether some methods favor languages with certain typologies. To
-     explore this, we take a sample of eight languages from the
-     Universal Dependencies dataset. Four languages use a
-     \textit{fusional} morphology, meaning that an affix may be
-     indicative of one or more morphological features. the other four
-     languages use an \textit{agglutinative} morphology, meaning that
-     each affix is mapped to one and only one morphological feature.
+    For both training and testing data, we will use the Universal
+    Dependencies dataset \citep{nivre2018} annotated with the UniMorph
+    schema \citep{mccarthy2018marrying}. We are interested in how
+    accuracy is influenced by different composition methods, and by
+    the typology of the languages. Additionally, we also consider the
+    correlation between these two variables --- still in terms of the
+    effect on accuracy for the task. To explore this, we take a sample
+    of eight languages from the Universal Dependencies dataset. Four
+    languages use a \textit{fusional} morphology, meaning that an
+    affix may be indicative of one or more morphological features. the
+    other four languages use an \textit{agglutinative} morphology,
+    meaning that each affix is mapped to one and only one
+    morphological feature.
 
     
            	The fusional languages that we consider are Arabic, Czech,
