@@ -36,6 +36,7 @@
 \newcommand\citet{\newcite}
 \newcommand\citep{\cite}
 \newcommand\citeyear{\shortcite}
+\newcommand\softmax{\mathsf{softmax}}
 %\setlength\titlebox{5cm}
 %\colingfinalcopy % Uncomment this line for the final submission
 
@@ -100,7 +101,7 @@
      \citep{bojanowski2017enriching}, while other approaches have
      looked at splitting words into \textit{roots} and
      \textit{morphemes}
-     \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},
+     \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},\jp{missing citations?}
      and then combining them. In this paper, we consider in particular
      Byte-Pair Encodings (BPE) \citep{sennrich2015neural}, which take
      another approach. It does not specifically look for either
@@ -277,12 +278,12 @@
      representation at layer $j$ and token position $i$, we calculate
      the weighted sum as follows:
     \begin{equation}
-		x_i = \sum_{1}^{J} softmax(w)_j r_{ji}
+		x_i = \sum_{j=1}^{J} \softmax(w)_j r_{ji}
 	\end{equation}
 
-            We train $w$ such that $softmax(w)_j$ will learn to
-     identify from which layer to extract information such that the
-     performance increase.
+        Consequently, in end-to-end training, the optimiser will find
+        a weight for extracting information from each layer
+        ($\softmax(w)$) which maximizes performance.
 
      \subsubsection{Composition of BPE feature sets}
       After we have computed a weighted sum for
