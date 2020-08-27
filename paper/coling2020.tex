@@ -94,20 +94,22 @@
      composed of the tokens: "scient", "ifical", "ly" --- here the
      central token does not correspond to a morpheme.
         %
-    That is, rather than identifying complete words or morphemes, one
-     aims to find \jp{relatively large(?)} sub-word units occurring significantly
-     often.\jp{yet all the corpus is covered by using small units (characters)?} Typical approaches to composing tokens from sub-token
+     That is, rather than identifying complete words or morphemes, one
+     aims to find relatively large sub-word units occurring
+     significantly often, while maximizing the coverage of the corpus
+     (the presence of the ``out of vocabulary'' token is
+     minimized). Typical approaches to composing tokens from sub-token
      units have focused on combining character $n$-grams
      \citep{bojanowski2017enriching}, while other approaches have
      looked at splitting words into \textit{roots} and
      \textit{morphemes}
-     \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},\jp{missing citations?}
-     and then combining them. In this paper, we consider in particular
-     Byte-Pair Encodings (BPE) \citep{sennrich2015neural}, which take
-     another approach. It does not specifically look for either
-     character n-grams or morphs, but rather it aims at splitting a
-     corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user
-     defined. [EXPAND]
+     \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},\jp{missing
+       citations?}  and then combining them. In this paper, we
+     consider in particular Byte-Pair Encodings (BPE)
+     \citep{sennrich2015neural}, which take another approach. It does
+     not specifically look for either character n-grams or morphs, but
+     rather it aims at splitting a corpus $\mathcal{C}$ into $N$
+     tokens, where $N$ is user defined. [EXPAND]
 
             One issue with statistical tokenization is that one is
      seldom interested in the encoding, but rather in the semantically
@@ -134,22 +136,31 @@
      explore the problem in further detail and identify the effect
      that different methods have on the final performance of a model.
 
-                 \adam{(some brainstorming... might be good to have
-     something like this to motivate language typologies)} With the
-     increased interest in multilingual NLP it becomes important to
-     explore how ``universal'' different computational methods are.
-     That is, because languages are different orthographically and
-     grammatically, the methods we use to derive information will most
-     likely not be uniformly efficient. \adam{It would of course be desirable
-     if there was ``one method to rule them all'',... .}  A common
-     mantra in NLP is typically that ``more data is better'', that is,
-     if a system performs poorly, we typically try to
-     find more data. More data is often possible to find, because languages are
-     infinite, and exhibit a large variance in their usage. But this variability
-     also means that a small dataset contain alot of information, and
-     the main question that have to be asked is if the methods we use
-     to build system efficiently extract the variety of information
-     present in the data.
+     Even though BPE is not grounded in morphosyntactic theory, the
+     characteristics of the BPE embeddings will be directly influenced
+     by morphosyntactic patterns in the language. In particular, it is
+     reasonable to expect that the statistical characteristics of BPE
+     to be different between fusional and agglutinative languages.
+     %
+     Additionally, with the increased interest in multilingual NLP it
+     becomes important to explore how ``universal'' different
+     computational methods are.  That is, because languages are
+     different orthographically and grammatically, one can expect the
+     methods to derive information not to be uniformly
+     efficient. However, at the same time, researchers always strive
+     to find unified theories and models, working for all language
+     families.
+
+     In statistical models, one tends to unify models by adding more
+     parameters to them, and then feeding them with correspondingly
+     more data.  In theory, more data is often possible to find,
+     because languages are infinite, and exhibit a large variance in
+     their usage. But this variability is also a source of confusion
+     for the statistical models. Hence, in sum, one should always be
+     on the lookout for the most efficient \emph{method} to model
+     languages and solve tasks. This is precisely what we do here: we
+     search for the best methods for BPE combination, and analyse them
+     in various contexts.
 
     \section{Task}
              In this paper we further focus on the task of
@@ -343,7 +354,6 @@
 
 	\begin{figure}%[h!]
           \centering
-          \jp{Figure missing from repo}
 	\includegraphics[scale=0.5]{single_step.pdf}
     \caption{\label{fig:model} Model outline for one input. A
      word $w_n$ is tokenized into $k$ bpe tokens by the transformer
