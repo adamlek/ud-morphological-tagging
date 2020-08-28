@@ -105,17 +105,17 @@
      \textit{morphemes}
      \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},
      and then combining them. In this paper, we consider in particular
-     Byte-Pair Encodings (BPE) \citep{sennrich2015neural}, which take
+     Byte-Pair Encodings (BPE) \citep{sennrich2015neural}, which takes
      another approach. It does not specifically look for either
-     character n-grams or morphs, but rather it aims at splitting a
+     character $n$-grams or morphs, but rather it aims at splitting a
      corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user
-     defined. 
+     defined.
 
                 One issue with statistical tokenization, such as BPE,
      is that one is seldom interested in the encoding, but rather in
      the semantically meaningful units in the original texts. Thus the
      question of mapping results back to the original text arises.
-        
+
         	In this paper we explore how to combine Byte-Pair
      Encodings from a transformer model to perform sequence
      classification, which is used in the popular BERT model
@@ -129,7 +129,7 @@
      "scient", "ifical" and "ly". Then this combined feature set is
      mapped to a class for the whole word ``scientifically''.
 
-    %\begin{table}   
+    %\begin{table}  
     %\centering  
     %\begin{tabular}{lllll}
     %Wordform & \multicolumn{4}{l}{teyzelerin} \\
@@ -141,12 +141,12 @@
     %\end{table}
 
                 	To our knownledge, this is a little-studied
-     problem. In the original BERT model \citep{devlin2018bert} simply
+     problem. For the original BERT model \citet{devlin2018bert} simply
      state that for named entity recognition the first sub-word token
      is used as a representation for the word to be tagged.  For
      morphological sequence classification \citet{kondratyuk2019cross}
      report that only few differences were found between averaging,
-     taking the first or last sub-word token.  In this paper we wish
+     taking the first or last sub-word token feature set.  In this paper we wish
      to explore the problem in further detail and identify the effect
      that different methods have on the final performance of a model.
 
@@ -159,12 +159,15 @@
      Additionally, with the increased interest in multilingual NLP it
      becomes important to explore how ``universal'' different
      computational methods are.  That is, because languages are
-     different orthographically and grammatically, one can expect the
+     different (morpho-)syntactically, % {orthographically and grammatically}
+     one can expect the
      methods to derive information not to be uniformly
-     efficient. However, at the same time, researchers always strive
+     efficient.
+
+     However, at the same time, researchers always strive
      to find unified theories and models, working for all language
      families.
-
+     %
      In statistical models, one tends to unify models by adding more
      parameters to them, and then feeding them with correspondingly
      more data.  In theory, more data is often possible to find,
@@ -172,9 +175,9 @@
      their usage. But this variability is also a source of confusion
      for the statistical models. Hence, in sum, one should always be
      on the lookout for the most efficient \emph{method} to model
-     languages and solve tasks. This is precisely what we do here: we
-     search for the best methods for BPE combination, and analyse them
-     in various contexts.
+     languages and solve tasks. This is our aim: finding the best
+     methods for BPE combination, by analysing them in various
+     contexts.
 
     \section{Task}
              In this paper we focus on the task of
