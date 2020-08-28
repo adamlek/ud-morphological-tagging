@@ -272,7 +272,7 @@
         composition module, which we vary for the purpose of
         evaluating each variant. This component yield one feature set
         per original word. Then a bidirectional LSTM is applied, which
-        is followed by two dense layers with GELU\jp{Gaussian Error Linear Units? If so cite: https://arxiv.org/abs/1606.08415}
+        is followed by two dense layers with GELU \citep{hendrycks2016gaussian}
         activation. These dense layers act on each word separately (but
         share parameters accross words).  An outline of the model is
         presented in \cref{fig:model}, where $f$ represents the
@@ -333,6 +333,11 @@
         averaging, and using an RNN. Summation and
         averaging have been used in previous work \adam{[CITATIONS]}, but
         using an RNN have not been explored before to our knowledge.
+
+        \paragraph{Fst:} We test the standard approach used in
+     \citep{devlin2018bert}, which is to use the first BPE token. That
+     is, given a word consisting of $k$ bpe token, we select the
+     representation of the $0$th bpe token as the word representation.
     
     	\paragraph{Sum:} For the sum method, we use an element-wise
      sum. That is, we take the sum for each dimension of the BPE
@@ -344,7 +349,7 @@
 	\end{equation}
 	
 
-    	\paragraph{Mean:} In the mean method we calculate the sum as above and
+     \paragraph{Mean:} In the mean method we calculate the sum as above and
      divide by the number of BPE embeddings in the word. Thus, for
      token $i$ we calculate a composite embedding by averaging over
      dimensions $1,\ldots,D$:
@@ -354,26 +359,25 @@
 	\end{equation}
 	
 	
-        	\paragraph{RNN:} For this method we employ a bidirectional
+     \paragraph{RNN:} For this method we employ a bidirectional
      LSTM to compose the BPE embeddings. For each multi-BPE token, we
      pass the sequence of BPE embeddings through an LSTM and use the
      final output as our word representation.
 
-        \subsubsection{Word-level feature sets and classification}
-        The above produces one embedding per word that is passed to an
-        LSTM (regardless of the method), to take into account the
-        context.
+     \subsubsection{Word-level feature sets and classification}
+     The above operation produces one embedding per word that is passed
+     to an LSTM (regardless of the method), to take into account the
+     context.
 
-        \jp{Is using character features a common technique? If so say it, if not not then the next sentence should be deleted.}
-        We opted not to include character
-        features because these would obfuscate the effect of the composition
-        method and may mask some of the effects of the different
-        methods.
+            Commonly, systems analyzing morphology use character
+     features. We opted not to include character features because
+     these would obfuscate the effect of the composition method and
+     may mask some of the effects of the different methods.
 
-        We pass the combined representations to LSTM outputs to a
-        dense layers with GELU activation, that computes scores
-        for each class in the output. We then use a softmax layer to
-        assign probabilities, and compute the loss accordingly.
+            We pass the combined representations to LSTM outputs to a
+     dense layers with GELU activation, that computes scores for each
+     class in the output. We then use a softmax layer to assign
+     probabilities, and compute the loss accordingly.
 
 	\begin{figure}%[h!]
           \centering
@@ -388,15 +392,6 @@
      followed by a dense preiction layer. }
 	\end{figure}
 
-	%\subsubsection{Character features}
-    %    \jp{Delete? Keep?}
-    %	In addition to layer attention we use a character LSTM to
-    % extract a word representation based on characters. The final
-    % representation that we pass to the word-LSTM is the concatenation
-    % of the word representation based on BPE compositions and
-    % characters,
-    % $w_i = \text{concat}(f(bpe_0,...,bpe_K), f(c_0, ..., c_M))$
-	
 	\subsubsection{Label smoothing}
     	Given that many of the languages have a large number of
      morphological tags, we want to prevent the model from growing
@@ -406,17 +401,10 @@
      correct class $100\%$ probability we let each of the incorrect
      classes have a small probability.
 
-        %The correct class is then assigned the probability $t$ by
-     %$(1-\alpha)t + \alpha / |C|$ where $|C|$ is the number of
-     %classes. \jp{I don't understand this formula (and I botched the
-     %sentence trying to fix it :/ ... What is $t$? I was expecting
-     %that you'd give the formula for the probability of the correct
-     %class, but apparently I am mistaken.)}
-
-     Let $\alpha$ be our smoothing value \jp{What is the value of
-       alpha used?}  and $C$ the number of classes, then given a
-     one-hot encoded target vector $t$ of size $C$, we calculate the
-     smoothed probabilities as:
+         Let $\alpha$ be our smoothing value, in our model we follow
+     \citep{kondratyukstraka} and use $\alpha = 0.03$, and $C$ the
+     number of classes, then given a one-hot encoded target vector $t$
+     of size $C$, we calculate the smoothed probabilities as:
     \begin{equation}
         t_{smooth} = (1-\alpha)t + \frac{\alpha}{C}
     \end{equation}
@@ -537,20 +525,20 @@
     \begin{table}%[h]
 	%\small
 	\centering
-	\begin{tabular}{l|c|ccc|ccc}
-		& & \multicolumn{3}{c}{Finetuning} & \multicolumn{3}{c}{Feature extraction} \\
-		Treebank & Baseline & Sum & Mean & RNN & Sum & Mean & RNN \\
+	\begin{tabular}{l|c|cccc|cccc}
+		& & \multicolumn{4}{c}{Finetuning} & \multicolumn{4}{c}{Feature extraction} \\
+		Treebank & Baseline & Fst & Sum & Mean & RNN & Fst & Sum & Mean & RNN \\
 		\hline
-		Basque-BDT      & .676 & .884 & .877 & \textbf{.901} & .789 & .780 & \textbf{.834} \\
-		Finnish-TDT     & .751 & .958 & .960 & \textbf{.965} & .856 & .847 & \textbf{.899} \\
-		Turkish-IMST    & .620 & .859 & .855 & \textbf{.884} & .741 & .735 & \textbf{.775} \\
-		Estonian-EDT    & .740 & .955 & .955 & \textbf{.961} & .856 & .853 & \textbf{.901} \\
-		Spanish-AnCora  & .842 & .977 & .977 & \textbf{.979} & .954 & .952 & \textbf{.962} \\
-		Arabic-PADT     & .770 & .946 & .947 & \textbf{.951} & .923 & .920 & \textbf{.936} \\
-		Czech-CAC       & .771 & .968 & .968 & \textbf{.975} & .887 & .881 & \textbf{.924} \\
-		Polish-LFG      & .657 & .953 & .953 & \textbf{.959} & .844 & .840 & \textbf{.878} \\
+		Basque-BDT      & .676 & .857 & .884 & .877 & \textbf{.901} & .759 & .789 & .780 & \textbf{.834} \\
+		Finnish-TDT     & .751 & .961 & .958 & .960 & \textbf{.965} & .853 & .856 & .847 & \textbf{.899} \\
+		Turkish-IMST    & .620 & .848 & .859 & .855 & \textbf{.884} & .742 & .741 & .735 & \textbf{.775} \\
+		Estonian-EDT    & .740 & .956 & .955 & .955 & \textbf{.961} & .855 & .856 & .853 & \textbf{.901} \\
+		Spanish-AnCora  & .842 & .977 & .977 & .977 & \textbf{.979} & .951 & .954 & .952 & \textbf{.962} \\
+		Arabic-PADT     & .770 & .946 & .946 & .947 & \textbf{.951} & .920 & .923 & .920 & \textbf{.936} \\
+		Czech-CAC       & .771 & .968 & .968 & .968 & \textbf{.975} & .863 & .887 & .881 & \textbf{.924} \\
+		Polish-LFG      & .657 & .956 & .953 & .953 & \textbf{.959} & .828 & .844 & .840 & \textbf{.878} \\
         \hline
-        Average         & .728 & .937 & .936 & \textbf{.946}  & .856 & .851 & \textbf{.888} \\
+        Average         & .728 & .933 & .937 & .936 & \textbf{.946} & .846 & .856 & .851 & \textbf{.888} \\
 	\end{tabular}
     	\caption{\label{tab:results_tokens} Accuracy for morphological
         tagging. We evaluate both when we finetune the XLMR model and
@@ -571,13 +559,6 @@
         finetuning have 250M more parameters tuned to the task than the
         feature extraction. % less than expected...
     
-    %which is understandable given that more
-    %    parameters are tuned to the task.
-    %However, the difference is
-    %    negligible \jp{to say so requires statistical analysis in such
-    %      a paper}, increasing by $3.1$ percentage points for
-    %    summation and averaging and $2.4$ points for RNN.
-
         When finetuning we see the largest changes for Basque with an
         increased performance of $3.25$ points, and Turkish ($2.7$
         points) using RNN over using mean or averaging. When only
@@ -598,22 +579,22 @@
 	\begin{table}%[h]
 	%\small
 	\centering
-	\begin{tabular}{l|ccc|ccc}
-		 & \multicolumn{3}{c}{Finetune} & \multicolumn{3}{c}{Feature extraction} \\
-		Treebank & Sum & Mean & RNN & Sum & Mean & RNN  \\
+	\begin{tabular}{l|cccc|cccc}
+		 & \multicolumn{4}{c}{Finetuning} & \multicolumn{4}{c}{Feature extraction} \\
+		Treebank & Fst & Sum & Mean & RNN & Fst & Sum & Mean & RNN  \\
 		 \hline
 		% agglutinative languages
-        Basque-BDT      & .802 & .790 & \textbf{.835} & .715 & .703 & \textbf{.774} \\
-		Finnish-TDT     & .946 & .946 & \textbf{.952} & .805 & .794 & \textbf{.861} \\ 
-		Turkish-IMST    & .780 & .778 & \textbf{.818} & .683 & .664 & \textbf{.711} \\
-		Estonian-EDT    & .939 & .939 & \textbf{.949} & .805 & .803 & \textbf{.868} \\
+        Basque-BDT      & .739 & .802 & .790 & \textbf{.835} & .657 & .715 & .703 & \textbf{.774} \\
+		Finnish-TDT     & .940 & .946 & .946 & \textbf{.952} & .780 & .805 & .794 & \textbf{.861} \\ 
+		Turkish-IMST    & .730 & .780 & .778 & \textbf{.818} & .653 & .683 & .664 & \textbf{.711} \\
+		Estonian-EDT    & .938 & .939 & .939 & \textbf{.949} & .779 & .805 & .803 & \textbf{.868} \\
 		% fusional languages
-		Spanish-AnCora  & .961 & .959 & \textbf{.964} & .937 & .930 & \textbf{.947} \\
-		Arabic-PADT     & .896 & .898 & \textbf{.907} & .909 & .906 & \textbf{.923}\\
-		Czech-CAC       & .947 & .947 & \textbf{.959} & .849 & .840 & \textbf{.900} \\
-		Polish-LFG      & .920 & .918 & \textbf{.927} & .761 & .752 & \textbf{.812} \\
+		Spanish-AnCora  & .956 & .961 & .959 & \textbf{.964} & .922 & .937 & .930 & \textbf{.947} \\
+		Arabic-PADT     & .889 & .896 & .898 & \textbf{.907} & .902 & .909 & .906 & \textbf{.923}\\
+		Czech-CAC       & .940 & .947 & .947 & \textbf{.959} & .786 & .849 & .840 & \textbf{.900} \\
+		Polish-LFG      & .917 & .920 & .918 & \textbf{.927} & .696 & .761 & .752 & \textbf{.812} \\
         \hline
-        Average         & .899 & .897 & \textbf{.913} & .808 & .799 & \textbf{.849} \\
+        Average         & .881 & .899 & .897 & \textbf{.913} & .772 & .808 & .799 & \textbf{.849} \\
 	\end{tabular}
     \caption{\label{tab:results_large_tokens} Accuracy for
      morphological tagging on all tokens that are composed of 2 or
@@ -634,7 +615,8 @@
      performance with the different methods in \cref{fig:bpe_lens}.
     
 	\begin{figure}%[h!]
-  	\centering\begin{tikzpicture} 
+  	\centering
+    \begin{tikzpicture} 
 	\begin{axis}[
 	name=,
 	title={Finnish-TDT},
@@ -663,7 +645,7 @@
 			(7, 0.95)
 };
 		\addplot[
-		color=blue,
+		color=cyan,
 		mark=triangle*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
@@ -691,6 +673,21 @@
 			(5, 0.970930233)+=(0,0.019118549510097702)-=(0,0.019118549510097702)
 			(6, 0.972222222)+=(0,0.03801018391614076)-=(0,0.03801018391614076)
 			(7, 0.95)+=(0,0.08447212917485333)-=(0,0.08447212917485333)
+};
+		\addplot[
+		color=pink,
+		mark=*,
+                mark size=1,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.980091171)
+			(2, 0.945900094)
+			(3, 0.93856076)
+			(4, 0.908113392)
+			(5, 0.962209302)
+			(6, 0.935185185)
+			(7, 0.95)
 };
 		\node[scale=0.4] at (1,-6) {10749};
 		\node[scale=0.4] at (100,-6) {5305};
@@ -731,7 +728,7 @@
 			(7, 0.8)
 };
 		\addplot[
-		color=blue,
+		color=cyan,
 		mark=triangle*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
@@ -759,6 +756,21 @@
 			(5, 0.746666667)+=(0,0.09746065981141003)-=(0,0.09746065981141003)
 			(6, 0.75)+=(0,0.22787810036435233)-=(0,0.22787810036435233)
 			(7, 0.8)+=(0,0.31002797388117415)-=(0,0.31002797388117415)
+};
+		\addplot[
+		color=pink,
+		mark=*,
+                mark size=1,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.946210996)
+			(2, 0.764301344)
+			(3, 0.713410483)
+			(4, 0.65974026)
+			(5, 0.6)
+			(6, 0.666666667)
+			(7, 0.8)
 };
 		\node[scale=0.4] at (1,-6) {6730};
 		\node[scale=0.4] at (100,-6) {3199};
@@ -799,7 +811,7 @@
 			(7, 0.75)
 };
 		\addplot[
-		color=blue,
+		color=cyan,
 		mark=triangle*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
@@ -827,6 +839,21 @@
 			(5, 0.826086957)+=(0,0.15686382857803416)-=(0,0.15686382857803416)
 			(6, 0.769230769)+=(0,0.21719589193854613)-=(0,0.21719589193854613)
 			(7, 0.75)+=(0,0.3383902260894284)-=(0,0.3383902260894284)
+};
+		\addplot[
+		color=pink,
+		mark=*,
+                mark size=1,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.922388921)
+			(2, 0.75843812)
+			(3, 0.65498155)
+			(4, 0.715116279)
+			(5, 0.695652174)
+			(6, 0.769230769)
+			(7, 0.75)
 };
 		\node[scale=0.4] at (1,-6) {3466};
 		\node[scale=0.4] at (100,-6) {1511};
@@ -867,7 +894,7 @@
 			(7, 0.946808511)
 };
 		\addplot[
-		color=blue,
+		color=cyan,
 		mark=triangle*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
@@ -895,6 +922,21 @@
 			(5, 0.959292035)+=(0,0.01681968549237994)-=(0,0.01681968549237994)
 			(6, 0.940789474)+=(0,0.04007961692831919)-=(0,0.04007961692831919)
 			(7, 0.936170213)+=(0,0.05404871299247627)-=(0,0.05404871299247627)
+};
+		\addplot[
+		color=pink,
+		mark=*,
+                mark size=1,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.970425289)
+			(2, 0.942359932)
+			(3, 0.929977674)
+			(4, 0.928530589)
+			(5, 0.953982301)
+			(6, 0.927631579)
+			(7, 0.936170213)
 };
 		\node[scale=0.4] at (1,-6) {24548};
 		\node[scale=0.4] at (100,-6) {11780};
@@ -933,7 +975,7 @@
 			(5, 0.8)
 };
 		\addplot[
-		color=blue,
+		color=cyan,
 		mark=triangle*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
@@ -957,6 +999,19 @@
 			(3, 0.90201871)+=(0,0.012961727810939487)-=(0,0.012961727810939487)
 			(4, 0.894941634)+=(0,0.03810358069342934)-=(0,0.03810358069342934)
 			(5, 0.866666667)+=(0,0.18330014190315588)-=(0,0.18330014190315588)
+};
+		\addplot[
+		color=pink,
+		mark=*,
+                mark size=1,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.964298996)
+			(2, 0.896684189)
+			(3, 0.873953717)
+			(4, 0.86770428)
+			(5, 0.933333333)
 };
 		\node[scale=0.4] at (1,-6) {21512};
 		\node[scale=0.4] at (100,-6) {4946};
@@ -995,7 +1050,7 @@
 			(7, 0.75)
 };
 		\addplot[
-		color=blue,
+		color=cyan,
 		mark=triangle*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
@@ -1023,6 +1078,21 @@
 			(5, 0.905660377)+=(0,0.08501108280383891)-=(0,0.08501108280383891)
 			(6, 0.92)+=(0,0.1250821627692161)-=(0,0.1250821627692161)
 			(7, 0.75)+=(0,0.3383902260894284)-=(0,0.3383902260894284)
+};
+		\addplot[
+		color=pink,
+		mark=*,
+                mark size=1,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.981991915)
+			(2, 0.9616295)
+			(3, 0.944259567)
+			(4, 0.919896641)
+			(5, 0.886792453)
+			(6, 0.88)
+			(7, 0.75)
 };
 		\node[scale=0.4] at (1,-6) {43536};
 		\node[scale=0.4] at (100,-6) {8027};
@@ -1062,7 +1132,7 @@
 			(6, 0.888888889)
 };
 		\addplot[
-		color=blue,
+		color=cyan,
 		mark=triangle*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
@@ -1088,6 +1158,20 @@
 			(4, 0.908536585)+=(0,0.025763757285900076)-=(0,0.025763757285900076)
 			(5, 0.842105263)+=(0,0.08322533572401784)-=(0,0.08322533572401784)
 			(6, 0.888888889)+=(0,0.22927231782530055)-=(0,0.22927231782530055)
+};
+		\addplot[
+		color=pink,
+		mark=*,
+                mark size=1,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.977081384)
+			(2, 0.929224652)
+			(3, 0.905500705)
+			(4, 0.902439024)
+			(5, 0.828947368)
+			(6, 0.888888889)
 };
 		\node[scale=0.4] at (1,-6) {8552};
 		\node[scale=0.4] at (100,-6) {2515};
@@ -1127,7 +1211,7 @@
 			(7, 1.0)
 };
 		\addplot[
-		color=blue,
+		color=cyan,
 		mark=triangle*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
@@ -1156,6 +1240,21 @@
 			(6, 0.957446809)+=(0,0.07333263763454309)-=(0,0.07333263763454309)
 			(7, 1.0)+=(0,0.3367274202349047)-=(0,0.3367274202349047)
 };
+		\addplot[
+		color=pink,
+		mark=*,
+                mark size=1,
+                error bars/.cd, y dir=both, y explicit,
+		]
+		coordinates {
+			(1, 0.986341597)
+			(2, 0.948390814)
+			(3, 0.927147645)
+			(4, 0.937043283)
+			(5, 0.881355932)
+			(6, 0.936170213)
+			(7, 1.0)
+};
 		\node[scale=0.4] at (1,-6) {29286};
 		\node[scale=0.4] at (100,-6) {12149};
 		\node[scale=0.4] at (200,-6) {5669};
@@ -1166,11 +1265,12 @@
 
         \end{axis}
 	\end{tikzpicture}
-        \caption{\label{fig:bpe_lens} Per-language accuracy on tokens
+
+    \caption{\label{fig:bpe_lens} Per-language accuracy on tokens
      with different number of BPE components of the funetuning
      training regime. Values of seven of the $x$-axis also include all
      tokens who are composed of seven or more BPE tokens. We indicate
-     the method by encoding summation as green, averaging as blue and
+     the method by encoding fst as pink, summation as green, averaging as blue and
      RNN as red. The accuracy is given on the $y$-axis. The number
      above the $x$-axis indicate how many samples the accuracy was
      calculated on. We calculate the confidence interval (95\%) for the RNN
@@ -1210,9 +1310,6 @@
      won't be aware that ``able'' is a meaningful unit in terms of
      morphology (and by extension, semantics).
 
-        %\jp{In particular, the position of an affix is lost if the
-     %word which includes it is split in several tokens.}
-
      One explanation for the success of using an RNN to compose BPE
      embeddings may be that the method simply simply can store more
      information about the words. This is most likely true to some
@@ -1239,6 +1336,25 @@
      because better performance on longer BPE tokens hopefully map a
      subset of the composite tag to the BPE token.
 
+    \subsubsection{Fst method}
+
+            Our experiments reveal that the standard method proposed
+     in \citep{devlin2018bert} is not efficient for morphological
+     sequence classification across languages. We see in
+     \cref{tab:results_tokens} that the method is, on average the fst
+     method is $.4$ and $1$ percentage points lower than the second
+     lowest scoring model for finetuning and feature extraction
+     respectively.  We see that this effect is further enhanced when
+     we consider the accuracy on tokens composed of more than two BPE
+     token in \cref{tab:results_large_tokens}, where the difference is
+     $1.6$ and $2.7$ percentage points lower than the lowest scoring
+     method.
+
+         This effect should not be surprising as what the transformer
+     must learn during training to put the predictive information in
+     each BPE token into the first token.  
+    
+    
     \subsubsection{Sum and Mean}
 
         Our analysis and experiments have primarily foused on the
@@ -1270,51 +1386,192 @@
     %changes happen for czech/polish mostly?
     % friday, how to structure?
     % scatter + linear regression for [bpe_len, sum/averaging-RNN]
+
+
+        We investigate whether a language is agglutinative or fusional
+     make a difference with respect to the method used to compose word
+     representations in \cref{fig:bpe_len_acc}. \adam{Fix sub-captions}
+
+            Our results indicate that it is not the typology of the
+     language that matter, but the ratio of BPE-to-tokens ratio. We
+     see this in Figure 3.b where the fusional languages with a high
+     BPE-to-token ratio exhitit similar gains using the RNN as the
+     agglutinative languages.
+
+    %    To some extent, when using BPE tokenization languages
+    % morphological typology is converted to fusional.  This is because
+    % one BPE token may consist of several morphemes is a agglutinative
+    % language and are interpreted as one meaningful language unit (as
+    % a representation is assigned to the unit). Thus, when we predict
+    % a label we have to map this one unit (that in reality is two or
+    % more units) to $1$ tag, while in-fact it should be mapped to $k$
+    % tags.
     
-        With regards to the performance of the different methods on
-     languages with different typology we have summarised the results
-     in \cref{tab:typology_performace}. 
+    \begin{figure}
+    \centering
+    \begin{tikzpicture}
+    	\begin{axis}[
+		name=basque,
+		title={(a)},
+		height=7cm,
+        legend pos=south west
+        %xlabel=BPE-token ratio,
+        %ylabel=accuracy
+		]
+    \addplot[
+             color=red,
+    	     mark=triangle*,
+    	     only marks,
+              mark size=1.5
+    	     ]
+    	      coordinates {
+    (1.98,0.852400682)
+    (1.79,0.787705263)
+    (1.73,0.736520677)
+    (1.86,0.854593176)
+    (1.39,0.920134905)
+    (1.25,0.954331692)
+    (1.75,0.843515541)
+    (1.77,0.88640611)
+    };
+    \addplot[
+                  color=cyan,
+    	      mark=diamond*,
+    	      only marks,
+              mark size=1.5
+    	      ]
+    	      coordinates {
+    (1.98,0.842992932)
+    (1.79,0.7792)
+    (1.73,0.730064561)
+    (1.86,0.851785918)
+    (1.39,0.917909669)
+    (1.25,0.952329341)
+    (1.75,0.83869239)
+    (1.77,0.880108881)
+    };
+    \addplot[
+                  color=black,
+    	      mark=square*,
+    	      only marks,
+              mark size=1.5
+    	      ]
+    	      coordinates {
+    (1.98,0.895686083)
+    (1.79,0.833094737)
+    (1.73,0.769499215)
+    (1.86,0.899372361)
+    (1.39,0.933625396)
+    (1.25,0.962139026)
+    (1.75,0.877047925)
+    (1.77,0.923437881)
+    };
+    \addplot[
+              color=brown,
+    	      mark=*,
+    	      only marks,
+              mark size=1.5
+    	      ]
+    	      coordinates {
+    (1.98,0.8489398)
+    (1.79,0.758652632)
+    (1.73,0.737044146)
+    (1.86,0.853132489)
+    (1.39,0.917005667)
+    (1.25,0.950933206)
+    (1.75,0.827591487)
+    (1.77,0.861928171)
+    };
+        \legend{Sum,Mean,RNN,Fst}
+    	\end{axis}
+        \end{tikzpicture}
+        \begin{tikzpicture}
+    	\begin{axis}[
+		name=basque,
+		title={(b)},
+		height=7cm,
+        legend pos=south east,
+        %xlabel=BPE-token ratio,
+        %ylabel=RNN accuracy - mean accuracy
+		]
+    \addplot[
+          color=blue,
+	      mark=square*,
+	      only marks
+	      ]
+	      coordinates {
+    (1.98,0.047574944999999924)
+    (1.79,0.057908772)
+    (1.73,0.03495608699999997)
+    (1.86,0.046201833333333275)
+    };
+\addplot[
+              color=red,
+	      mark=square*,
+	      only marks
+	      ]
+	      coordinates {
+(1.39,0.015275315666666622)
+(1.25,0.009607613000000015)
+(1.75,0.040448118999999894)
+(1.77,0.04729016033333333)
+};
+            \legend{Agglutinative, Fusional}
+    		\end{axis}
+        \end{tikzpicture}
+           \caption{\label{fig:bpe_len_acc} Figure (a) show the
+     performance of the different method compared against the average
+     BPE-to-token ratio using the finetuning training regime. Figure (b) show the gain of using an RNN as
+     compared to the other methods, we calculate this by subtracting
+     the accuracy of the RNN method by the mean of the other three
+     methods accuracy.}
+    \end{figure}
 
-    \begin{table}
-        \centering  
-        \begin{tabular} {c|cllllll}
-            & & \multicolumn{3}{c}{Finetune} & \multicolumn{3}{c}{Feature extraction} \\
-            Typology & BPE & Sum & Mean & RNN & Sum & Mean & RNN \\
-            \hline
-            Agglutinative & All & .914 & .911 & \textbf{.927} & .808 & .801 & \textbf{.849} \\   
-            Agglutinative & $>2$ & .867 & .864 & \textbf{.888} & .752 & .741 & \textbf{.803} \\
-            Fusional & All & .961 & .961  & \textbf{.966} & .901 & .897 & \textbf{.924} \\
-            Fusional & $>2$ & .931 & .930  & \textbf{.939} & .864 & .857 & \textbf{.896} \\
-        \end{tabular}
-     \caption{Average performance of the different BPE
-     composition methods between agglutinative and fusional
-     languages. The second column indictae whether we compute accuracy
-     of All tokens or only on the tokens which consist of two or more
-     BPE tokens. }
-     \label{tab:typology_performace}
-    \end{table}
+    
+   %     With regards to the performance of the different methods on
+   %  languages with different typology we have summarised the results
+   %  in \cref{tab:typology_performace}. 
 
-         When comparing the agglutinative and fusional languages we
-     see that the tagging is more difficult for the agglutinative
-     languages. Another interesting trend we see is that combining BPE
-     tokens with an RNN yields stronger gains for the agglutinative
-     languages. When we compare using RNN over Sum/Mean we see an
-     increase of $1.1$/$1.6$ percentage points and $4.1$/$4.8$ points
-     for fine-tuning and feature extraction respectively on the
-     agglutinative languages. For the fusional languages we see a
-     smaller increase of $.5$ percentage points for finetuning and
-     $2.3$/$2.7$ points for feature extraction.
+    %\begin{table}
+    %    \centering  
+    %    \begin{tabular} {c|cllllll}
+    %        & & \multicolumn{3}{c}{Finetune} & \multicolumn{3}{c}{Feature extraction} \\
+    %        Typology & BPE & Sum & Mean & RNN & Sum & Mean & RNN \\
+    %        \hline
+    %        Agglutinative & All & .914 & .911 & \textbf{.927} & .808 & .801 & \textbf{.849} \\   
+    %        Agglutinative & $>2$ & .867 & .864 & \textbf{.888} & .752 & .741 & \textbf{.803} \\
+    %        Fusional & All & .961 & .961  & \textbf{.966} & .901 & .897 & \textbf{.924} \\
+    %        Fusional & $>2$ & .931 & .930  & \textbf{.939} & .864 & .857 & \textbf{.896} \\
+    %    \end{tabular}
+    % \caption{Average performance of the different BPE
+    % composition methods between agglutinative and fusional
+    % languages. The second column indictae whether we compute accuracy
+    % of All tokens or only on the tokens which consist of two or more
+    % BPE tokens. }
+    % \label{tab:typology_performace}
+    %\end{table}
 
-         Looking at the cases most relevant to the present study,
-     namely text-tokens composed of two or more BPE tokens the gain
-     from using an RNN is in general more noticable. But the same
-     pattern of agglutinative languages receiving a larger benefit
-     from using an RNN over the Sum or Mean methods is still there,
-     yielding an increase of $1.2$/$2.4$ percentage points for
-     finetuning and $5.1$/$6.2$ percentage points for feature
-     extraction. For the fusional languages the gain is also larger,
-     yielding an increase of $.8$/$.9$ percentage points for
-     finetuning and $3.2$/$3.9$ points for feature extraction.
+   %      When comparing the agglutinative and fusional languages we
+   %  see that the tagging is more difficult for the agglutinative
+   %  languages. Another interesting trend we see is that combining BPE
+   %  tokens with an RNN yields stronger gains for the agglutinative
+   %  languages. When we compare using RNN over Sum/Mean we see an
+   %  increase of $1.1$/$1.6$ percentage points and $4.1$/$4.8$ points
+   %  for fine-tuning and feature extraction respectively on the
+   %  agglutinative languages. For the fusional languages we see a
+   %  smaller increase of $.5$ percentage points for finetuning and
+   %  $2.3$/$2.7$ points for feature extraction.
+
+   %      Looking at the cases most relevant to the present study,
+   %  namely text-tokens composed of two or more BPE tokens the gain
+   %  from using an RNN is in general more noticable. But the same
+   %  pattern of agglutinative languages receiving a larger benefit
+   %  from using an RNN over the Sum or Mean methods is still there,
+   %  yielding an increase of $1.2$/$2.4$ percentage points for
+   %  finetuning and $5.1$/$6.2$ percentage points for feature
+   %  extraction. For the fusional languages the gain is also larger,
+   %  yielding an increase of $.8$/$.9$ percentage points for
+   %  finetuning and $3.2$/$3.9$ points for feature extraction.
     
     \section{Conclusions and Future Work}
     
