@@ -463,8 +463,7 @@
 	\end{wraptable}
      
          When fine-tuning the model we freeze the XLMR parameters for
-     the first epoch, (effectively not fine-tuning for the first
-     epoch).  When training the model we use cosine annealing learning
+     the first epoch, (effectively not fine-tuning at first).  When training the model we use a cosine annealing learning
      rate with restarts every epoch, that is, the learning rate starts
      high then incrementally decreases to $1\mathrm{e}{-12}$ during
      $N$ steps, where $N$ is the number of batches in an epoch. We use
@@ -482,7 +481,7 @@
         input to the transformer, replacing 20 percent of the BPE tokens
         with \texttt{<UNK>}. After we have extracted layer features
         from the transformer we apply a dropout of $0.4$, and before
-        computing the weighted sum of layers we apply full dropout on
+        computing the weighted sum of layers we apply full\jp{What is full dropout (compared to just dropout?)} dropout on
         a layers with a probability of $0.1$. After the word LSTM have
         processed the sequence, but before the final prediction, we
         apply a dropout of $0.5$.
@@ -502,7 +501,7 @@
      concatenation or other methods to incorporate information from
      all treebanks available in a language, which means that results
      are not reported on a strict per-treebank basis --- contrary to
-     what we do here.
+     what we do here --- and thus our numbers are not directly comparable.
         % get new ref from shared task to kondratyukstraka, and perhaps other systems
     %
         The accuracy of our system is computed by checking the prediction
@@ -560,14 +559,14 @@
 
 
         Our system performs better than the baseline. As a general
-        trend we can see that the RNN method tends to perform better
+        trend we see that the RNN method tends to perform better
         than the summation or averaging methods. This is consistent
         across both languages families (agglutinative and fusional),
-        and training regimes, showing that while the differences between each methods are
-        small, they occur consistenty.
+        and training regimes, showing that while the advantage of the RNN is
+        small, it occurs consistenty.\jp{Can we rule out the possibility that this is simply due to additional non-recurrent layers? One could say that the two additional dense layers already do this job and so the non-recurrent aspect is already taken care of by these last two layers(?)}
     %
         We find that in general finetuning yields higher accuracy than
-        feature extraction, on average the difference is about $5.8$
+        plain feature extraction, on average the difference is about $5.8$
         percentage points.  This difference is to be expected when the
         finetuning have 250M more parameters tuned to the task than the
         feature extraction. % less than expected...
@@ -591,8 +590,8 @@
     \Cref{tab:results_tokens} reports average accuracy for every word,
     thus also including those which are only composed of a single BPE
     token. To highlight the strengths and weaknesses of each
-    composition method, we also compute the accuracy for tokens which
-    are composed of two BPE tokens or more. The results can be seen in
+    composition method, we also compute the accuracy for longer words only 
+    (composed of two BPE tokens or more). The results can be seen in
     \cref{tab:results_large_tokens}.  We see again that the RNN works
     better than summation or averaging BPE embeddings.
     
