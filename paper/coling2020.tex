@@ -190,29 +190,29 @@
      cases, the context of the sentence will affect which class should
      be assigned to a word.
 
-     For the task, we have to identify $k$ different tags for a word,
+     For our task, we have to identify $k$ different tags for a word,
      each with $C_i$ possible classes, making the task a multi-class
      classification problem. We simplify the classification problem by
-     instead of having $k$ prediction layers we combine the different
-     tags into a composite tag with up to $\prod _i^k C_i$ classes.
+     combining the different tags into a composite tag with up to
+     $\prod _i^k C_i$ classes (instead of making $k$ separate
+     predictions).
 
     \section{Data}
     
-    For both training and testing data, we will the Universal
+    For both training and testing data, we use the Universal
     Dependencies dataset \citep{nivre2018} annotated with the UniMorph
     schema \citep{mccarthy2018marrying}. We are interested in how
     accuracy is influenced by different composition methods, and by
     the typology of the languages. Additionally, we also consider the
     correlation between these two variables --- still in terms of the
-    effect on accuracy for the task. To explore this, we take a sample
+    effect on accuracy for the task. To this end, we take a sample
     of eight languages from the Universal Dependencies dataset. Four
     languages use a \textit{fusional} morphology, meaning that an
-    affix may be indicative of one or more morphological features. the
+    affix may be indicative of one or more morphological features. The
     other four languages use an \textit{agglutinative} morphology,
     meaning that each affix is mapped to one and only one
     morphological feature.
 
-    
            	The fusional languages that we consider are Arabic, Czech,
      Polish and Spanish, and the agglutinative languages that we
      consider are Finnish, Basque, Turkish and Estonian.  We show the
@@ -253,8 +253,9 @@
         fusional and agglutinative languages with similar BPE per
         token ratio we can take this variable into account properly in
         our analysis.
-    %\jp{But we never come back to this point? AE: as of yet, the current experiments do not seem to yield same results as before}
-
+    % \jp{But we never come back to this point? AE: as of yet, the current experiments do not seem to yield same results as before}
+        \jp{So what is the status? forward ref to the precise point where this is discussed?}
+        
 	\section{Method}
 	\label{method}
     	In this section we present the model used for sequence
@@ -271,25 +272,24 @@
         composition module, which we vary for the purpose of
         evaluating each variant. This component yield one feature set
         per original word. Then a bidirectional LSTM is applied, which
-        is followed by two dense layers with GELU
-        activation. These dense layer act on each word separately (but
+        is followed by two dense layers with GELU\jp{Gaussian Error Linear Units? If so cite: https://arxiv.org/abs/1606.08415}
+        activation. These dense layers act on each word separately (but
         share parameters accross words).  An outline of the model is
         presented in \cref{fig:model}, where $f$ represents the
         different methods we use to combine BPE embeddings.
 
 	\subsubsection{Underlying Transformer Model}
-     To extract feature set for BPE tokens, we use the
+     To extract a feature set for BPE tokens, we use the
      XLM-RoBERTa \cite{conneau2019unsupervised} model\footnote{We use the
      huggingface implementation
      \url{https://huggingface.co/transformers/model_doc/xlmroberta.html}}. XLMR
      is a masked language model based on the transformer
-     (specifically, RoBERTa \cite{liu2019roberta}), and trained on
+     (specifically RoBERTa \citep{liu2019roberta}), and trained on
      data from 100 different languages, using a shared vocabulary of
-     250000 BPE tokens. All the languages that we test are included in
+     250000 BPE tokens. All the languages that we test are included in the
      XLMR model. In this experiment we use the \textsc{XLMR}$_{base}$
      model. It has 12 encoder layers, 12 attention heads and use 768
      dimensions for its hidden size.
-	
 
 	\subsubsection{BPE feature extraction}
         \label{sec:bpe-features}
@@ -299,22 +299,22 @@
                 The XLMR model use 12 layers to compute an embedding
      for a BPE token, and it has been shown in previous research
      \citep{kondratyukstraka,raganato2018analysis,liu2019linguistic}
-     [Find 1 or 2 more citations] that the different layers of the
+     \adam{[Find 1 or 2 more citations]} that the different layers of the
      transformer model encode different types of information. To take
-     advantage of this we compute BPE embeddings as a weighted sum of
+     advantage of this variety, we compute BPE embeddings as a weighted sum of
      layer representations \citep{kondratyukstraka}.  That is, we
-     initialize a parameter $w$ of dimension $l$, each from a normal
+     initialize a parameter $w$ of dimension $l$, each element from a normal
      distribution of mean $0$ and standard deviation $1$, where $l$ is
      the number of layers in the transformer model. If $r_{ji}$ is the
      layer representation at layer $j$ and token position $i$, we
      calculate the weighted sum as follows:
     \begin{equation}
-		x_i = \sum_{j=1}^{J} \softmax(w)_j r_{ji}
+		x_i = \sum_{j=1}^{l} \softmax(w)_j r_{ji}
 	\end{equation}
 
         Consequently, in end-to-end training, the optimiser will find
         a weight for extracting information from each layer
-        ($\softmax(w)$) which maximizes performance.
+        ($\softmax(w)_j$) which maximizes performance.
 
      \subsubsection{Composition of BPE feature sets}
       After we have computed a weighted sum for
@@ -329,14 +329,14 @@
         BPE embedding to a function $f$ which combines the BPE
         embeddings.
 
-        We look at three methods in particular, summation and
-        averaging along a dimension, and using an RNN. Summation and
-        averaging have been used in previous work [CITATIONS], but
+        We consider three methods: summation,
+        averaging, and using an RNN. Summation and
+        averaging have been used in previous work \adam{[CITATIONS]}, but
         using an RNN have not been explored before to our knowledge.
     
     	\paragraph{Sum:} For the sum method, we use an element-wise
      sum. That is, we take the sum for each dimension of the BPE
-     embeddings separately. Thus, for token $i$ we calculate a
+     embeddings independently. Thus, for token $i$ we calculate a
      composite embedding by summing over dimensions $1,\ldots,D$:
 	
 	\begin{equation}
@@ -344,7 +344,7 @@
 	\end{equation}
 	
 
-    	\paragraph{Mean:} In the mean method we calculate the sum and
+    	\paragraph{Mean:} In the mean method we calculate the sum as above and
      divide by the number of BPE embeddings in the word. Thus, for
      token $i$ we calculate a composite embedding by averaging over
      dimensions $1,\ldots,D$:
@@ -359,13 +359,16 @@
      pass the sequence of BPE embeddings through an LSTM and use the
      final output as our word representation.
 
-       
         \subsubsection{Word-level feature sets and classification}
-                   The above produces one embedding per word that is
-     passed to an LSTM, to take into account the context. In the model
-     we opted not to include character features as these would
-     obfuscate the effect of the compoition method and may mask some
-     of the effects of the different methods.
+        The above produces one embedding per word that is passed to an
+        LSTM (regardless of the method), to take into account the
+        context.
+
+        \jp{Is using character features a common technique? If so say it, if not not then the next sentence should be deleted.}
+        We opted not to include character
+        features because these would obfuscate the effect of the composition
+        method and may mask some of the effects of the different
+        methods.
 
         We pass the combined representations to LSTM outputs to a
         dense layers with GELU activation, that computes scores
@@ -376,11 +379,11 @@
           \centering
 	\includegraphics[scale=0.5]{single_step.pdf}
     \caption{\label{fig:model} Model outline for one input. A
-     word $w_n$ is tokenized into $k$ bpe tokens by the transformer
+     word $w_n$ is tokenized into $k$ BPE tokens by the transformer
      model, we then calculate a weighted sum over the layers for each
-     feature embedding in a function $g(\cdot)$. The resulting
+     feature embedding in a function $g(\cdot)$ \jp{What is this g? Why isn't it explained before? Perhaps it could be deleted from here?}. The resulting
      embeddings are then passed to a BPE composition function
-     $f(\cdot)$ that combine the $k$ different BPE embeddings into a
+     $f(\cdot)$ that combines the $k$ different BPE embeddings into a
      word embedding. The word embedding is then passed to a LSTM
      followed by a dense preiction layer. }
 	\end{figure}
@@ -410,15 +413,15 @@
      %that you'd give the formula for the probability of the correct
      %class, but apparently I am mistaken.)}
 
-     Let $\alpha$ be our smoothing value and $C$ the number of
-     classes, then given a one-hot encoded target vector $t$ of size
-     $C$, we calculate the smoothed probabilities as:
+     Let $\alpha$ be our smoothing value \jp{What is the value of
+       alpha used?}  and $C$ the number of classes, then given a
+     one-hot encoded target vector $t$ of size $C$, we calculate the
+     smoothed probabilities as:
     \begin{equation}
         t_{smooth} = (1-\alpha)t + \frac{\alpha}{C}
     \end{equation}
     In words, we remove $\alpha$ from the correct class then
     distribute $\alpha$ uniformly among all classes.
-
      \subsection{Training}
 
     %\jp{add here a warning that we consider several possible training regimes}
