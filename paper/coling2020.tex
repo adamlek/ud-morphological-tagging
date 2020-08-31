@@ -30,6 +30,7 @@
 \usepackage{pgfplots}
 \usepackage{wrapfig}
 \pgfplotsset{every tick label/.append style={font=\small}}
+\usepackage{pgfplotstable}
 
 \newcommand\jp[1]{(\textbf{JP:} #1)}
 \newcommand\adam[1]{(\textbf{Adam:} #1)}
@@ -94,12 +95,12 @@
      composed of the tokens: "scient", "ifical", "ly" --- here the
      central token does not correspond to a morpheme.
         %
-         That is, rather than identifying complete words or morphemes,
-     one aims to find relatively large sub-word units occurring
-     significantly often, while maximizing the coverage of the corpus
-     (the presence of the ``out of vocabulary'' token is
-     minimized). Approaches for composing tokens from sub-token
-     units have focused on combining character $n$-grams
+             That is, rather than identifying complete words or
+     morphemes, one aims to find relatively large sub-word units
+     occurring significantly often, while maximizing the coverage of
+     the corpus (the presence of the ``out of vocabulary'' token is
+     minimized). Approaches for composing tokens from sub-token units
+     have focused on combining character $n$-grams
      \citep{bojanowski2017enriching}, while other approaches have
      looked at splitting words into \textit{roots} and
      \textit{morphemes}
@@ -108,13 +109,11 @@
      Byte-Pair Encodings (BPE) \citep{sennrich2015neural}, which takes
      another approach. It does not specifically look for either
      character $n$-grams or morphs, but rather it aims at splitting a
-     corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user
-     defined.
-
-                One issue with statistical tokenization, such as BPE,
-     is that one is seldom interested in the encoding, but rather in
-     the semantically meaningful units in the original texts. Thus the
-     question of mapping results back to the original text arises.
+     corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user defined.
+      One issue with this tokenization is that one is seldom
+     interested in the encoding, but rather in the semantically
+     meaningful units in the original texts. Thus the question of
+     mapping results back to the original text arises.
 
         	In this paper we explore how to combine Byte-Pair
      Encodings from a transformer model to perform sequence
@@ -156,13 +155,11 @@
      reasonable to expect that the statistical characteristics of BPE
      to be different between fusional and agglutinative languages.
      %
-     Additionally, with the increased interest in multilingual NLP it
-     becomes important to explore how ``universal'' different
+             Additionally, with the increased interest in multilingual
+     NLP it becomes important to explore how ``universal'' different
      computational methods are.  That is, because languages are
-     different (morpho-)syntactically, % {orthographically and grammatically}
-     one can expect the
-     methods to derive information not to be uniformly
-     efficient.
+     different (morpho-)syntactically, one can expect the methods to
+     derive information not to be uniformly efficient.
 
      However, at the same time, researchers always strive
      to find unified theories and models, working for all language
@@ -199,20 +196,34 @@
 
     \section{Data}
     
-    For both training and testing data, we use the Universal
-    Dependencies dataset \citep{nivre2018} annotated with the UniMorph
-    schema \citep{mccarthy2018marrying}. We are interested in how
-    accuracy is influenced by different composition methods, and by
-    the typology of the languages. Additionally, we also consider the
-    correlation between these two variables --- still in terms of the
-    effect on accuracy for the task. To this end, we take a sample
-    of eight languages from the Universal Dependencies dataset. Four
-    languages use a \textit{fusional} morphology, meaning that an
-    affix may be indicative of one or more morphological features. The
-    other four languages use an \textit{agglutinative} morphology,
-    meaning that each affix is mapped to one and only one
-    morphological feature.
-
+            For both training and testing data, we use the Universal
+     Dependencies dataset \citep{nivre2018} annotated with the
+     UniMorph schema \citep{mccarthy2018marrying}.  We are mainly
+     interested in how the accuracy is influenced by different
+     composition methods, but also consider the type of morphology a
+     language use as a factor in this task.
+    
+     %We take a sample
+     %of eight languages with varying typology. 
+%
+    With this in mind we consider both
+     languages that use agglutinative morphology where each morpheme
+     is mapped to one and only one morphological feature, and
+     languages that use fusional morphology where a morpheme may be
+     mapped to one or more grammatical features. 
+%
+    %We are interested in how
+    %accuracy is influenced by different composition methods, and by
+    %the typology of the languages. Additionally, we also consider the
+    %correlation between these two variables --- still in terms of the
+    %effect on accuracy for the task. To this end, we take a sample
+    %of eight languages from the Universal Dependencies dataset. Four
+    %languages use a \textit{fusional} morphology, meaning that an
+    %affix may be indicative of one or more morphological features. The
+    %other four languages use an \textit{agglutinative} morphology,
+    %meaning that each affix is mapped to one and only one
+    %morphological feature.
+%
            	The fusional languages that we consider are Arabic, Czech,
      Polish and Spanish, and the agglutinative languages that we
      consider are Finnish, Basque, Turkish and Estonian.  We show the
@@ -465,14 +476,15 @@
 
 
 
-        We use dropout throughout the model. We apply dropout on the
-        input to the transformer, replacing 20 percent of the BPE tokens
-        with \texttt{<UNK>}. After we have extracted layer features
-        from the transformer we apply a dropout of $0.4$, and before
-        computing the weighted sum of layers we apply full\jp{What is full dropout (compared to just dropout?)} dropout on
-        a layers with a probability of $0.1$. After the word LSTM have
-        processed the sequence, but before the final prediction, we
-        apply a dropout of $0.5$.
+            We use dropout throughout the model. We apply dropout on
+     the input to the transformer, replacing 20 percent of the BPE
+     tokens with \texttt{<UNK>}. After we have extracted layer
+     features from the transformer we apply a dropout of $0.4$, and
+     before computing the weighted sum of layers we apply dropout on a
+     layers with a probability of $0.1$, that is we set all
+     representations in the layer to $0$. After the word LSTM have
+     processed the sequence, but before the final prediction, we apply
+     a dropout of $0.5$.
 
 	
 	\section{Results}
@@ -494,7 +506,7 @@
     %
         The accuracy of our system is computed by checking the prediction
         of morphological tags. We report in \cref{tab:results_tokens}
-        the result for each of the three different methods, and the
+        the result for each of the four different methods, and the
         two training regimes.
 
 %	\begin{table} % [h]
@@ -546,12 +558,16 @@
     \end{table}
 
 
-        Our system performs better than the baseline. As a general
-        trend we see that the RNN method tends to perform better
-        than the summation or averaging methods. This is consistent
-        across both languages families (agglutinative and fusional),
-        and training regimes, showing that while the advantage of the RNN is
-        small, it occurs consistenty.\jp{Can we rule out the possibility that this is simply due to additional non-recurrent layers? One could say that the two additional dense layers already do this job and so the non-recurrent aspect is already taken care of by these last two layers(?)}
+            Our system performs better than the baseline. As a general
+     trend we see that the RNN method tends to perform better than the
+     first bpe token, summation or averaging methods. This is
+     consistent across both languages families (agglutinative and
+     fusional), and training regimes, showing that while the advantage
+     of the RNN is small, it occurs consistenty.\jp{Can we rule out
+     the possibility that this is simply due to additional
+     non-recurrent layers? One could say that the two additional dense
+     layers already do this job and so the non-recurrent aspect is
+     already taken care of by these last two layers(?)}
     %
         We find that in general finetuning yields higher accuracy than
         plain feature extraction, on average the difference is about $5.8$
@@ -607,11 +623,10 @@
      can also see that the average increase in accuracy when using an
      RNN is larger. This holds for both when we only finetune the
      model and extract features.
-
-    
-    Given that the number of BPE tokens per natural-language token
-     varies, we also look at the accuracy of the different methods
-     given a different number of BPE tokens. We show per-language
+    %
+    Given that the number of BPE tokens per text token
+     varies in the different languages, we also look at the accuracy of the different methods
+     given the number of BPE tokens. We show per-language
      performance with the different methods in \cref{fig:bpe_lens}.
     
 	\begin{figure}%[h!]
@@ -627,6 +642,8 @@
 	legend pos=south west,
 	ymajorgrids=false,
 	grid style=dashed,
+    ymax={1.},
+    ymin={.9},
 	height=4cm
 	]
 		\addplot[
@@ -710,6 +727,8 @@
 	legend pos=south west,
 	ymajorgrids=false,
 	grid style=dashed,
+    ymax={1.},
+    ymin={.55},
 	height=4cm
 	]
 		\addplot[
@@ -793,6 +812,8 @@
 	legend pos=south west,
 	ymajorgrids=false,
 	grid style=dashed,
+    ymax={1.},
+    ymin={.6},
 	height=4cm
 	]
 		\addplot[
@@ -876,6 +897,8 @@
 	legend pos=south west,
 	ymajorgrids=false,
 	grid style=dashed,
+    ymax={1.},
+    ymin={.9},
 	height=4cm
 	]
 		\addplot[
@@ -959,6 +982,8 @@
 	legend pos=south west,
 	ymajorgrids=false,
 	grid style=dashed,
+    ymax={1.},
+    ymin={.85},
 	height=4cm
 	]
 		\addplot[
@@ -1032,6 +1057,8 @@
 	legend pos=south west,
 	ymajorgrids=false,
 	grid style=dashed,
+    ymax={1.},
+    ymin={.7},
 	height=4cm
 	]
 		\addplot[
@@ -1111,10 +1138,13 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,3,4,5,6,7},
+    %extra x tick labels={1,2,3,4,5,6,7},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
 	grid style=dashed,
+    ymax={1.},
+    ymin={.8},
 	height=4cm
 	]
 		\addplot[
@@ -1189,6 +1219,8 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,3,4,5,6,7},
+    ymax={1.},
+    ymin={.85},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
@@ -1227,7 +1259,7 @@
 };
 		\addplot[
 		color=red,
-		mark=square*,
+		mark=diamond*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -1241,7 +1273,7 @@
 			(7, 1.0)+=(0,0.3367274202349047)-=(0,0.3367274202349047)
 };
 		\addplot[
-		color=pink,
+		color=brown,
 		mark=*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
@@ -1338,6 +1370,31 @@
      because better performance on longer BPE tokens hopefully map a
      subset of the composite tag to the BPE token.
 
+                We can suspect at this points that the average
+     BPE-per-token ratio in a language affect the composition method
+     used. In \cref{fig:scatter_len} we plot the average number of BPE
+     tokens per text token, and compare this against the gain in
+     accuracy yielded by using the RNN method over summation.  For
+     fine-tuning we see that in general the average number of BPE
+     tokens do not matter than much. The two cases where it does
+     matter is for Turkish and Basque, where we see a substantial
+     improvement of about $3$ percentage points. For the other
+     languages the improvements lie in the range $.6$ to $1.2$. This
+     indicate that when fine-tuning, the model can provide information
+     that allows commutative methods to properly compose BPE tokens.
+      However, looking at feature extraction we see that there is a
+     much larger divide between the low-bpe-ratio languages and the
+     high bpe-ratio languages. \adam{This indicates that while the
+     pretrained BPE weights contain predictive information, there is
+     still more to be extracted from them.}
+
+        Our sample of languages contain both fusional and
+     agglutinative languages, but the typology does not appear to have
+     an effect in our experiments. We see about the same trends for
+     the fusional languages with a high BPE-to-token ratio as the
+     agglutinative languages. 
+    \adam{Effect of training data?}
+    \adam{This may be influenced by our choice of creating composite tags instead of predicting each feature individually.}
 
     \subsubsection{Fst method}
 
@@ -1415,87 +1472,80 @@
     % experiments, that is, the embeddings extracted from a transformer
     % model are probed for linguistic knowledge.
 
-\begin{figure}  
+\begin{figure}%{r}{8cm}
     \centering  
             \begin{tikzpicture}
     	\begin{axis}[
-		name=basque,
-		title={(a)},
+		name=,
+		title={},
 		height=7cm,
-        legend pos=south west,
+        legend pos=north west,
         xlabel={BPE per token ratio},
-        ylabel=Accuracy
 		]
-    \addplot[
+            \addplot[
              color=red,
     	     mark=triangle*,
     	     only marks,
               mark size=1.5
     	     ]
-    	      coordinates {
-    (1.98,0.852400682)
-    (1.79,0.787705263)
-    (1.73,0.736520677)
-    (1.86,0.854593176)
-    (1.39,0.920134905)
-    (1.25,0.954331692)
-    (1.75,0.843515541)
-    (1.77,0.88640611)
-    };
-    \addplot[
-                  color=cyan,
-    	      mark=diamond*,
-    	      only marks,
+        	 coordinates {
+            (1.98,0.006000000000000005)
+            (1.79,0.03299999999999992)
+            (1.73,0.03799999999999992)
+            (1.86,0.010000000000000009)
+            (1.39,0.01100000000000001)
+            (1.25,0.0030000000000000027)
+            (1.75,0.007000000000000006)
+            (1.77,0.01200000000000001)
+            };
+            \addlegendentry{Finetuning}
+    
+            \addplot[no marks, color=red] table [row sep=\\,y={create col/linear regression={y=Y}},forget plot] {
+            X Y \\
+            1.98 0.006000000000000005 \\
+            1.79 0.03299999999999992 \\
+            1.73 0.03799999999999992 \\
+            1.86 0.010000000000000009 \\
+            1.39 0.01100000000000001 \\
+            1.25 0.0030000000000000027 \\
+            1.75 0.007000000000000006 \\
+            1.77 0.01200000000000001 \\
+            };
+    
+            \addplot[
+             color=blue,
+    	     mark=diamond*,
+    	     only marks,
               mark size=1.5
-    	      ]
-    	      coordinates {
-    (1.98,0.842992932)
-    (1.79,0.7792)
-    (1.73,0.730064561)
-    (1.86,0.851785918)
-    (1.39,0.917909669)
-    (1.25,0.952329341)
-    (1.75,0.83869239)
-    (1.77,0.880108881)
-    };
-    \addplot[
-                  color=black,
-    	      mark=square*,
-    	      only marks,
-              mark size=1.5
-    	      ]
-    	      coordinates {
-    (1.98,0.895686083)
-    (1.79,0.833094737)
-    (1.73,0.769499215)
-    (1.86,0.899372361)
-    (1.39,0.933625396)
-    (1.25,0.962139026)
-    (1.75,0.877047925)
-    (1.77,0.923437881)
-    };
-    \addplot[
-              color=brown,
-    	      mark=*,
-    	      only marks,
-              mark size=1.5
-    	      ]
-    	      coordinates {
-    (1.98,0.8489398)
-    (1.79,0.758652632)
-    (1.73,0.737044146)
-    (1.86,0.853132489)
-    (1.39,0.917005667)
-    (1.25,0.950933206)
-    (1.75,0.827591487)
-    (1.77,0.861928171)
-    };
-        \legend{Sum,Mean,RNN,Fst}
-    	\end{axis}
+    	     ]
+            coordinates {
+            (1.98,0.05599999999999994)
+            (1.79,0.05900000000000005)
+            (1.73,0.027999999999999914)
+            (1.86,0.06299999999999994)
+            (1.39,0.014000000000000012)
+            (1.25,0.009999999999999898)
+            (1.75,0.051000000000000045)
+            (1.77,0.051000000000000045)
+            };
+            \addlegendentry{Feature extraction}
+    
+            \addplot[no marks, color=blue] table [row sep=\\,y={create col/linear regression={y=Y}},forget plot] {
+            X Y \\
+            1.98 0.05599999999999994 \\
+            1.79 0.05900000000000005 \\
+            1.73 0.027999999999999914 \\
+            1.86 0.06299999999999994 \\
+            1.39 0.014000000000000012 \\
+            1.25 0.009999999999999898 \\
+            1.75 0.051000000000000045 \\
+            1.77 0.051000000000000045 \\
+            };
+    %\legend{Finetuning, Feature extraction}
+        	\end{axis}
         \end{tikzpicture}
-        \caption{Method accuracy plotted against average number of BPE
-     tokens per text token in all languages in the feature extraction
-     training regime.}
+        \caption{The difference in accuracy between summation and RNN plotted against average number of BPE
+     tokens per text token in all languages, with a linear regression line.}
     \label{fig:scatter_len}
     \end{figure}
     
