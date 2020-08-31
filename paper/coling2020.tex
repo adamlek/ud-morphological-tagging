@@ -65,16 +65,16 @@
         		In this paper we evaluate four different methods of
      composing word representations from multiple BPE tokens. The
      evaluation is done for the task of morphological feature
-     classification, our experiments reveal that using an RNN to
+     classification, and our experiments reveal that using an RNN to
      compute word representations is more effective than the other
      methods tested, across a sample of eight languages with varying
-     word lengths .
+     word lengths.
 	\end{abstract}
 	
 	\section{Introduction}
 	\label{intro}
 
-            After its introduction [CITE:TODO], the transformer model
+            After its introduction \adam{[CITE:TODO]}, the transformer model
      \citep{vaswani2017attention} has emerged as the dominant
      architecture for statistical language models, displacing
      recurrent neural networks, in particular the LSTM and its
@@ -106,8 +106,8 @@
      \textit{morphemes}
      \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},
      and then combining them. In this paper, we consider in particular
-     Byte-Pair Encodings (BPE) \citep{sennrich2015neural}, which takes
-     another approach. It does not specifically look for either
+     Byte-Pair Encodings (BPE) \citep{sennrich2015neural}.
+     The BPE algorithm does not specifically look for either
      character $n$-grams or morphs, but rather it aims at splitting a
      corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user defined.
       One issue with this tokenization is that one is seldom
@@ -118,7 +118,7 @@
         	In this paper we explore how to combine Byte-Pair
      Encodings from a transformer model to perform sequence
      classification, which is used in the popular BERT model
-     \citep{devlin2018bert}. For our purposes, the goal in sequence
+     \citep{devlin2018bert}\jp{???}. For our purposes, the goal in sequence
      classification is to assign a label to every word in a
      sentence. When we are using byte-pair encoding (or similar
      sub-token representations) we must then find some way of
@@ -158,15 +158,16 @@
              Additionally, with the increased interest in multilingual
      NLP it becomes important to explore how ``universal'' different
      computational methods are.  That is, because languages are
-     different (morpho-)syntactically, one can expect the methods to
-     derive information not to be uniformly efficient.
+     different (morpho-)syntactically, % {orthographically and grammatically}
+     one can expect various computational
+     methods not to be uniformly efficient. % at derive 
 
      However, at the same time, researchers always strive
      to find unified theories and models, working for all language
      families.
      %
-     In statistical models, one tends to unify models by adding more
-     parameters to them, and then feeding them with correspondingly
+     In statistical models, one tends to unify models by increasing
+     the number of parameters, and then feeding them with correspondingly
      more data.  In theory, more data is often possible to find,
      because languages are infinite, and exhibit a large variance in
      their usage. But this variability is also a source of confusion
@@ -265,7 +266,7 @@
         token ratio we can take this variable into account properly in
         our analysis.
     % \jp{But we never come back to this point? AE: as of yet, the current experiments do not seem to yield same results as before}
-        \jp{So what is the status? forward ref to the precise point where this is discussed?}
+        % \jp{So what is the status? forward ref to the precise point where this is discussed?}
         
 	\section{Method}
 	\label{method}
@@ -1299,15 +1300,14 @@
 	\end{tikzpicture}
 
     \caption{\label{fig:bpe_lens} Per-language accuracy on tokens
-     with different number of BPE components of the funetuning
+     with different numbers of BPE components, for the funetuning
      training regime. Values of seven of the $x$-axis also include all
-     tokens who are composed of seven or more BPE tokens. We indicate
+     tokens who are composed of seven or more BPE tokens.\jp{???} We indicate
      the method by encoding fst as pink, summation as green, averaging as blue and
      RNN as red. The accuracy is given on the $y$-axis. The number
      above the $x$-axis indicate how many samples the accuracy was
-     calculated on. We calculate the confidence interval (95\%) for the RNN
-     method via the Agresti-Coull interval
-     \citep{agresti1998approximate}.}
+     calculated on. We show the the Agresti-Coull approximation of a 95\%-confidence interval for the RNN
+     method \citep{agresti1998approximate}.}
     %The confidence interval is calculated using the Agresti-Coull interval.
     
 		%\caption{\label{fig:bpe_lens} Per language accuracy of
@@ -1329,15 +1329,17 @@
 	\section{Discussion}
 
     \subsection{BPE composition methods}
-        For our experiments we see that the RNN method is most
-     effective than the other proposed methods, summing, averaging or
-     taking the first BPE token, for morphological feature
-     prediction. We see this holds regardless of training regime
+    % For our experiments
+    % We see that
+    For morphological feature
+     prediction, The RNN method is more
+     effective than the other proposed methods (summing, averaging or
+     taking the first BPE token). This holds regardless of training regime
      (finetuning versus feature extraction) and across languages with
      different BPE per token ratios.
     %
-         Analogously to character embeddings, using a method that take
-     the order of elements into account seem to be able to collect
+         Analogously to character embeddings\jp{what is this referring to?} using a method that takes
+     the order of elements into account seems to be able to collect
      more predictive information from sub-word embeddings.
     We conjecture that this discrepancy is can
      be attributed to the commutativity of the Sum and Mean
@@ -1348,18 +1350,18 @@
      be aware of, for example, split affixes. For example if the word
      "derivable" is split into ``deriv'' + ``ab'' + ``le'' the system
      won't be aware that ``able'' is a meaningful unit in terms of
-     morphology (and by extension, semantics).
+     morphology (and by extension, semantics).\jp{actually this is not an example of non-commutativity; for that you'd need ``le+ab'' to be occuring in English, but it really isn't (as far as I know.)}
 
     
-       In general, we see that the RNN perform better
-     than summation or averaging, but one question that arise when we
-     look at \cref{fig:bpe_lens}, specifically looking at the
+       In general, we see that the RNN performs better
+     than summation or averaging, but one question that arises when we
+     look at \cref{fig:bpe_lens}, specifically considering the
      performance on tokens composed of only one BPE token, is whether
-     this is because of the additional parameters in the model, or the
+     this is due to the additional parameters in the model, or the
      contextual information. We would expect that for these tokens,
      the performance of the model would be the same for all
      methods. But for practical reasons we push all tokens through an
-     RNN, effectively doing a non-linear transfromation with tanh
+     RNN, effectively doing a non-linear transformation with $\mathsf{tanh}$
      activations on the tokens composed of only one BPE token.
 
         Typically, the effect is small, but for example in Finnish we
@@ -1399,19 +1401,20 @@
     \subsubsection{Fst method}
 
                         Our experiments reveal that the standard
-     method proposed in \citep{devlin2018bert} is not efficient for
+     method proposed by \citet{devlin2018bert} is less efficient than any other method we tested, for
      morphological sequence classification across languages. We see in
      \cref{tab:results_tokens} that the method is, on average, $.4$
-     and $1$ percentage points lower than the second lowest scoring
+     and $1$ percentage points lower than the next lowest scoring
      method for both finetuning and feature extraction respectively.
-      We see that this effect is further enhanced when we consider the
-     accuracy on tokens composed of more than two BPE token in
+     % We see that
+     This effect is further enhanced when we consider the
+     accuracy of tokens composed of more than two BPE token in
      \cref{tab:results_large_tokens}, where the difference is $1.6$
-     and $2.7$ percentage, compared against the second lowest scoring
+     and $2.7$ points, compared against the next lowest scoring
      method. When we compare the performance against the RNN we see a
      much lager gap in performance.
 
-             While the fst method may be effective, for classifying
+             While the fst\jp{typeset} method may be effective, for classifying
      tokens using this method forces to model to push the predictive
      information of several BPE tokens into the first one. This adds
      an implicit objective to the model that is not strictly
@@ -1423,21 +1426,21 @@
     \subsubsection{Sum and Mean}
             When we consider the linear methods of combining BPE
      embeddings, summation or averaging, we see no clear advantage for
-     any of them when doing the fine-tuning regime. However, when only
-     extracting features we see some hints that summation is more
+     either of them over the other one, when doing the fine-tuning regime. However, when
+     extracting features only we see hints that summation is more
      effective than averaging. For feature extraction, summation is
      $.5$ percentage points better than averaging, and when we
      consider tokens composed of two or more BPE tokens this shows an
      advantage of $.9$ percentage points for summation.
 
-            This shows by averaging, we are removing some predictive
+            This shows \jp{??} by averaging, we are removing some predictive
      information from the pretrained BPE tokens, that is, by reducing the values
      in the BPE embeddings uniformly across a collection of BPE
      embeddings we lose useful information. This suggests, perhaps not
      surprisingly, that some BPE embeddings contain more predictive
      information than others, and by summing them we retain all this
      information.
-
+      %
          But when we fine-tune, the model appears to learn how to
      distribute the information uniformly across the BPE tokens that
      compose a word.
@@ -1555,16 +1558,16 @@
             We find evidence that combining sub-word tokens for
      sequence classification using the transformer models with BPE
      tokenization performs better when BPE tokens are combined with a
-     Recurrent Neural Network compared to taking the firs,
+     Recurrent Neural Network compared to taking the first,
      summing or averaging the BPE tokens. 
 
-                For future work we want to continue experiments with
+                As future work we want to continue experiments with
      the different BPE composition methods, specifically looking at
      more complex syntactic tasks such as dependency and/or
      constituency parsing. Another avenue we wish to explore is adding
-     the remaining UD treebanks to our experiments.  Additionally, an
-     interesting direction for future work is to also to explore BPE
-     compositions both for syntactic and semantic tasks.
+     the remaining UD treebanks to our experiments\jp{how many are there?}.  Additionally, an
+     interesting direction for future work is to explore BPE
+     compositions for other syntactic and semantic tasks.
     
 %	\section*{Acknowledgments}
 
