@@ -30,6 +30,7 @@
 \usepackage{pgfplots}
 \usepackage{wrapfig}
 \pgfplotsset{every tick label/.append style={font=\small}}
+\pgfplotsset{/pgfplots/error bars/error bar style={thin}}
 \usepackage{pgfplotstable}
 
 \newcommand\jp[1]{(\textbf{JP:} #1)}
@@ -63,13 +64,13 @@
 	\maketitle
 	
 	\begin{abstract}
-        		In this paper we evaluate four different methods of
-     composing word representations from multiple BPE tokens. The
-     evaluation is done for the task of morphological feature
-     classification, and our experiments reveal that using an RNN to
+            		In this paper we evaluate four different methods
+     of composing word representations from multiple BPE tokens. We
+     evaluate the methods on the task of morphological feature
+     classification. Our experiments reveal that using an RNN to
      compute word representations is more effective than the other
      methods tested, across a sample of eight languages with varying
-     word lengths.
+     amounts of BPE tokens per word.
 	\end{abstract}
 	
 	\section{Introduction}
@@ -201,11 +202,11 @@
      $\prod _i^k C_i$ classes (instead of making $k$ separate
      predictions).
     %
-                We believe this task is suitable for our goal, to find
-     the grammatical features of a word a system needs both to encode
-     the structure of a word and the context efficiently as the output
-     space typically is large.
-
+        This task is suitable for our goal as the output space is
+     larger (ranging from 100 to 1000 possible tags for a word). This
+     requires a system to efficiently encode information about the
+     structure of the target words aswell as the context words.
+    
     \section{Data}
     
             For both training and testing data, we use the Universal
@@ -265,7 +266,7 @@
     		\caption{\label{tab:data} Treebank statistics showing the
      language typology, average number of BPE tokens per word, the
      number of morphological tags and the size of the datasets in
-     terms of text tokens.}
+     terms of words.}
 	\end{table}
     
         The fusional languages where chosen such that two of them
@@ -404,9 +405,7 @@
      $w_n$ is tokenized into $k$ BPE tokens by the transformer model,
      we then calculate a weighted sum over the layers for each feature
      embedding. The resulting embeddings are then passed to a BPE
-     composition function $f(\cdot)$ that combines the $k$ different
-     \jp{ is the \(\cdot\) necessary here? Why not just $f$? This dot evokes dot product.}
-     \jp{Why is there $g$ in the figure but not in the caption?}
+     composition function $f$ that combines the $k$ different
      BPE embeddings into a word embedding. The word embedding is then
      passed to a LSTM followed by a dense preiction layer. }
 	\end{figure}
@@ -564,29 +563,29 @@
     \end{table}
 
 
-            Our system performs better than the baseline. As a general
-            trend we see that the RNN method tends to perform better than all other tested methods
-            % taking the
-            % first BPE token, summation or averaging methods.
-            This trend is
-     consistent across both languages families (agglutinative and
-     fusional), and training regimes, showing that while the advantage
-     of the RNN is small, it occurs consistenty.
-
+                Our system performs better than the baseline. As a
+     general trend we see that the RNN method tends to perform better
+     than all other tested methods This trend is consistent across
+     both languages families (agglutinative and fusional), and
+     training regimes, showing that while the advantage of the RNN is
+     small, it occurs consistenty.
+        %
         In general we find that finetuning yields higher accuracy than
         plain feature extraction, on average the difference is about $5.8$
         percentage points.  This difference is to be expected when
         finetuning has 250M more parameters tuned to the task than the
         feature extraction. % less than expected...
     
-        Focusing on the finetuning regime only, we see the largest benefits of the RNN method for Basque with an
-        increased performance of $3.25$ points, and Turkish ($2.7$
-        points) over using mean or averaging. In the bare
-        features extraction regime, we see a larger benefit for the
-        RNN, of $3.7$ points (Turkish) and $4.95$ points
-        (Basque). Again, this is not unexpected: when fine-tuning the
-        smaller error rate is overall smaller and therefore there is a
-        smaller margin for a subsequent phase to yield an improvement.
+            Focusing on the finetuning regime only, we see the largest
+     benefits of the RNN method for Basque with an increased
+     performance of $3.25$ points, and Turkish ($2.7$ points) over
+     using mean or averaging. The Fst method for Basque and Turkish
+     performs much worse. In the bare features extraction regime, we
+     see a larger benefit for the RNN, of $3.7$ points (Turkish) and
+     $4.95$ points (Basque). Again, this is not unexpected: when
+     fine-tuning the smaller error rate is overall smaller and
+     therefore there is a smaller margin for a subsequent phase to
+     yield an improvement.
 
     \Cref{tab:results_tokens} reports average accuracy for every word,
     thus also including those which are only composed of a single BPE
@@ -627,10 +626,11 @@
      can also see that the average increase in accuracy when using an
      RNN is larger. This holds both when finetuning or extract bare features.
     %
-    Given that the number of BPE tokens per text token
-     varies in the different languages, we also look at the accuracy of the different methods
-     given the number of BPE tokens. We show per-language
-     performance with the different methods in \cref{fig:bpe_lens}.
+        Given that the number of BPE tokens per word varies in the
+     different languages, we also look at the accuracy of the
+     different methods given the number of BPE tokens. We show
+     per-language performance with the different methods in
+     \cref{fig:bpe_lens}.
     
 	\begin{figure}%[h!]
   	\centering
@@ -638,15 +638,16 @@
 	\begin{axis}[
 	name=,
 	title={Finnish-TDT},
-        xtick style={draw=none},
-        ytick style={draw=none},
-        xtick={1,2,3,3,4,5,6,7},
+    xtick style={draw=none},
+    ytick style={draw=none},
+    xtick={1,2,3,4,5,6,7},
+    xticklabels={1,2,3,4,5,6,$\ge7$},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
+        ymax=1.0,
+        ymin={0.7},
 	grid style=dashed,
-    ymax={1.},
-    ymin={.9},
 	height=4cm
 	]
 		\addplot[
@@ -695,8 +696,8 @@
 			(7, 0.95)+=(0,0.08447212917485333)-=(0,0.08447212917485333)
 };
 		\addplot[
-		color=pink,
-		mark=*,
+		color=brown,
+		mark=diamond*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -709,13 +710,6 @@
 			(6, 0.935185185)
 			(7, 0.95)
 };
-		\node[scale=0.4] at (1,-6) {10749};
-		\node[scale=0.4] at (100,-6) {5305};
-		\node[scale=0.4] at (200,-6) {2946};
-		\node[scale=0.4] at (300,-6) {1023};
-		\node[scale=0.4] at (400,-6) {344};
-		\node[scale=0.4] at (500,-6) {108};
-		\node[scale=0.4] at (600,-6) {40};
 
         \end{axis}
 	\end{tikzpicture}
@@ -725,13 +719,14 @@
 	title={Basque-BDT},
         xtick style={draw=none},
         ytick style={draw=none},
-        xtick={1,2,3,3,4,5,6,7},
+        xtick={1,2,3,4,5,6,7},
+        xticklabels={1,2,3,4,5,6,$\ge7$},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
+        ymax=1.0,
+        ymin={0.6},
 	grid style=dashed,
-    ymax={1.},
-    ymin={.55},
 	height=4cm
 	]
 		\addplot[
@@ -780,8 +775,8 @@
 			(7, 0.8)+=(0,0.31002797388117415)-=(0,0.31002797388117415)
 };
 		\addplot[
-		color=pink,
-		mark=*,
+		color=brown,
+		mark=diamond*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -794,13 +789,6 @@
 			(6, 0.666666667)
 			(7, 0.8)
 };
-		\node[scale=0.4] at (1,-6) {6730};
-		\node[scale=0.4] at (100,-6) {3199};
-		\node[scale=0.4] at (200,-6) {1469};
-		\node[scale=0.4] at (300,-6) {385};
-		\node[scale=0.4] at (400,-6) {75};
-		\node[scale=0.4] at (500,-6) {12};
-		\node[scale=0.4] at (600,-6) {5};
 
         \end{axis}
 	\end{tikzpicture}
@@ -810,13 +798,14 @@
 	title={Turkish-IMST},
         xtick style={draw=none},
         ytick style={draw=none},
-        xtick={1,2,3,3,4,5,6,7},
+        xtick={1,2,3,4,5,6,7},
+        xticklabels={1,2,3,4,5,6,$\ge7$},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
+        ymax=1.0,
+        ymin={0.6},
 	grid style=dashed,
-    ymax={1.},
-    ymin={.6},
 	height=4cm
 	]
 		\addplot[
@@ -865,8 +854,8 @@
 			(7, 0.75)+=(0,0.3383902260894284)-=(0,0.3383902260894284)
 };
 		\addplot[
-		color=pink,
-		mark=*,
+		color=brown,
+		mark=diamond*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -879,13 +868,6 @@
 			(6, 0.769230769)
 			(7, 0.75)
 };
-		\node[scale=0.4] at (1,-6) {3466};
-		\node[scale=0.4] at (100,-6) {1511};
-		\node[scale=0.4] at (200,-6) {542};
-		\node[scale=0.4] at (300,-6) {172};
-		\node[scale=0.4] at (400,-6) {23};
-		\node[scale=0.4] at (500,-6) {13};
-		\node[scale=0.4] at (600,-6) {4};
 
         \end{axis}
 	\end{tikzpicture}
@@ -895,13 +877,14 @@
 	title={Estonian-EDT},
         xtick style={draw=none},
         ytick style={draw=none},
-        xtick={1,2,3,3,4,5,6,7},
+        xtick={1,2,3,4,5,6,7},
+        xticklabels={1,2,3,4,5,6,$\ge7$},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
+        ymax=1.0,
+        ymin={0.9},
 	grid style=dashed,
-    ymax={1.},
-    ymin={.9},
 	height=4cm
 	]
 		\addplot[
@@ -950,8 +933,8 @@
 			(7, 0.936170213)+=(0,0.05404871299247627)-=(0,0.05404871299247627)
 };
 		\addplot[
-		color=pink,
-		mark=*,
+		color=brown,
+		mark=diamond*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -964,13 +947,6 @@
 			(6, 0.927631579)
 			(7, 0.936170213)
 };
-		\node[scale=0.4] at (1,-6) {24548};
-		\node[scale=0.4] at (100,-6) {11780};
-		\node[scale=0.4] at (200,-6) {4927};
-		\node[scale=0.4] at (300,-6) {1749};
-		\node[scale=0.4] at (400,-6) {565};
-		\node[scale=0.4] at (500,-6) {152};
-		\node[scale=0.4] at (600,-6) {94};
 
         \end{axis}
 	\end{tikzpicture}
@@ -980,13 +956,14 @@
 	title={Arabic-PADT},
         xtick style={draw=none},
         ytick style={draw=none},
-        xtick={1,2,3,3,4,5,6,7},
+        xtick={1,2,3,4,5,6,7},
+        xticklabels={1,2,3,4,5,6,$\ge7$},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
+        ymax=1.0,
+        ymin={0.75},
 	grid style=dashed,
-    ymax={1.},
-    ymin={.85},
 	height=4cm
 	]
 		\addplot[
@@ -1017,8 +994,8 @@
 };
 		\addplot[
 		color=red,
-		mark=square*,
-                mark size=1,
+		mark=star,
+                mark size=1.5,
                 error bars/.cd, y dir=both, y explicit,
 		]
 		coordinates {
@@ -1029,8 +1006,8 @@
 			(5, 0.866666667)+=(0,0.18330014190315588)-=(0,0.18330014190315588)
 };
 		\addplot[
-		color=pink,
-		mark=*,
+		color=brown,
+		mark=diamond*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -1041,11 +1018,6 @@
 			(4, 0.86770428)
 			(5, 0.933333333)
 };
-		\node[scale=0.4] at (1,-6) {21512};
-		\node[scale=0.4] at (100,-6) {4946};
-		\node[scale=0.4] at (200,-6) {2031};
-		\node[scale=0.4] at (300,-6) {257};
-		\node[scale=0.4] at (400,-6) {15};
 
         \end{axis}
 	\end{tikzpicture}
@@ -1056,12 +1028,13 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,4,5,6,7},
+        xticklabels={1,2,3,4,5,6,$\ge7$},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
+        ymax=1.0,
+        ymin={0.7},
 	grid style=dashed,
-    ymax={1.},
-    ymin={.7},
 	height=4cm
 	]
 		\addplot[
@@ -1110,8 +1083,8 @@
 			(7, 0.75)+=(0,0.3383902260894284)-=(0,0.3383902260894284)
 };
 		\addplot[
-		color=pink,
-		mark=*,
+		color=brown,
+		mark=diamond*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -1124,13 +1097,6 @@
 			(6, 0.88)
 			(7, 0.75)
 };
-		\node[scale=0.4] at (1,-6) {43536};
-		\node[scale=0.4] at (100,-6) {8027};
-		\node[scale=0.4] at (200,-6) {2404};
-		\node[scale=0.4] at (300,-6) {387};
-		\node[scale=0.4] at (400,-6) {53};
-		\node[scale=0.4] at (500,-6) {25};
-		\node[scale=0.4] at (600,-6) {4};
 
         \end{axis}
 	\end{tikzpicture}
@@ -1141,13 +1107,13 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,4,5,6,7},
-    %extra x tick labels={1,2,3,4,5,6,7},
+        xticklabels={1,2,3,4,5,6,$\ge7$},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
+        ymax=1.0,
+        ymin={0.8},
 	grid style=dashed,
-    ymax={1.},
-    ymin={.8},
 	height=4cm
 	]
 		\addplot[
@@ -1193,8 +1159,8 @@
 			(6, 0.888888889)+=(0,0.22927231782530055)-=(0,0.22927231782530055)
 };
 		\addplot[
-		color=pink,
-		mark=*,
+		color=brown,
+		mark=diamond*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -1206,12 +1172,6 @@
 			(5, 0.828947368)
 			(6, 0.888888889)
 };
-		\node[scale=0.4] at (1,-6) {8552};
-		\node[scale=0.4] at (100,-6) {2515};
-		\node[scale=0.4] at (200,-6) {1418};
-		\node[scale=0.4] at (300,-6) {492};
-		\node[scale=0.4] at (400,-6) {76};
-		\node[scale=0.4] at (500,-6) {9};
 
         \end{axis}
 	\end{tikzpicture}
@@ -1222,12 +1182,12 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,4,5,6,7},
-        xticklabels={1, 2, 3,4,5,6,$\ge7$},
-    ymax={1.},
-    ymin={.85},
+        xticklabels={1,2,3,4,5,6,$\ge7$},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
+        ymax=1.0,
+        ymin={0.85},
 	grid style=dashed,
 	height=4cm
 	]
@@ -1263,7 +1223,7 @@
 };
 		\addplot[
 		color=red,
-		mark=diamond*,
+		mark=square*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -1278,7 +1238,7 @@
 };
 		\addplot[
 		color=brown,
-		mark=*,
+		mark=diamond*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -1291,18 +1251,11 @@
 			(6, 0.936170213)
 			(7, 1.0)
 };
-		\node[scale=0.4] at (1,0.9) {29286};
-		\node[scale=0.4] at (100,-6) {12149};
-		\node[scale=0.4] at (200,-6) {5669};
-		\node[scale=0.4] at (300,-6) {1779};
-		\node[scale=0.4] at (400,-6) {295};
-		\node[scale=0.4] at (500,-6) {47};
-		\node[scale=0.4] at (600,-6) {3};
 
         \end{axis}
 	\end{tikzpicture}
 
-        \caption{\label{fig:bpe_lens} Per-language accuracy on tokens
+     \caption{\label{fig:bpe_lens} Per-language accuracy on tokens
      with different numbers of BPE components, for the funetuning
      training regime. The last data point on the $x$-axis refers to
      all tokens composed of seven or more BPE tokens.  We indicate the
@@ -1314,7 +1267,7 @@
      \citep{agresti1998approximate}.
      %
      We do not show the intervals for other methods to avoid excessive
-     cluter.}
+     clutter.}
     %The confidence interval is calculated using the Agresti-Coull interval.
     
 		%\caption{\label{fig:bpe_lens} Per language accuracy of
@@ -1338,12 +1291,11 @@
     \subsection{BPE composition methods}
     % For our experiments
     % We see that
-    For morphological feature
-     prediction, The RNN method is more
+        For morphological feature prediction, The RNN method is more
      effective than the other proposed methods (summing, averaging or
-     taking the first BPE token). This holds regardless of training regime
-     (finetuning versus feature extraction) and across languages with
-     different BPE per token ratios.
+     taking the first BPE token). This holds regardless of training
+     regime (finetuning versus feature extraction) and across
+     languages with different BPE per token ratios.
     
      As we see it, the advantage of the RNN over commutative methods
      (Sum, Mean) is that it can take the order of elements into
@@ -1360,15 +1312,16 @@
        % In general, we see that the RNN performs better
        % than summation or averaging, but
 
-       One question that arises when we
-     look at \cref{fig:bpe_lens}, specifically considering the
-     performance on tokens composed of only one BPE token, is whether
-     this is due to the additional parameters in the model, or the
-     contextual information. We would expect that for these tokens,
-     the performance of the model would be the same for all
-     methods. But for practical reasons we push all tokens through an
-     RNN, effectively doing a non-linear transformation with $\mathsf{tanh}$
-     activations on the tokens composed of only one BPE token.
+           One question that arises when we look at
+     \cref{fig:bpe_lens}, specifically considering the performance on
+     tokens composed of only one BPE token, is whether this is due to
+     the additional parameters in the model, or the contextual
+     information. We would expect that for these tokens, the
+     performance of the model would be the same for all methods. But
+     for practical reasons we push all tokens through an RNN,
+     effectively doing a non-linear transformation with
+     $\mathsf{tanh}$ activations on the tokens composed of only one
+     BPE token.
     %
             Typically, the difference in accuracy between various
      method for length one token words is small (barely visible in
@@ -1382,21 +1335,24 @@
     % because better performance on longer words hopefully map a
     % subset of the composite tag to the BPE token.\jp{I don't understand the purpose of this paragraph; what is the context?}
 
-         We can suspect that the average BPE-per-token ratio in a
+             We can suspect that the average BPE per word ratio in a
      language affects the performance of the composition method
      used. To further control this variable, in \cref{fig:scatter_len}
-     we plot the average number of BPE tokens per word , and
-     compare this average against the gain in accuracy yielded by
-     using the RNN method over summation.  For fine-tuning we see that
-     in general the average number of BPE tokens do not matter that
+     we plot the average number of BPE tokens per word, and compare
+     this average against the gain in accuracy yielded by using the
+     RNN method over summation.  For fine-tuning we see that in
+     general the average number of BPE tokens do not matter that
      much. The two cases where it does matter is for Turkish and
      Basque, where we see a substantial improvement of about $3$
-     percentage points. For the other languages the improvements lie
+     percentage points. We note however that these are also the
+     languages with the lowest amount of training data.
+    %
+    For the other languages the improvements lie
      in the range $.6$ to $1.2$ point. This indicates that when
      fine-tuning, the model can provide information that allows
      commutative methods to properly compose BPE tokens.  However,
      looking at bare feature extraction we see that there is a
-     larger gap between the low BPE-ratio languages and the
+     larger gap between the low BPE-ratio and the
      high BPE-ratio languages.
     %\adam{This indicates that while the
     % pretrained BPE weights contain predictive information, there is
@@ -1406,9 +1362,20 @@
      agglutinative languages, and the typology does not appear to have
      an effect in our experiments. We see about the same trends for
      the fusional languages with a high BPE-to-token ratio as the
-     agglutinative languages. 
-    \adam{Effect of training data?}
-    \adam{This may be influenced by our choice of creating composite tags instead of predicting each feature individually.}
+     agglutinative languages.
+
+    %%%%%%%%
+    %     We suspect this might be influenced by how the task was
+    % setup, with using composite tags rather than multi-class
+    % prediction.
+    %   With only one prediction layer, the layer have to extract information for all classes 
+    %If we were to use one prediction layer per
+    % grammatical class, each layer would act independently of the
+    % other layers, thus allowing for an explicit mapping of BPE tokens
+    % to grammatical classes.
+    
+    %\adam{Effect of training data?}
+    %\adam{This may be influenced by our choice of creating composite tags instead of predicting each feature individually.}
 
     \subsubsection{Fst method}
 
@@ -1421,7 +1388,7 @@
      sequence classification across languages. We see in
      \cref{tab:results_tokens} that the method is, on average, $.4$
      and $1$ percentage points lower than the next lowest scoring
-     method for both finetuning and feature extraction respectively.
+     method for finetuning and feature extraction respectively.
      % We see that
          This effect is further enhanced when we consider the accuracy
      of words composed of more than two BPE token in
@@ -1430,37 +1397,38 @@
      method, for finetuning and feature extraction repescively. When
      we compare the performance against the RNN this difference only increases.
 
-                 While the Fst method may be effective, but the method
-     forces the model to push the predictive information of several BPE
-     tokens into the first one. This adds an implicit objective to the
-     model which is not strictly necessary, because we can pool
-     information from the other tokens into a word representation
-     explicitly.
+                     While the Fst method may be effective, the method
+     forces the model to push the predictive information of several
+     BPE tokens into the first one. This adds an implicit objective to
+     the model which is not strictly necessary and appear to degrade
+     the performance.
      %
     % This present 
 
     \subsubsection{Sum and Mean}
-            When we consider the commutative methods of combining BPE
-     embeddings, summation or averaging, we see no clear advantage for
-     either of them over the other one, when doing finetuning. However, when
-     extracting features only we see hints that summation is more
-     effective than averaging. For feature extraction, summation is
-     $.5$ percentage points better than averaging, and words composed of two or more BPE tokens exhibit an
-     advantage of $.9$ point for summation.
+                When we consider the commutative methods of combining
+     BPE embeddings, summation or averaging, we see no clear advantage
+     for either of them over the other one, when doing
+     finetuning. However, when extracting features only we see hints
+     that summation is more effective than averaging. For feature
+     extraction, summation is $.5$ percentage points better than
+     averaging, and words composed of two or more BPE tokens exhibit
+     an advantage of $.9$ point for summation.
     
                 This discrepancy suggests that by averaging, we are
      removing some predictive information from the pretrained BPE
      tokens, that is, by reducing the values in the BPE embeddings
-     uniformly across a collection of BPE embeddings we lose useful
+     uniformly across a sequence of BPE embeddings we lose useful
      information.
-    
+    %
         We believe that some BPE embeddings contain more predictive
-     information than others, and by summing them we retain all this
+     information than others, and by summing them we retain all the
      information.
       %
-         But when we fine-tune, the model appears to learn how to
+             But when we fine-tune, and the differense between summing
+     and averaging alomst disapear, the model appears to learn how to
      distribute the information uniformly across the BPE tokens that
-     compose a word.
+     compose a word, as is thus able to retain the information better.
     %This is rather interesting as it has consequences
     % for work aimed at probing linguistic information contained in
     % pre-trained models. That is, when probing for linguistic information regarding a word embedding 
@@ -1494,7 +1462,7 @@
 
 \begin{figure}%{r}{8cm}
     \centering  
-            \begin{tikzpicture}
+        \begin{tikzpicture}
     	\begin{axis}[
 		name=,
 		title={},
@@ -1565,22 +1533,26 @@
         	\end{axis}
         \end{tikzpicture}
         \caption{The difference in accuracy between summation and RNN plotted against average number of BPE
-     tokens per text token in all languages, with a linear regression line.}
+     tokens per word in all languages, with a linear regression line.}
     \label{fig:scatter_len}
     \end{figure}
     
     
     \section{Conclusions and Future Work}
-    
-    We find evidence that for the sequence classification task using
-    the transformer models with BPE tokenization, combining BPE tokens
-    using a Recurrent Neural Network performs better than taking the
-    first, summing or averaging the BPE tokens.
 
+
+        In conclusion, our results show that for morphological
+     sequence classification in eight different languages, using a
+     tranformer with BPE tokenization, combining BPE tokens into words
+     using an RNN performs better than two commutative methods,
+     summation and averaging, and the default method proposed in
+     \citep{devlin2018bert} which take the first BPE token as the word
+     representation.
+    
     As future work we want to continue experiments with the different
     BPE composition methods, specifically looking at more complex
     syntactic and semantic tasks, such as dependency and/or
-    constituency parsing.
+    constituency parsing, and semantic role labeling and named entity recognition.
     %
         We also wish to run our experiments on the hundreds
      of available UD treebanks, to improve the robustness of our
