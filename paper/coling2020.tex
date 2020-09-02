@@ -395,6 +395,8 @@
      we then calculate a weighted sum over the layers for each feature
      embedding. The resulting embeddings are then passed to a BPE
      composition function $f(\cdot)$ that combines the $k$ different
+     \jp{ is the \(\cdot\) necessary here? Why not just $f$? This dot evokes dot product.}
+     \jp{Why is there $g$ in the figure but not in the caption?}
      BPE embeddings into a word embedding. The word embedding is then
      passed to a LSTM followed by a dense preiction layer. }
 	\end{figure}
@@ -491,7 +493,7 @@
      \citet{mccarthy2019sigmorphon}. This comparison serves the
      purpose of checking that our system is generally sound.  In
      particular, the actual state of the art, as reported by
-     \citet{mccarthy2019sigmorphon,kondratyuk2019cross}, use treebank
+     \citet{mccarthy2019sigmorphon,kondratyuk2019cross}, uses treebank
      concatenation or other methods to incorporate information from
      all treebanks available in a language, which means that results
      are not reported on a strict per-treebank basis --- contrary to
@@ -547,8 +549,8 @@
         Average         & .728 & .933 & .937 & .936 & \textbf{.946} & .846 & .856 & .851 & \textbf{.888} \\
 	\end{tabular}
     	\caption{\label{tab:results_tokens} Accuracy for morphological
-        tagging. We evaluate both when we finetune the XLMR model and
-        when we only extract BPE embeddings.}
+          tagging. We show scores both for finetuning the XLMR model and
+          bare BPE embeddings extraction.}
     \end{table}
 
 
@@ -1297,7 +1299,10 @@
      number above the $x$-axis indicate how many samples the accuracy
      was calculated on. We show the the Agresti-Coull approximation of
      a 95\%-confidence interval for the RNN method
-     \citep{agresti1998approximate}.}
+     \citep{agresti1998approximate}.
+     %
+     We do not show the intervals for other methods to avoid excessive
+     cluter.}
     %The confidence interval is calculated using the Agresti-Coull interval.
     
 		%\caption{\label{fig:bpe_lens} Per language accuracy of
