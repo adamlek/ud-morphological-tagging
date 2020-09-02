@@ -38,6 +38,7 @@
 \newcommand\citep{\cite}
 \newcommand\citeyear{\shortcite}
 \newcommand\softmax{\mathsf{softmax}}
+
 %\setlength\titlebox{5cm}
 %\colingfinalcopy % Uncomment this line for the final submission
 
@@ -165,16 +166,17 @@
      to find unified theories and models, working for all language
      families.
      %
-     In statistical models, one tends to unify models by increasing
-     the number of parameters, and feeding them with correspondingly
-     more data.  In theory, more data is often possible to find,
-     because languages are infinite, and exhibit a large variance in
-     their usage. But this variability is also a source of confusion
-     for the statistical models. Hence, in sum, one should always be
-     on the lookout for the most efficient \emph{method} to model
-     languages and solve tasks. This is our aim: finding the best
-     methods for BPE combination, by analysing them in various
-     contexts.
+         In statistical models, one tends to unify models by
+     increasing the number of parameters, and feeding them with
+     correspondingly more data.  In theory, more data is often
+     possible to find, because languages are infinite, and exhibit a
+     large variance in their usage. But this variability is also a
+     source of confusion for the statistical models. Hence, in sum,
+     one should always be on the lookout for the most efficient
+     \emph{method} to model languages and solve tasks. This is our
+     aim: finding the best methods for BPE combination, by analysing
+     them in various contexts. \footnote{We will use ``word'' to
+     denote a token as it is tokenized in the UD datasets.}
 
     \section{Task}
              In this paper we focus on the task of
@@ -208,7 +210,7 @@
 %
     With this in mind we consider both
      languages that use agglutinative morphology where each morpheme
-     is mapped to one and only one morphological feature, and
+     is mapped to one and only one grammatical feature, and
      languages that use fusional morphology where a morpheme may be
      mapped to one or more grammatical features. 
 %
@@ -1208,7 +1210,8 @@
 	title={Czech-CAC},
         xtick style={draw=none},
         ytick style={draw=none},
-        xtick={1,2,3,4,5,6,>7},
+        xtick={1,2,3,4,5,6,7},
+        xticklabels={1, 2, 3,4,5,6,$\ge7$},
     ymax={1.},
     ymin={.85},
 	typeset ticklabels with strut,
@@ -1277,7 +1280,7 @@
 			(6, 0.936170213)
 			(7, 1.0)
 };
-		\node[scale=0.4] at (1,-6) {29286};
+		\node[scale=0.4] at (1,0.9) {29286};
 		\node[scale=0.4] at (100,-6) {12149};
 		\node[scale=0.4] at (200,-6) {5669};
 		\node[scale=0.4] at (300,-6) {1779};
