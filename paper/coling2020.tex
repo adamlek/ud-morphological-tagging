@@ -106,95 +106,105 @@
      looked at splitting words into \textit{roots} and
      \textit{morphemes}
      \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},
-     and then combining them. In this paper, we consider in particular
+     and then combining them.
+
+    In this paper, we consider in particular
      Byte-Pair Encodings (BPE) \citep{sennrich2015neural}.
-     BPE has been popularized by its usage in the BERT transformer model \citep{devlin2018bert}.
+     BPE has been popularized by its usage in translation and the BERT transformer model \citep{devlin2018bert}.
      The BPE algorithm does not specifically look for either
      character $n$-grams or morphs, but rather it aims at splitting a
      corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user defined.
-      One issue with this tokenization is that one is seldom
+    %
+    Even though BPE is not grounded in morphosyntactic theory, the
+     characteristics of the BPE embeddings will be directly influenced
+     by morphosyntactic patterns in a language. In particular, it is
+     reasonable to expect that the statistical characteristics of BPE
+     to be different between languages with different typologies.
+    %fusional and agglutinative languages. 
+    %
+        One issue with this tokenization is that one is seldom
      interested in the encoding, but rather in the semantically
-     meaningful units in the original texts. Thus the question of
+     meaningful units in the original texts.  Thus the question of
      mapping results back to the original text arises.
 
-        In this paper we explore how to combine BPE from a transformer
-     model to perform sequence classification.  For our purposes, the
-     goal in sequence classification is to assign a label to every
+        Our main goal is to explore how to combine BPE from a transformer
+     model to perform sequence classification.  The
+     aim in sequence classification is to assign a label to every
      word in a sentence. When we are using byte-pair encoding (or
      similar sub-token representations) we must then find some way of
      combining the units that compose the word, before it is
      eventually assigned a label. Coming back to our example, we must
-     map the feature-set assigned (depending on the context) to
+     map the feature-set assigned to
      "scient", "ifical" and "ly". Then this combined feature set is
      mapped to a class for the whole word ``scientifically''.
 
-    %\begin{table}  
-    %\centering  
-    %\begin{tabular}{lllll}
-    %Wordform & \multicolumn{4}{l}{teyzelerin} \\
-    %Segmentation & teyze & ler in \\
-    %BPE segmentation & te & y & ze & lerin \\
-    %\end{tabular}
-    %\caption{Turkish example}
-    %\label{tab:t_example}
-    %\end{table}
-
-                	To our knownledge, this is a little-studied
-     problem. For the original BERT model \citet{devlin2018bert} simply
-     state that for named entity recognition the first sub-word token
-     is used as a representation for the word to be tagged.  For
+                    	To our knownledge, this is a little-studied
+     problem. For the original BERT model \citet{devlin2018bert}
+     simply state that for named entity recognition the first sub-word
+     token is used as a representation for the word to be tagged.  For
      morphological sequence classification \citet{kondratyuk2019cross}
      report that only few differences were found between averaging,
-     taking the first or last sub-word token feature set.  In this paper we wish
-     to explore the problem in further detail and identify the effect
-     that different methods have on the final performance of a model.
-
-     Even though BPE is not grounded in morphosyntactic theory, the
-     characteristics of the BPE embeddings will be directly influenced
-     by morphosyntactic patterns in the language. In particular, it is
-     reasonable to expect that the statistical characteristics of BPE
-     to be different between fusional and agglutinative languages.
+     taking the maximum value or first sub-word token from the feature
+     set.  In this paper we wish to explore the problem in further
+     detail and identify the effect that different methods have on the
+     final performance of a model.
      %
-             Additionally, with the increased interest in multilingual
-     NLP it becomes important to explore how ``universal'' different
-     computational methods are.  That is, because languages are
-     different (morpho-)syntactically, % {orthographically and grammatically}
-     one can expect various computational
-     methods not to be uniformly efficient. % at derive 
+                 Additionally, with the increased interest in
+     multilingual NLP it becomes important to explore how
+     ``universal'' different computational methods are.  That is,
+     because languages are different (morpho-)syntactically, one can
+     expect various computational methods not to be uniformly
+     efficient. 
 
-     However, at the same time, researchers always strive
-     to find unified theories and models, working for all language
-     families.
-     %
-         In statistical models, one tends to unify models by
-     increasing the number of parameters, and feeding them with
-     correspondingly more data.  In theory, more data is often
-     possible to find, because languages are infinite, and exhibit a
-     large variance in their usage. But this variability is also a
-     source of confusion for the statistical models. Hence, in sum,
-     one should always be on the lookout for the most efficient
-     \emph{method} to model languages and solve tasks. This is our
-     aim: finding the best methods for BPE combination, by analysing
-     them in various contexts. \footnote{We will use ``word'' to
-     denote a token as it is tokenized in the UD datasets.}
+    % However, at the same time, researchers always strive
+    % to find unified theories and models, working for all language
+    % families.
+    % %
+    %     In statistical models, one tends to unify models by
+    % increasing the number of parameters, and feeding them with
+    % correspondingly more data.  In theory, more data is often
+    % possible to find, because languages are infinite, and exhibit a
+    % large variance in their usage. But this variability is also a
+    % source of confusion for the statistical models. Hence, in sum,
+    % one should always be on the lookout for the most efficient
+    % \emph{method} to model languages and solve tasks. This is our
+    % aim: finding the best methods for BPE combination, by analysing
+    % them in various contexts. \footnote{We will use ``word'' to
+    % denote a token as it is tokenized in the UD datasets.}
 
     \section{Task}
-             In this paper we focus on the task of
-     morphological sequence classification. Morphological tagging
-     involves identifying a set of morphological features that a word
-     possesses, such as number, person, case, etc. In many languages,
-     morphological features primarily depend on the affixes of
-     words. However, conversely, the morphological class is not
-     determined by the word affixes, nor even the whole word. In many
-     cases, the context of the sentence will affect which class should
-     be assigned to a word.
 
-     For our task, we have to identify $k$ different tags for a word,
-     each with $C_i$ possible classes, making the task a multi-class
+        To investigate composition methods for BPE tokens we focus on
+     the task of morphological sequence classification. The task is to
+     assign a tag to a word that represent its grammatical
+     features, such as gender, number and so on.
+    %
+            In addition to the word form, the system can use
+     information from context words as cues. While the grammatical
+     features primarily are given by the word form, useful information
+     is also found in the context.
+
+%\begin{table}   
+%    \centering  
+%    \begin{tabular} {l|cccc}
+%        Sentence: & valtakunta & jaettiin & hallinnollisesti & kreivikuntiin \\
+%        Grammatical features: & N;NOM;SG & FIN;IND;PASS;PST;V & ADV & IN+ALL;N;PL\\
+%    \end{tabular}
+%    \caption{Example of morphological tags for a Finnish sentence taken from the Finnish-TDT treebank.}
+%    \label{tab:task_example}
+%    \end{table}
+
+        Thus, we have to identify $k$ different tags for a word, each
+     with $C_i$ possible classes, making the task a multi-class
      classification problem. We simplify the classification problem by
      combining the different tags into a composite tag with up to
      $\prod _i^k C_i$ classes (instead of making $k$ separate
      predictions).
+    %
+                We believe this task is suitable for our goal, to find
+     the grammatical features of a word a system needs both to encode
+     the structure of a word and the context efficiently as the output
+     space typically is large.
 
     \section{Data}
     
@@ -229,7 +239,7 @@
            	The fusional languages that we consider are Arabic, Czech,
      Polish and Spanish, and the agglutinative languages that we
      consider are Finnish, Basque, Turkish and Estonian.  We show the
-     size, average number of BPE tokens per text-token and number of \jp{It would be much better to clarify the definition of ``word'' and simply use this term than the awkward ``text-token'' phrase.}
+     size, average number of BPE tokens per word and number of
      morphological tags for each treebank in \cref{tab:data}.
     
     %The size of
@@ -259,7 +269,7 @@
 	\end{table}
     
         The fusional languages where chosen such that two of them
-        (Czech and Polish) have a higher BPE per token ratio than the
+        (Czech and Polish) have a higher BPE per word ratio than the
         other two (Arabic and Spanish). We make this choice because
         one factor that impacts the accuracy obtained by a composition
         method may be the BPE per token ratio.  By having both
@@ -328,14 +338,12 @@
         ($\softmax(w)_j$) which maximizes performance.
 
      \subsubsection{Composition of BPE feature sets}
-      After we have computed a weighted sum for
-     each BPE token we proceed to combine them into the tokens as they
-     appear in the data.
-	The model that we use to combine morphological features is as
-        follows. For each sentence we extract $n$ BPE embeddings $x^0$
-        to $x^{n-1}$ from $XLMR_{base}$, and then align them to
-        words.
-
+          After we have computed a weighted sum for each BPE token we
+     proceed to combine them into words as they appear in the data.
+      The model that we use to combine morphological features is as
+     follows. For each sentence we extract $n$ BPE embeddings $x^0$ to
+     $x^{n-1}$ from $XLMR_{base}$, and then align them to words.
+    %
         We then feed all words which consist of more than one
         BPE embedding to a function $f$ which combines the BPE
         embeddings.
@@ -378,7 +386,7 @@
      The above operation produces one embedding per word that is passed
      to an LSTM (regardless of the method), to take into account the
      context.
-
+    %
             Commonly, systems analyzing morphology use character
      features. We opted not to include character features because
      these would obfuscate the effect of the composition method and
@@ -1361,34 +1369,38 @@
      methods. But for practical reasons we push all tokens through an
      RNN, effectively doing a non-linear transformation with $\mathsf{tanh}$
      activations on the tokens composed of only one BPE token.
+    %
+            Typically, the difference in accuracy between various
+     method for length one token words is small (barely visible in
+     \cref{fig:bpe_lens}). But for example in Finnish we see a larger
+     difference. Although, in general if we perform better on longer
+     tokens consisting of BPE tokens that also appear as words in the
+     data, we could also expect the performance to be better for
+     tokens of BPE length one.
 
-        Typically, the effect is small, but for example in Finnish we
-     see a larger difference.\jp{between what and what?} Although, in general if we perform
-     better on longer tokens consisting of BPE tokens that also appear
-     as words in the data, we could also expect the performance
-     to be better for tokens of BPE length one. Specifically,
-     because better performance on longer BPE tokens hopefully map a
-     subset of the composite tag to the BPE token.\jp{I don't understand the purpose of this paragraph; what is the context?}
+    %Specifically,
+    % because better performance on longer words hopefully map a
+    % subset of the composite tag to the BPE token.\jp{I don't understand the purpose of this paragraph; what is the context?}
 
-     We can suspect % at this point
-     that the average
-     BPE-per-token ratio in a language affects the performance of the composition method
-     used. To further control this variable, in \cref{fig:scatter_len} we plot the average number of BPE
-     tokens per text token 
-     , and compare this average against the gain in
-     accuracy yielded by using the RNN method over summation.  For
-     fine-tuning we see that in general the average number of BPE
-     tokens do not matter that much. The two cases where it does
-     matter is for Turkish and Basque, where we see a substantial
-     improvement of about $3$ percentage points. For the other
-     languages the improvements lie in the range $.6$ to $1.2$ point. This
-     indicates that when fine-tuning, the model can provide information
-     that allows commutative methods to properly compose BPE tokens.
-      However, looking at bare feature extraction we see that there is a
-     much larger gap between the low-bpe-ratio languages and the
-     high-bpe-ratio languages. \adam{This indicates that while the
-     pretrained BPE weights contain predictive information, there is
-     still more to be extracted from them.}
+         We can suspect that the average BPE-per-token ratio in a
+     language affects the performance of the composition method
+     used. To further control this variable, in \cref{fig:scatter_len}
+     we plot the average number of BPE tokens per word , and
+     compare this average against the gain in accuracy yielded by
+     using the RNN method over summation.  For fine-tuning we see that
+     in general the average number of BPE tokens do not matter that
+     much. The two cases where it does matter is for Turkish and
+     Basque, where we see a substantial improvement of about $3$
+     percentage points. For the other languages the improvements lie
+     in the range $.6$ to $1.2$ point. This indicates that when
+     fine-tuning, the model can provide information that allows
+     commutative methods to properly compose BPE tokens.  However,
+     looking at bare feature extraction we see that there is a
+     larger gap between the low BPE-ratio languages and the
+     high BPE-ratio languages.
+    %\adam{This indicates that while the
+    % pretrained BPE weights contain predictive information, there is
+    % still more to be extracted from them.}
 
         Our sample of languages contain both fusional and
      agglutinative languages, and the typology does not appear to have
@@ -1411,26 +1423,26 @@
      and $1$ percentage points lower than the next lowest scoring
      method for both finetuning and feature extraction respectively.
      % We see that
-     This effect is further enhanced when we consider the
-     accuracy of text-tokens composed of more than two BPE token in
+         This effect is further enhanced when we consider the accuracy
+     of words composed of more than two BPE token in
      \cref{tab:results_large_tokens}, where the difference is $1.6$
      and $2.7$ points, compared against the next lowest scoring
-     method. When we compare the performance against the RNN we see a
-     much lager gap in performance.
+     method, for finetuning and feature extraction repescively. When
+     we compare the performance against the RNN this difference only increases.
 
-             While the Fst method may be effective, for classifying
-     tokens using this method forces to model to push the predictive
-     information of several BPE tokens into the first one. This adds
-     an implicit objective to the model which is not strictly
-     necessary, because we can pool information from the other tokens
-     into a word representation explicitly.
+                 While the Fst method may be effective, but the method
+     forces the model to push the predictive information of several BPE
+     tokens into the first one. This adds an implicit objective to the
+     model which is not strictly necessary, because we can pool
+     information from the other tokens into a word representation
+     explicitly.
      %
     % This present 
 
     \subsubsection{Sum and Mean}
-            When we consider the linear methods of combining BPE
+            When we consider the commutative methods of combining BPE
      embeddings, summation or averaging, we see no clear advantage for
-     either of them over the other one, when doing the fine-tuning regime. However, when
+     either of them over the other one, when doing finetuning. However, when
      extracting features only we see hints that summation is more
      effective than averaging. For feature extraction, summation is
      $.5$ percentage points better than averaging, and words composed of two or more BPE tokens exhibit an
@@ -1569,7 +1581,7 @@
     BPE composition methods, specifically looking at more complex
     syntactic and semantic tasks, such as dependency and/or
     constituency parsing.
-
+    %
         We also wish to run our experiments on the hundreds
      of available UD treebanks, to improve the robustness of our
      results.  
