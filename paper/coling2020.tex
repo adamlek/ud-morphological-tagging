@@ -84,7 +84,7 @@
      including the availability of pretrained models, which
      effectively yield rich contextual word embeddings. Such
      embeddings can be used as is (for so-called \emph{feature extraction}),
-     or the pre-trained models can be fine-tuned to specific
+     or the pre-trained models can be finetuned to specific
      tasks.
 
     	At the same time as transformer models became popular, the
@@ -128,16 +128,20 @@
      meaningful units in the original texts.  Thus the question of
      mapping results back to the original text arises.
 
-                Our main goal is to explore how to combine BPE tokens
-     from a transformer model to perform sequence classification, that
-     is, the task of assigning a label to every word in a
-     sentence. When we are using BPE tokens (or similar
+                    Our main goal is to explore how to combine BPE
+     tokens from a transformer model to perform sequence
+     classification, that is, the task of assigning a label to every
+     word in a sentence. When we are using BPE tokens (or similar
      sub-token representations) we must then find some way of
-     combining the units that compose the word, before it is
-     eventually assigned a label. Coming back to our example, we must
-     map the feature-set assigned to "scient", "ifical" and "ly". Then
-     this combined feature set is mapped to a class for the whole word
-     ``scientifically''.
+     combining the units that compose the word, before it is assigned
+     a label.  Coming back to our example, we must combine the
+     feature-set assigned to "scient", "ifical" and "ly" to form a
+     word representation of ``scientifically'' which we can assign a label to.
+
+    %Coming back to our example, we must
+    % map the feature-set assigned to "scient", "ifical" and "ly". Then
+    % this combined feature set is mapped to a class for the whole word
+    % ``scientifically''.
 
                     	To our knownledge, this is a little-studied
      problem. For the original BERT model \citet{devlin2018bert}
@@ -266,7 +270,7 @@
         \end{tabular}
     		\caption{\label{tab:data} Treebank statistics showing the
      language typology, average number of BPE tokens per word, the
-     number of morphological tags and the size of the datasets in
+     number of (composite) morphological tags and the size of the datasets in
      terms of words.}
 	\end{table}
     
@@ -302,22 +306,20 @@
         different methods we use to combine BPE embeddings.
 
 	\subsubsection{Underlying Transformer Model}
-     To extract a feature set for BPE tokens, we use the
-     XLM-RoBERTa \cite{conneau2019unsupervised} model\footnote{We use the
-     huggingface implementation
+         To extract a feature set for BPE tokens, we use the
+     XLM-RoBERTa \cite{conneau2019unsupervised} model\footnote{We use
+     the huggingface implementation
      \url{https://huggingface.co/transformers/model_doc/xlmroberta.html}}. XLMR
-     is a masked language model based on the transformer
-     (specifically RoBERTa \citep{liu2019roberta}), and trained on
-     data from 100 different languages, using a shared vocabulary of
-     250000 BPE tokens. All the languages that we test are included in the
-     XLMR model. In this experiment we use the \textsc{XLMR}$_{base}$
-     model with 250M parameters. It has 12 encoder layers, 12 attention heads and use 768
-     dimensions for its hidden size.
+     is a masked language model based on the transformer (specifically
+     RoBERTa \citep{liu2019roberta}), and trained on data from 100
+     different languages, using a shared vocabulary of 250000 BPE
+     tokens. All the languages that we test are included in the XLMR
+     model. In this experiment we use the \textsc{XLMR}$_{base}$ model
+     with 250M parameters. It has 12 encoder layers, 12 attention
+     heads and use 768 dimensions for its hidden size.
 
 	\subsubsection{BPE feature extraction}
         \label{sec:bpe-features}
-
-        % As mentioned previously, we look at methods for composing embeddings of BPE tokens into word embeddings.
 
                 The XLMR model use 12 layers to compute an embedding
      for a BPE token, and it has been shown in previous research
@@ -467,13 +469,14 @@
      when we finetune or extract features.}
 	\end{wraptable}
      
-         When fine-tuning the model we freeze the XLMR parameters for
-     the first epoch, (effectively not fine-tuning at first).  When training the model we use a cosine annealing learning
-     rate with restarts every epoch, that is, the learning rate starts
-     high then incrementally decreases to $1\mathrm{e}{-12}$ during
-     $N$ steps, where $N$ is the number of batches in an epoch. We use
-     the Adam optimizer, using standard parameters, with a learning
-     rate of $0.001$ for layer importance parameter ($w$ in
+             When finetuning the model we freeze the XLMR parameters
+     for the first epoch, (effectively not finetuning at first).
+      When training the model we use a cosine annealing learning rate
+     with restarts every epoch, that is, the learning rate starts high
+     then incrementally decreases to $1\mathrm{e}{-12}$ during $N$
+     steps, where $N$ is the number of batches in an epoch. We use the
+     Adam optimizer, using standard parameters, with a learning rate
+     of $0.001$ for layer importance parameter ($w$ in
      \cref{sec:bpe-features}), the parameters of the word LSTM,
      classification layer, and BPE combination module (when an RNN is
      used). For the transformer parameters, we use a lower learning
@@ -624,12 +627,12 @@
     xtick style={draw=none},
     ytick style={draw=none},
     xtick={1,2,3,4,5,6,7},
-    xticklabels={1,2,3,4,5,6,$\ge7$},
+    xticklabels={1,2,3,4,5,6,$\ge$7},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
         ymax=1.0,
-        ymin={0.7},
+        ymin={0.9},
 	grid style=dashed,
 	height=4cm
 	]
@@ -703,7 +706,7 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,4,5,6,7},
-        xticklabels={1,2,3,4,5,6,$\ge7$},
+        xticklabels={1,2,3,4,5,6,$\ge$7},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
@@ -782,7 +785,7 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,4,5,6,7},
-        xticklabels={1,2,3,4,5,6,$\ge7$},
+        xticklabels={1,2,3,4,5,6,$\ge$7},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
@@ -861,7 +864,7 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,4,5,6,7},
-        xticklabels={1,2,3,4,5,6,$\ge7$},
+        xticklabels={1,2,3,4,5,6,$\ge$7},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
@@ -940,7 +943,7 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,4,5,6,7},
-        xticklabels={1,2,3,4,5,6,$\ge7$},
+        xticklabels={1,2,3,4,5,6,$\ge$7},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
@@ -1011,7 +1014,7 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,4,5,6,7},
-        xticklabels={1,2,3,4,5,6,$\ge7$},
+        xticklabels={1,2,3,4,5,6,$\ge$7},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
@@ -1090,7 +1093,7 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,4,5,6,7},
-        xticklabels={1,2,3,4,5,6,$\ge7$},
+        xticklabels={1,2,3,4,5,6,$\ge$7},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
@@ -1165,7 +1168,7 @@
         xtick style={draw=none},
         ytick style={draw=none},
         xtick={1,2,3,4,5,6,7},
-        xticklabels={1,2,3,4,5,6,$\ge7$},
+        xticklabels={1,2,3,4,5,6,$\ge$7},
 	typeset ticklabels with strut,
 	legend pos=south west,
 	ymajorgrids=false,
@@ -1238,17 +1241,15 @@
         \end{axis}
 	\end{tikzpicture}
 
-     \caption{\label{fig:bpe_lens} Per-language accuracy on tokens
+         \caption{\label{fig:bpe_lens} Per-language accuracy on tokens
      with different numbers of BPE components, for the funetuning
      training regime. The last data point on the $x$-axis refers to
      all tokens composed of seven or more BPE tokens.  We indicate the
      method by encoding fst as pink, summation as green, averaging as
-     blue and RNN as red. The accuracy is given on the $y$-axis. The
-     number above the $x$-axis indicate how many samples the accuracy
-     was calculated on. We show the the Agresti-Coull approximation of
-     a 95\%-confidence interval for the RNN method
-     \citep{agresti1998approximate}.
-     We do not show the intervals for other methods to avoid excessive
+     blue and RNN as red. The accuracy is given on the $y$-axis. We
+     show the the Agresti-Coull approximation of a 95\%-confidence
+     interval for the RNN method \citep{agresti1998approximate}.  We
+     do not show the intervals for other methods to avoid excessive
      clutter.}
     %The confidence interval is calculated using the Agresti-Coull interval.
     
@@ -1279,13 +1280,13 @@
      regime (finetuning versus feature extraction) and across
      languages with different BPE per token ratios.
     
-             As we see it, the advantage of the RNN over commutative
-     methods (Sum, Mean) and taking the first BPE token is that it can
-     take the order of elements into account, and thus is able to
-     collect more predictive information from sub-word embeddings. The
-     order of elements is important in morphology, in broad terms,
-     contextual cues within a word allows a system to determine what
-     is a stem, prefix, or suffix.
+                 As we see it, the advantage of the RNN over
+     commutative methods (Sum, Mean) and taking the first BPE token is
+     that it can take the order of elements into account. In broad
+     terms, information about the order of elements in morphology
+     allows a system to determine what is a stem, prefix, or suffix.
+      Thus allowing a model to collect more predictive information
+     from sub-word embeddings.
     
      % We conjecture that this discrepancy is can
      % be attributed to the commutativity of the Sum and Mean
@@ -1328,7 +1329,7 @@
      used. To further control this variable, in \cref{fig:scatter_len}
      we plot the average number of BPE tokens per word, and compare
      this average against the gain in accuracy yielded by using the
-     RNN method over summation.  For fine-tuning we see that in
+     RNN method over summation.  For finetuning we see that in
      general the average number of BPE tokens do not matter that
      much. The two cases where it does matter is for Turkish and
      Basque, where we see a substantial improvement of about $3$
@@ -1336,7 +1337,7 @@
      languages with the lowest amount of training data.
     %
         For the other languages the improvements lie in the range $.6$
-     to $1.2$ percentage points. This indicates that when fine-tuning,
+     to $1.2$ percentage points. This indicates that when finetuning,
      the model can provide information that allows commutative methods
      to properly compose BPE tokens. However, looking at bare feature
      extraction we see that there is a larger gap between the low
@@ -1416,41 +1417,16 @@
      information than others, and by summing them we retain all the
      information.
       %
-             But when we fine-tune, and the differense between summing
-     and averaging almost disapear, the model appears to learn how to
-     distribute the information uniformly across the BPE tokens that
-     compose a word, as is thus able to retain the information better.
-    %This is rather interesting as it has consequences
-    % for work aimed at probing linguistic information contained in
-    % pre-trained models. That is, when probing for linguistic information regarding a word embedding 
-    
-    
-    %\subsubsection{Sum and Mean}
-
-    %    Our analysis and experiments have primarily foused on the
-    % effects of using an RNN over summation or averaging. Previous
-    % work have reported not finding any large differences between
-    % summation or averaging and, over all languages, our experiments
-    % support these findings.
-
-    %        However, looking closer at the results we obtained
-    % we find that summation and averaging matter, more for some
-    % languages than others. In general, these differences appear when
-    % we only extract features from the transformer model, in this case
-    % we see a difference of $.5$ percentage points on average between
-    % the methods, where summation performs better. We see the
-    % same pattern when looking at the accuracy of tokens composed of
-    % two or more BPE tokens, where the Sum method is $.9$ percentage
-    % points better than averaging.
-
-    %         When we fine-tune the model, interestingly this effect
-    % disapear. As such it seems to be the case that fine-tuning the
-    % transformer model generally decrease the impact of BPE
-    % combination methods. Thus, in work that employ the transformer
-    % this is something to consider, especially when doing probing
-    % experiments, that is, the embeddings extracted from a transformer
-    % model are probed for linguistic knowledge.
-
+                     But when we finetune, the differense between
+     summing and averaging almost disapear, the model appears to learn
+     how to distribute the information uniformly across the BPE tokens
+     that compose a word, as is thus able to retain the information
+     better. Interestingly, the model learns distribute the
+     information across multiple BPE tokens more efficiently than
+     pushing the information into the first token. This is shown by
+     the large difference between finetuning and feature extraction
+     for the Fst and averaging method.
+   
 \begin{figure}%{r}{8cm}
     \centering  
         \begin{tikzpicture}
@@ -1537,20 +1513,20 @@
     % have implications for systems that use pretrained models with BPE
     % tokenization that perform some type of word classification. 
     
-    In conclusion, our results show that for morphological
+        In conclusion, our results show that for morphological
      sequence classification in eight different languages, using a
-     tranformer with BPE tokenization, combining BPE tokens into word representations
-     using an RNN performs better than two commutative methods,
-     summation, averaging, and taking the first BPE token as the word
-     representation.
+     tranformer with BPE tokenization, combining BPE tokens into word
+     representations using an RNN performs better than two commutative
+     methods, summation, averaging, and taking the first BPE token as
+     the word representation.
     
     As future work we want to continue experiments with the different
     BPE composition methods, specifically looking at more complex
     syntactic and semantic tasks, such as dependency and/or
-    constituency parsing, and semantic role labeling and named entity recognition.
+    constituency parsing, semantic role labeling and named entity recognition. 
     %
         We also wish to run our experiments on the hundreds
-     of available UD treebanks, to improve the robustness of our
+     of available UD treebanks to improve the robustness of our
      results.  
     
 %	\section*{Acknowledgments}
