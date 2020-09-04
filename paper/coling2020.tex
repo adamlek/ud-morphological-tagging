@@ -344,9 +344,12 @@
      follows. For each sentence we extract $n$ BPE embeddings $x^0$ to
      $x^{n-1}$ from $\text{\sc XLMR}_{base}$, and then align them to words.
     %
-        We then feed all words which consist of more than one
-        BPE embedding\jp{I think that they all go through this, otherwise it really makes no sense to measure anything about 1-token words} to a function $f$ which combines the BPE
-        embeddings.
+        We then pass all words to a to a function $f$ which combines
+     the BPE embeddings into word representations.
+    
+        %We then feed all words which consist of more than one
+        %BPE embedding\jp{I think that they all go through this, otherwise it really makes no sense to measure anything about 1-token words} to a function $f$ which combines the BPE
+        %embeddings.
 
                     We consider four methods: taking the first BPE
      token, summation, averaging, and using an RNN. Taking the first
@@ -554,8 +557,9 @@
      largest benefits of the RNN method for Basque with an increased
      performance of $3.25$ points, and Turkish ($2.7$ points) over
      using mean or averaging. The Fst method for Basque and Turkish
-     performs much worse with a decrease of $9.6$ percentage points
-     for Basque and $8.8$ points for Turkish.\jp{In this paragraph we don't know the reference for ``increase'' or ``decrease''}
+     performs much worse with a decrease of $4.4$ percentage points
+     for Basque and $3.6$ points for Turkish with respect to the RNN method.
+    %\jp{In this paragraph we don't know the reference for ``increase'' or ``decrease''}
     %
         In the bare features extraction regime, we see a larger
      benefit for the RNN, of $3.7$ percentage points (Turkish) and
@@ -604,7 +608,7 @@
     \cref{tab:results_large_tokens}.
             We see the same trend for accuracy on tokens that are
      composed of two or more BPE tokens, as in the overall accuracy,
-     where the RNN outperforms the Fst method\jp{all other methods?}, and both the summation and averaging methods. We
+     where the RNN outperforms all other methods. We
      can also see that the average increase in accuracy when using an
      RNN is larger. This holds both when finetuning or extract bare features.
     %
@@ -1247,20 +1251,6 @@
      interval for the RNN method \citep{agresti1998approximate}.  We
      do not show the intervals for other methods to avoid excessive
      clutter.}
-    %The confidence interval is calculated using the Agresti-Coull interval.
-    
-		%\caption{\label{fig:bpe_lens} Per language accuracy of
-        %          tokens composed of more than two BPE tokens\jp{it is
-        %            the case that the methods always coincide at 1
-        %            token? Either say so, or this graph could also
-        %            include this data. }. The x-axis indicates how
-        %          many BPE tokens a word is composed of; and the
-        %          y-axis shows the accuracy. The different methods are
-        %          distinguished by color, where blue is the summation
-        %          method, red the mean and green RNN. \jp{? The number
-        %            of samples for 6-bpe token is probably low and not
-        %            that ``accurate''. Perhaps you could show (indicative) error
-        %            bars? https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval}}
 	\end{figure}
 
 	
@@ -1315,10 +1305,6 @@
      data, we could also expect the performance to be better for
      tokens of BPE length one, because we will have more accurarate
      representations of the contextual words.
-
-    %Specifically,
-    % because better performance on longer words hopefully map a
-    % subset of the composite tag to the BPE token.\jp{I don't understand the purpose of this paragraph; what is the context?}
 
              We can suspect that the average BPE per word ratio in a
      language affects the performance of the composition method
