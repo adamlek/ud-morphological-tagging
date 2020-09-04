@@ -64,13 +64,13 @@
 	\maketitle
 	
 	\begin{abstract}
-            		In this paper we evaluate four different methods
-     of composing word representations from multiple BPE tokens. We
-     evaluate the methods on the task of morphological feature
-     classification. Our experiments reveal that using an RNN to
-     compute word representations is more effective than the other
-     methods tested across a sample of eight languages with varying
-     amounts of BPE tokens per word.
+                		In this paper we evaluate four different
+     methods of composing word representations from multiple BPE
+     tokens. We evaluate the methods on the task of morphological
+     feature classification. Our experiments reveal that using an RNN
+     to compute word representations is consistently more effective
+     than the other methods tested across a sample of eight languages
+     with varying amounts of BPE tokens per word.
 	\end{abstract}
 	
 	\section{Introduction}
@@ -128,7 +128,7 @@
      meaningful units in the original texts.  Thus the question of
      mapping results back to the original text arises.
 
-                    Our main goal is to explore how to combine BPE
+                        Our main goal is to explore how to combine BPE
      tokens from a transformer model to perform sequence
      classification, that is, the task of assigning a label to every
      word in a sentence. When we are using BPE tokens (or similar
@@ -136,7 +136,8 @@
      combining the units that compose the word, before it is assigned
      a label.  Coming back to our example, we must combine the
      feature-set assigned to "scient", "ifical" and "ly" to form a
-     word representation of ``scientifically'' which we can assign a label to.
+     word representation of ``scientifically'' which we can assign a
+     label to.
 
     %Coming back to our example, we must
     % map the feature-set assigned to "scient", "ifical" and "ly". Then
@@ -220,9 +221,6 @@
      interested in how the accuracy is influenced by different
      composition methods, but also consider the type of morphology a
      language use as a factor in this task.
-    
-     %We take a sample
-     %of eight languages with varying typology. 
 %
     With this in mind we consider both
      languages that use agglutinative morphology where each morpheme
@@ -248,13 +246,8 @@
      size, average number of BPE tokens per word and number of
      morphological tags for each treebank in \cref{tab:data}.
     
-    %The size of
-    % the dataset \jp{in original words?}  and the average number of
-    % BPE tokens per word are shown in \cref{tab:data}.
-
     
-    
-    	\begin{table} % JP it's better to leave placement to the tex engine and the style sheet. (unless there is a real problem doing so)
+    \begin{table}
 		\centering
 		\begin{tabular}{l|lrrrrr}
 			Language & Typology & $\frac{BPE}{word}$ & Tags & Train & Validation & Test \\
@@ -321,14 +314,16 @@
 	\subsubsection{BPE feature extraction}
         \label{sec:bpe-features}
 
-                The XLMR model use 12 layers to compute an embedding
-     for a BPE token, and it has been shown in previous research
+    %\adam{[Find 1 or 2 more citations]}
+                    The XLMR model use 12 layers to compute an
+     embedding for a BPE token, and it has been shown in previous
+     research
      \citep{kondratyukstraka,raganato2018analysis,liu2019linguistic}
-     \adam{[Find 1 or 2 more citations]} that the different layers of the
-     transformer model encode different types of information. To take
-     advantage of this variety, we compute BPE embeddings as a weighted sum of
-     layer representations \citep{kondratyukstraka}.  That is, we
-     initialize a parameter $w$ of dimension $l$, each element from a normal
+     that the different layers of the transformer model encode
+     different types of information. To take advantage of this
+     variety, we compute BPE embeddings as a weighted sum of layer
+     representations \citep{kondratyukstraka}.  That is, we initialize
+     a parameter $w$ of dimension $l$, each element from a normal
      distribution of mean $0$ and standard deviation $1$, where $l$ is
      the number of layers in the transformer model. If $r_{ji}$ is the
      layer representation at layer $j$ and token position $i$, we
@@ -512,7 +507,7 @@
      are not reported on a strict per-treebank basis and thus our
      numbers are not directly comparable.
     
-        The accuracy of our system is computed by checking the prediction
+     The accuracy of our system is computed by checking the prediction
         of morphological tags. We report in \cref{tab:results_tokens}
         the result for each of the four different methods, and the
         two training regimes.
@@ -1245,7 +1240,7 @@
      with different numbers of BPE components, for the funetuning
      training regime. The last data point on the $x$-axis refers to
      all tokens composed of seven or more BPE tokens.  We indicate the
-     method by encoding fst as pink, summation as green, averaging as
+     method by encoding fst as brown, summation as green, averaging as
      blue and RNN as red. The accuracy is given on the $y$-axis. We
      show the the Agresti-Coull approximation of a 95\%-confidence
      interval for the RNN method \citep{agresti1998approximate}.  We
@@ -1370,7 +1365,7 @@
             The idea behind the Fst method is that the transformer is
      sufficiently powerful to pool the relevant information into the
      first BPE token.
-    
+    %
                             However, our experiments reveal that it is
      less efficient than any other method we tested for morphological
      sequence classification across languages. We see in
@@ -1412,7 +1407,6 @@
      tokens, that is, by reducing the values in the BPE embeddings
      uniformly across a sequence of BPE embeddings we lose useful
      information.
-    %
         We believe that some BPE embeddings contain more predictive
      information than others, and by summing them we retain all the
      information.
@@ -1434,6 +1428,7 @@
 		name=,
 		title={},
 		height=7cm,
+        width=15cm,
         legend pos=north west,
         xlabel={BPE per token ratio},
 		]
