@@ -1,4 +1,5 @@
-%
+\nonstopmode
+% 
 % File coling2020.tex
 %
 % Contact: feiliu@cs.ucf.edu & liang.huang.sh@gmail.com
@@ -346,10 +347,10 @@
      proceed to combine them into words as they appear in the data.
       The model that we use to combine morphological features is as
      follows. For each sentence we extract $n$ BPE embeddings $x^0$ to
-     $x^{n-1}$ from $XLMR_{base}$, and then align them to words.
+     $x^{n-1}$ from $\text{\sc XLMR}_{base}$, and then align them to words.
     %
         We then feed all words which consist of more than one
-        BPE embedding to a function $f$ which combines the BPE
+        BPE embedding\jp{I think that they all go through this, otherwise it really makes no sense to measure anything about 1-token words} to a function $f$ which combines the BPE
         embeddings.
 
                     We consider four methods: taking the first BPE
@@ -387,7 +388,7 @@
      final output as our word representation.
 
      \subsubsection{Word-level feature sets and classification}
-     The above operation produces one embedding per word that is passed
+     The above operation produces one embedding per word, which is passed
      to an LSTM (regardless of the method), to take into account the
      context.
     %
@@ -473,14 +474,14 @@
      for the first epoch, (effectively not finetuning at first).
       When training the model we use a cosine annealing learning rate
      with restarts every epoch, that is, the learning rate starts high
-     then incrementally decreases to $1\mathrm{e}{-12}$ during $N$
+     then incrementally decreases to $1\mathrm{e}{-12}$ over $N$
      steps, where $N$ is the number of batches in an epoch. We use the
      Adam optimizer, using standard parameters, with a learning rate
      of $0.001$ for layer importance parameter ($w$ in
      \cref{sec:bpe-features}), the parameters of the word LSTM,
      classification layer, and BPE combination module (when an RNN is
      used). For the transformer parameters, we use a lower learning
-     rate of $1\mathrm{e}{-06}$. We summarize the hyperparameters used
+     rate of $1\mathrm{e}{-6}$. We summarize the hyperparameters used
      in \cref{tab:parameters}.
 
 
@@ -489,9 +490,9 @@
      the input to the transformer, replacing 20 percent of the BPE
      tokens with \texttt{<UNK>}. After we have extracted layer
      features from the transformer we apply a dropout of $0.4$, and
-     before computing the weighted sum of layers we apply dropout on a
+     before computing the weighted sum of layers we apply dropout on
      layers with a probability of $0.1$, that is we set all
-     representations in the layer to $0$. After the word LSTM have
+     representations in the layer to $0$. After the word-LSTM has
      processed the sequence, but before the final prediction, we apply
      a dropout of $0.5$.
 
@@ -543,9 +544,9 @@
 
                 Our system performs better than the baseline. As a
      general trend we see that the RNN method tends to perform better
-     than all other tested methods This trend is consistent across
-     both languages families (agglutinative and fusional), and
-     training regimes, showing that while the advantage of the RNN is
+     than all other tested methods. This trend is consistent across
+     both languages families (agglutinative and fusional) and
+     training regimes showing that, while the advantage of the RNN is
      small, it occurs consistenty.
         %
         In general we find that finetuning yields higher accuracy than
@@ -559,7 +560,7 @@
      performance of $3.25$ points, and Turkish ($2.7$ points) over
      using mean or averaging. The Fst method for Basque and Turkish
      performs much worse with a decrease of $9.6$ percentage points
-     for Basque and $8.8$ points for Turkish.
+     for Basque and $8.8$ points for Turkish.\jp{In this paragraph we don't know the reference for ``increase'' or ``decrease''}
     %
         In the bare features extraction regime, we see a larger
      benefit for the RNN, of $3.7$ percentage points (Turkish) and
@@ -608,7 +609,7 @@
     \cref{tab:results_large_tokens}.
             We see the same trend for accuracy on tokens that are
      composed of two or more BPE tokens, as in the overall accuracy,
-     where the RNN outperforms the Fst method, and both the summation and averaging methods. We
+     where the RNN outperforms the Fst method\jp{all other methods?}, and both the summation and averaging methods. We
      can also see that the average increase in accuracy when using an
      RNN is larger. This holds both when finetuning or extract bare features.
     %
@@ -1520,7 +1521,7 @@
      methods, summation, averaging, and taking the first BPE token as
      the word representation.
     
-    As future work we want to continue experiments with the different
+    As future work we want to continue experimenting with the different
     BPE composition methods, specifically looking at more complex
     syntactic and semantic tasks, such as dependency and/or
     constituency parsing, semantic role labeling and named entity recognition. 
