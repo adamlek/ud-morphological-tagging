@@ -110,12 +110,13 @@
      \citep{el2012orthographic,chaudhary2018adapting,xu2017implicitly},
      and then combining them.
 
-    In this paper, we consider in particular
-     Byte-Pair Encodings (BPE) \citep{sennrich2015neural}.
-     BPE has been popularized by its usage in translation and the BERT transformer model \citep{devlin2018bert}.
-     The BPE algorithm does not specifically look for either
-     character $n$-grams or morphs, but rather it aims at splitting a
-     corpus $\mathcal{C}$ into $N$ tokens, where $N$ is user defined.
+        In this paper, we consider in particular Byte-Pair Encodings
+     (BPE) \citep{sennrich2015neural}.  BPE has been popularized by
+     its usage in translation and the BERT transformer model
+     \citep{devlin2018bert}.  The BPE algorithm does not specifically
+     look for either character $n$-grams or morphs, but rather it aims
+     at splitting a corpus $\mathcal{C}$ into $N$ tokens, where $N$ is
+     user defined.
     %
     Even though BPE is not grounded in morphosyntactic theory, the
      characteristics of the BPE embeddings will be directly influenced
@@ -409,7 +410,7 @@
      embedding. The resulting embeddings are then passed to a BPE
      composition function $f$ that combines the $k$ different
      BPE embeddings into a word embedding. The word embedding is then
-     passed to a LSTM followed by a dense preiction layer. }
+     passed to a LSTM followed by a dense prediction layer. }
 	\end{figure}
 
 	\subsubsection{Label smoothing}
@@ -638,7 +639,7 @@
 	]
 		\addplot[
 		color=green,
-		mark=circle*,
+		mark=*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -717,7 +718,7 @@
 	]
 		\addplot[
 		color=green,
-		mark=circle*,
+		mark=*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -796,7 +797,7 @@
 	]
 		\addplot[
 		color=green,
-		mark=circle*,
+		mark=*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -875,7 +876,7 @@
 	]
 		\addplot[
 		color=green,
-		mark=circle*,
+		mark=*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -954,7 +955,7 @@
 	]
 		\addplot[
 		color=green,
-		mark=circle*,
+		mark=*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -1025,7 +1026,7 @@
 	]
 		\addplot[
 		color=green,
-		mark=circle*,
+		mark=*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -1104,7 +1105,7 @@
 	]
 		\addplot[
 		color=green,
-		mark=circle*,
+		mark=*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -1179,7 +1180,7 @@
 	]
 		\addplot[
 		color=green,
-		mark=circle*,
+		mark=*,
                 mark size=1,
                 error bars/.cd, y dir=both, y explicit,
 		]
@@ -1242,10 +1243,10 @@
 	\end{tikzpicture}
 
          \caption{\label{fig:bpe_lens} Per-language accuracy on tokens
-     with different numbers of BPE components, for the funetuning
+     with different numbers of BPE components, for the finetuning
      training regime. The last data point on the $x$-axis refers to
      all tokens composed of seven or more BPE tokens.  We indicate the
-     method by encoding fst as brown, summation as green, averaging as
+     method by encoding Fst as brown, summation as green, averaging as
      blue and RNN as red. The accuracy is given on the $y$-axis. We
      show the the Agresti-Coull approximation of a 95\%-confidence
      interval for the RNN method \citep{agresti1998approximate}.  We
@@ -1257,7 +1258,7 @@
 	
 	\section{Discussion}
 
-    \subsection{BPE composition methods}
+%    \subsection{BPE composition methods}
     % For our experiments
     % We see that
         For morphological feature prediction, the RNN method is more
@@ -1335,7 +1336,7 @@
     %\adam{Effect of training data?}
     %\adam{This may be influenced by our choice of creating composite tags instead of predicting each feature individually.}
 
-    \subsubsection{Fst method}
+    \subsection{Fst method}
 
             The idea behind the Fst method is that the transformer is
      sufficiently powerful to pool the relevant information into the
@@ -1367,7 +1368,7 @@
      %
     % This present 
 
-    \subsubsection{Sum and Mean}
+    \subsection{Sum and Mean}
                 When we consider the commutative methods of combining
      BPE embeddings, summation or averaging, we see no clear advantage
      for either of them over the other one, when doing
