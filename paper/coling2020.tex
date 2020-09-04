@@ -1273,18 +1273,6 @@
      allows a system to determine what is a stem, prefix, or suffix.
       Thus allowing a model to collect more predictive information
      from sub-word embeddings.
-    
-     % We conjecture that this discrepancy is can
-     % be attributed to the commutativity of the Sum and Mean
-     % operations. That is, the ordering of elements within a word does
-     % not affect the result of applying Sum or Mean.
-
-    %Intuitively, when using the Sum or Mean method the system won't
-    % be aware of, for example, whether an affix is a prefix or suffix. %\adam{example}
-
-    
-       % In general, we see that the RNN performs better
-       % than summation or averaging, but
 
                One question that arises when we look at
      \cref{fig:bpe_lens}, specifically considering the performance on
@@ -1415,7 +1403,7 @@
 		name=,
 		title={},
 		height=7cm,
-        width=15cm,
+        width=9cm,
         legend pos=north west,
         xlabel={BPE per token ratio},
 		]
@@ -1495,27 +1483,20 @@
     % have implications for systems that use pretrained models with BPE
     % tokenization that perform some type of word classification. 
     
-    %        In conclusion, our results show that for morphological
-    % sequence classification in eight different languages with varying typology, using a
-    % tranformer with BPE tokenization, combining BPE tokens into word
-    % representations using an RNN performs better than two commutative
-    % methods, summation and averaging, and better than letting the
-    % model push all the predictive information to the first BPE token.
-
-
-    %In conclusion, our results show that for morphological sequence classifcation on eight diffrent languages with varying morphology, using an RNN to compose word representations from BPE tokens is more efficient than combining them with commutative methods,  
-
-
-            In conclusion, our results indicate that using an RNN to
-     compose word representations from BPE tokens is more efficient
+                In conclusion, our results indicate that using an RNN
+     to compose word representations from BPE tokens is more efficient
      than two commutative methods, summing and averaging, and also
-     more effective than letting a model automatically pool predictive
-     word-level information into a single BPE token.
+     more effective than letting a model automatically pool the
+     predictive word-level information into a single BPE token.
     %
     We show this for the task of morphological sequence classification in 
      eight different languages with varying morphology and BPE
      lengths, aswell as for two training regimes, finetuning and
-     feature extraction..
+     feature extraction.
+
+    % consequences for probing?
+    % Lexical probes om pretrained word-embeddings using the Fst model will be bad.
+    
      
     In future work we want to continue experimenting with the different
     BPE composition methods, specifically looking at more complex
