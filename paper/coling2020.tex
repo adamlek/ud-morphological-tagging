@@ -409,17 +409,17 @@
      to an LSTM (regardless of the method), to take into account the
      context.
     %
-            Commonly, systems analyzing morphology use character
-     features. We opted not to include character features because
-     these would obfuscate the effect of the composition method and
-     may mask some of the effects of the different methods.
+    Commonly, systems analyzing morphology use character features. We
+     opted not to include character features because these would
+     obfuscate the effect of the composition method and may mask some
+     of the effects of the different methods.
 
-                    We pass the combined representations to an LSTM,
-     and then add a residual connection with the pre-LSTM
-     representation.  This representation is passed to a dense layers
-     with GELU activation that computes scores for each class in the
-     output. We then use a softmax layer to assign probabilities, and
-     compute the loss accordingly.
+    We pass the combined representations to an LSTM, and then add a
+     residual connection with the pre-LSTM representation.  This
+     representation is passed to a dense layers with GELU activation
+     that computes scores for each class in the output. We then use a
+     softmax layer to assign probabilities, and compute the loss
+     accordingly.
 
 	\begin{figure}%[h!]
           \centering
