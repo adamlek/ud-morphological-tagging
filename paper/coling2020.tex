@@ -62,18 +62,19 @@
 \date{}
 
 \begin{document}
-	\maketitle
-	
-	\begin{abstract}
-                		In this paper we evaluate four different
-     methods of composing word representations from multiple BPE
-     tokens. We evaluate the methods on the task of morphological
-     feature classification. Our experiments reveal that using an RNN
-     to compute word representations is consistently more effective
-     than the other methods tested across a sample of eight languages
-     with different typology and varying amounts of BPE tokens per word.
-	\end{abstract}
-	
+\maketitle
+\begin{abstract}
+  Byte-pair encodings may split a word into several byte-pair tokens.
+  Language models then assign representations seperately to each of
+  these tokens.  In this paper, we evaluate four different methods of
+  composing such representations into word representations. We
+  evaluate the methods on the task of morphological feature
+  classification. Our experiments reveal that using an RNN to compute
+  word representations is consistently more effective than the other
+  methods tested across a sample of eight languages with different
+  typology and varying numbers of byte-pair tokens per word.
+\end{abstract}
+
 	\section{Introduction}
 	\label{intro}
 
