@@ -385,21 +385,18 @@
     
      \paragraph{Sum:} For the Sum method, we use an element-wise
      sum. That is, we calculate the vector sum of the token
-     vectors. Thus, for token $i$ we calculate a composite vector
-     by summing over dimensions $1,\ldots,D$:
-	
+     vectors. Thus, assuming that we have $T$ token vectors, for token $i$ we calculate a composite vector
+     by summing over them:
 	\begin{equation}
-	f(x)_i = \sum_{j=1}^{D} x_i^j
+	f(x)_i = \sum_{j=1}^{T} x_i^j
 	\end{equation}
-	
 
      \paragraph{Mean:} In the mean method we calculate the sum as above and
      divide by the number of BPE tokens in the word. Thus, for
      word $i$ we calculate a composite embedding by averaging over
-     dimensions $1,\ldots,D$:\jp{This appears to be nonsense; we must be averaging over tokens, not dimensions?}
-	
+     them:
 	\begin{equation}
-	f(x)_{i} = \frac{1}{D}\sum_{j=1}^{D} x_i^j
+	f(x)_{i} = \frac{1}{T}\sum_{j=1}^{T} x_i^j
 	\end{equation}
 	
 	
