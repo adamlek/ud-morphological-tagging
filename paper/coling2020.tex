@@ -1381,13 +1381,16 @@
      increases, showing a gain of $3.2$ percentage points and $7.7$
      points for finetuning and feature extraction respectively.
 
-                         While the Fst method may be effective,
+                             While the Fst method may be effective,
      primarily because of the expressivity of the transformer
      architecture, the method forces the model to push the predictive
-     information of several BPE tokens vectors into the first one. This adds
-     an implicit objective to the model which is not strictly
-     necessary, since we can pool this information, and appear to
-     degrade the performance.\jp{... since doing so apears to degrade performance. (?)}
+     information of several BPE token vectors into the first one. This
+     adds an implicit objective to the model, that appears to degrade
+     the performance, which is not strictly necessary since we can
+     pool this information.
+     %and appear to
+     %degrade the performance.
+    \jp{... since doing so apears to degrade performance. (?)}
      %
     % This present 
 
