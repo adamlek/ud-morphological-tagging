@@ -19,7 +19,7 @@ It reviews the common approaches, i.e. using only the first subword embedding, s
 
 The authors claim that applying an RNN in this way has not been done before. I strongly believe this actually has been done, as I had known about this option before reading the paper, but I have not been able to find any reference for this at the moment. Therefore, I kindly ask the authors to retry searching for a reference, and I am sorry that I am unable to provide one. Thus, this is just a suggestion and not a negative comment.
 [ADAM:] Will do!
-    
+
 The paper then goes on to empirically compare the foour embedding combination approaches on a morphological tagging task for 8 languages, with and without fine-tuning the underlying contextualizer (XLMR).
 
 The authors quite convincingly show that RNN outperforms the other approaches, with summation and averaging being quite similar (with averaging being slightly weaker) and taking only the first subword being worse.
@@ -38,25 +38,41 @@ The approach of the authors seems sane and well thought of, and, accordingly, br
 
 Weaknesses:
 
-The main (and practically only) weakness of the paper is that it does not convincingly show whether the better performance of the RNN combination approach is due to the approach itself being superior or only due to the RNN-employing model having a larger capacity than the other models.
-[Address this]
-    
-    In the third paragraph of the Discussion, the authors acknowledge that this question arises and discuss it for a while, but I do not feel that they provide a definitive answer.
-I believe a contrastive setup should be created to investigate this; probably enriching the other methods also with an RNN but taking the hidden states, not the final state, as the representations, i.e. these models would suddenly have the same capacity as the RNN-based model but the RNNs in these setups would not perform the combination...
-[Nice idea]
-    
-As the fine-tuned model already has a huge capacity itself and the RNN does not add much, I rather believe that we are indeed observing the effect of the RNN-based method being better than the other methods, I just feel that this should really be shown empirically.
-[Good observation!]
+The main (and practically only) weakness of the paper is that it does
+not convincingly show whether the better performance of the RNN
+combination approach is due to the approach itself being superior or
+only due to the RNN-employing model having a larger capacity than the
+other models.  [Address this]
+
+In the third paragraph of the Discussion, the authors acknowledge that
+this question arises and discuss it for a while, but I do not feel
+that they provide a definitive answer.  I believe a contrastive setup
+should be created to investigate this; probably enriching the other
+methods also with an RNN but taking the hidden states, not the final
+state, as the representations, i.e. these models would suddenly have
+the same capacity as the RNN-based model but the RNNs in these setups
+would not perform the combination...  [Nice idea]
+
+As the fine-tuned model already has a huge capacity itself and the RNN
+does not add much, I rather believe that we are indeed observing the
+effect of the RNN-based method being better than the other methods, I
+just feel that this should really be shown empirically.  [Good
+observation!]
 
 
 Comments:
 
-It is not immediately clear that the paper operates on contextual BERT-like word embeddings, not static word embeddings. I feel that the established term for what the authors are using is "contextual embeddings", while the paper uses various ways to refer to this, including "BPE" (but BPE is the way of tokenization and does not say anything about the representation) and "feature set" (which might mean other things as well).
-[Clear this up]
+It is not immediately clear that the paper operates on contextual
+BERT-like word embeddings, not static word embeddings. I feel that the
+established term for what the authors are using is "contextual
+embeddings", while the paper uses various ways to refer to this,
+including "BPE" (but BPE is the way of tokenization and does not say
+anything about the representation) and "feature set" (which might mean
+other things as well).  [JP: Clear this up]
 
 The section 4.2 seems to contain quite a lot of magic without being clear where this magic comes from (such as the complex way of playing with dropouts).
 [Dropout at every "output"]
-    
+
 The paper contains occasional errors in English (e.g. "model use" instead of "model uses") and typos and should be proofread for the final version.
 [Will do!]
 ---------------------------------------------------------------------------
@@ -87,8 +103,8 @@ Weaknesses:
 EDIT: I realize in hindsight that the approach is only useful for supervised learning. If you're trying to create unsupervised feature representation (e.g. for word sense induction (not disambiguation!) or topic clustering), you'd not be able to use the RNN approach which the authors found best. I didn't state this in the review because it occurred to me overnight. This isn't a shortcoming of the paper's analysis, but rather a caveat that they should state clearly and upfront. This doesn't affect my final score.
 
 - Some terminological confusion of the authors may lessen the impact and reception of the paper. If the authors understand the confusion and are able to correct it, this will be a strong paper.
-[BPE?]
-    
+[DONE]
+
 - The result is a bit unsurprising, for a reason that isn't touched on in the paper: their two baselines are parameterless. The RNN does better in part because it can adjust itself to find the best weight.
 [This was addressed]
     
