@@ -1,0 +1,131 @@
+============================================================================
+                            REVIEWER #1
+============================================================================
+
+---------------------------------------------------------------------------
+Reviewer's Scores
+---------------------------------------------------------------------------
+                   Appropriateness (1-5): 5
+                           Clarity (1-5): 5
+                    Recommendation (1-5): 4
+
+Detailed Comments
+---------------------------------------------------------------------------
+Summary:
+
+The paper deals with a very current and underresearched problem of comparing various possible ways of combining subword embeddings into word embeddings, for applications in which word embeddings are required, such as word-level tagging.
+
+It reviews the common approaches, i.e. using only the first subword embedding, summing the subword embeddings, averaging the subword embeddings, or processing them with a RNN.
+
+The authors claim that applying an RNN in this way has not been done before. I strongly believe this actually has been done, as I had known about this option before reading the paper, but I have not been able to find any reference for this at the moment. Therefore, I kindly ask the authors to retry searching for a reference, and I am sorry that I am unable to provide one. Thus, this is just a suggestion and not a negative comment.
+[ADAM:] Will do!
+    
+The paper then goes on to empirically compare the foour embedding combination approaches on a morphological tagging task for 8 languages, with and without fine-tuning the underlying contextualizer (XLMR).
+
+The authors quite convincingly show that RNN outperforms the other approaches, with summation and averaging being quite similar (with averaging being slightly weaker) and taking only the first subword being worse.
+
+
+Strengths:
+
+The main finding of the paper is an important one, is rather well supported and analyzed and explained.
+
+The paper contains a nice detailed analysis and discussion of the results. I very much appreciate that the authors do not only state the results (as unfortunately is still quite common in papers in our field) but try to understand and interpret them, providing sane hypotheses that explain their findings. E.g. the hypothesis for the main result is that the advantage of the RNN-based method over summing or averaging may lie in the fact that it takes order of the tokens into account, while the other two methods are commutative; I find this explanation quite sensible.
+
+Utilizing multiple languages also adds breadth and strength; plus the languages are nicely selected, varying relevant characteristics related to their morphological structure and compelxity.
+
+The approach of the authors seems sane and well thought of, and, accordingly, brings very nice results.. Well done!
+
+
+Weaknesses:
+
+The main (and practically only) weakness of the paper is that it does not convincingly show whether the better performance of the RNN combination approach is due to the approach itself being superior or only due to the RNN-employing model having a larger capacity than the other models.
+[Address this]
+    
+    In the third paragraph of the Discussion, the authors acknowledge that this question arises and discuss it for a while, but I do not feel that they provide a definitive answer.
+I believe a contrastive setup should be created to investigate this; probably enriching the other methods also with an RNN but taking the hidden states, not the final state, as the representations, i.e. these models would suddenly have the same capacity as the RNN-based model but the RNNs in these setups would not perform the combination...
+[Nice idea]
+    
+As the fine-tuned model already has a huge capacity itself and the RNN does not add much, I rather believe that we are indeed observing the effect of the RNN-based method being better than the other methods, I just feel that this should really be shown empirically.
+[Good observation!]
+
+
+Comments:
+
+It is not immediately clear that the paper operates on contextual BERT-like word embeddings, not static word embeddings. I feel that the established term for what the authors are using is "contextual embeddings", while the paper uses various ways to refer to this, including "BPE" (but BPE is the way of tokenization and does not say anything about the representation) and "feature set" (which might mean other things as well).
+[Clear this up]
+
+The section 4.2 seems to contain quite a lot of magic without being clear where this magic comes from (such as the complex way of playing with dropouts).
+[Dropout at every "output"]
+    
+The paper contains occasional errors in English (e.g. "model use" instead of "model uses") and typos and should be proofread for the final version.
+[Will do!]
+---------------------------------------------------------------------------
+
+
+
+============================================================================
+                            REVIEWER #2
+============================================================================
+
+---------------------------------------------------------------------------
+Reviewer's Scores
+---------------------------------------------------------------------------
+                   Appropriateness (1-5): 5
+                           Clarity (1-5): 3
+                    Recommendation (1-5): 5
+
+Detailed Comments
+---------------------------------------------------------------------------
+Summary:
+BERT and its ilk tokenize text into subword units. This work investigates strategies for combining the subwords' representations into word representations. They use these representations for morphological tagging and find that a bi-RNN is the best composition function.
+
+Strengths:
+Clean, simple, straightforward experiments, well explained. Useful to a general question in the field of how to handle the fact that while our models stopped working with words, we didn't. I'm not going to lavish praise on the paper, but I felt that it was very well done. It'll garner attention and citations from the community, even beyond UD and morphology.
+
+Weaknesses:
+
+EDIT: I realize in hindsight that the approach is only useful for supervised learning. If you're trying to create unsupervised feature representation (e.g. for word sense induction (not disambiguation!) or topic clustering), you'd not be able to use the RNN approach which the authors found best. I didn't state this in the review because it occurred to me overnight. This isn't a shortcoming of the paper's analysis, but rather a caveat that they should state clearly and upfront. This doesn't affect my final score.
+
+- Some terminological confusion of the authors may lessen the impact and reception of the paper. If the authors understand the confusion and are able to correct it, this will be a strong paper.
+[BPE?]
+    
+- The result is a bit unsurprising, for a reason that isn't touched on in the paper: their two baselines are parameterless. The RNN does better in part because it can adjust itself to find the best weight.
+[This was addressed]
+    
+-The paper is a bit short on analysis (as distinct from digesting the experimental results). I'd like to know: which layers have highest weights for the morphological tagging task? That is—which layers (the more syntactic lower layers or the more semantic higher layers) does the model rely on for tagging? And does this differ for different averaging strategies? (I don't expect it to. Worth checking, though.)
+[Tried this, ]
+
+Doesn't use ACL Anthology's BibTeX for papers which have it (instead using Google Scholar's), so the references have several capitalization problems: "bert" (should be BERT), "english-arabic" (should be English–Arabic), etc. Please use the ACL Anthology's BibTeX.
+The SIGMORPHON 2019 shared task citation—the capitalization of SIGMORPHON is wrong.
+[Will do!]
+
+Comments:
+- Did you really need 􏰸prod_i^k Ci tags? Some combinations should be impossible, like a noun with aspect. This should reduce the tag set.
+- Some places, you say "BPE per token" which doesn't make sense. Even if you mean BPE units when you say "BPE", these are the tokens. (It's not a word-level model.) I'm certain that you mean tokens per word. [Done!]
+- The Transformer doesn't tokenize the sequence. A (non-neural) tokenizer does that as a preprocessing step. The Transformer. 
+- Equation 1 makes sense, but the discussion before it doesn't. You picked a really weird place to tell us how you initialized w. Without that, it reads much more naturally. It's a weighted *average*, where the weights are learned.
+- In case you deem it worth mentioning, taking the first *character* and morphologically tagging it as an auxiliary task has been investigated by Blevins and Zettlemoyer for character-level language modeling. 
+
+Typos/style that didn't affect my evaluation:
+- "knownledge" → "knowledge" [DONE!]
+- "uniformly efficient" → "uniformly effective" [DONE!]
+- "aswell" → "as well" ("aswell" isn't a word) [DONE!]
+- Transformer should always be capitalized. [Todo!]
+- "the type of morphology a language use" → "the type of morphology a language uses" [DONE!]
+- rename "BPE / word" to "tokens / word" in Table 1; it's like saying "a word2vec" instead of "an embedding" when you're talking about an embedding.
+[Todo!]
+Also, the math mode there looks really ugly, and this is easily fixed: \frac{\textrm{BPE}}{\textrm{word}} -- the textrm is the key.
+[table fix with frac done!]
+- similarity, "BPE embeddings" → "subword embeddings". BPE is a how, not a what.
+- "This component yield" → "This component yields" [DONE!]
+- "accross" → "across" [DONE!]
+- "XLMR" → "XLM-R" [DONE!]
+- "XLMR_{base}" → "XLM-R\textsubscript{base}" [DONE!]
+- "use 768 dimensions" [???] 
+- "a LSTM" → "an LSTM" [Done!?]
+- I _really_ don't like the abbreviation "Fst". It makes me think of finite-state transducers, which aren't related. Plus, you haven't even saved that many letters; can't you spell out the whole word?
+[Probably :)]
+- "For the Sum method, we use an element-wise sum. That is, we take the sum for each dimen- sion of the BPE embeddings independently." That's what vector addition is. You could just say "For the Sum method, we use the vector sum of the BPE embeddings."
+[Done!]
+- 1e-6 didn't turn out right because LaTeX misinterprets it.
+---------------------------------------------------------------------------
