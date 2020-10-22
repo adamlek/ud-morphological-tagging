@@ -33,6 +33,9 @@
 \pgfplotsset{every tick label/.append style={font=\small}}
 \pgfplotsset{/pgfplots/error bars/error bar style={thin}}
 \usepackage{pgfplotstable}
+\usepackage{siunitx}
+\sisetup{output-exponent-marker=\ensuremath{\mathrm{e}}}
+\usepackage{colortbl}
 
 \newcommand\jp[1]{(\textbf{JP:} #1)}
 \newcommand\adam[1]{(\textbf{Adam:} #1)}
@@ -61,18 +64,24 @@
 
 \date{}
 
+
+
+    
 \begin{document}
 \maketitle
 \begin{abstract}
-  Byte-pair encodings may split a word into several byte-pair tokens.
-  Language models then assign representations seperately to each of
-  these tokens.  In this paper, we evaluate four different methods of
-  composing such representations into word representations. We
-  evaluate the methods on the task of morphological feature
-  classification. Our experiments reveal that using an RNN to compute
-  word representations is consistently more effective than the other
-  methods tested across a sample of eight languages with different
-  typology and varying numbers of byte-pair tokens per word.
+  %Byte-pair encodings may split a word into several byte-pair tokens.
+          Byte-pair encodings is a method for splitting a word into
+     sub-word tokens, a language model then assigns (contextual)
+     representations separately to each of these tokens.  In this
+     paper, we evaluate four different methods of composing such
+     sub-word representations into word representations. We evaluate
+     the methods on the task of morphological sequence classification,
+     the task of predicting grammatical features of a word. Our
+     experiments reveal that using an RNN to compute word
+     representations is consistently more effective than the other
+     methods tested across a sample of eight languages with different
+     typology and varying numbers of byte-pair tokens per word.
 \end{abstract}
 
 	\section{Introduction}
@@ -192,10 +201,11 @@
 
     \section{Task}
 
-        To investigate composition methods for BPE tokens vectors we focus on
-     the task of morphological sequence classification. The task is to
-     assign a tag to a word that represent its grammatical
-     features, such as gender, number and so on.
+            To investigate composition methods for BPE token vectors
+     we focus on the task of morphological sequence
+     classification. The task is to assign a tag to a word that
+     represent its grammatical features, such as gender, number and so
+     on.
     %
             In addition to the word form, the system can use
      information from context words as cues. While the grammatical
@@ -269,15 +279,15 @@
 			Finnish-TDT     & Agglutinative & 1.98 & 591 & 161791 & 19876 & 20541 \\
 			Turkish-IMST    & Agglutinative & 1.73 & 1056 & 46417 & 5708 & 5734 \\
 			Estonian-EDT    & Agglutinative & 1.86 & 512 & 346986 & 43434 & 43825 \\
+    		Spanish-AnCora  & Fusional & 1.25 & 177 & 439925 & 55196 & 54449 \\ 
             Arabic-PADT     & Fusional & 1.39 & 300 & 225494 & 28089 & 28801  \\
 			Czech-CAC       & Fusional & 1.77 & 990 & 395043 & 50087 & 49253 \\
 			Polish-LFG      & Fusional & 1.75 & 634 & 104730 & 13161 & 13076 \\
-			Spanish-AnCora  & Fusional & 1.25 & 177 & 439925 & 55196 & 54449 \\
         \end{tabular}
-    		\caption{\label{tab:data} Treebank statistics showing the
+        \caption{\label{tab:data} Treebank statistics showing the
      language typology, average number of BPE tokens per word, the
-     number of (composite) morphological tags and the size of the datasets in
-     terms of words.}
+     number of (composite) morphological tags and the size of the
+     datasets in terms of words.}
 	\end{table}
     
         The fusional languages where chosen such that two of them
@@ -291,33 +301,35 @@
         
 	\section{Method}
 	\label{method}
-    	In this section we present the model used for sequence
+    	In this section we present the model used for morphological sequence
      classification, the methods that we use to compose BPE
      embeddings, and how the model is trained. \footnote{Our code is
-     available at: \url{https://github.com/ANONYMIZED}}
+     available at: \url{https://github.com/adamlek/ud-morphological-tagging}}
 
 	\subsection{Model}
 
-        Our model is composed of three components, each of them
-        detailed below. First, the input sequence of BPE tokens is fed
-        to a transformer model, which yields a vector representation for each
-        BPE token. Then, the tokens vectors are combined using a
-        composition module, which we vary for the purpose of
-        evaluating each variant. This component yields one vector
-        per original word. Then a bidirectional LSTM is applied, which
-        is followed by two dense layers with GELU \citep{hendrycks2016gaussian}
-        activation. These dense layers act on each word vector separately (but
-        share parameters across words).  An outline of the model is
-        presented in \cref{fig:model}, where $f$ represents the
-        different methods we use to combine token vectors.
+            Our model is composed of three components, each of them
+     detailed below. First, the input sequence of BPE tokens is fed to
+     a transformer model, which yields a contextual vector
+     representation for each BPE token. The contextual information
+     here is the surrounding BPE tokens in the sentence.  Then, the
+     tokens vectors are combined using a composition module, which we
+     vary for the purpose of evaluating each variant. This component
+     yields one vector per original word. Then a bidirectional LSTM is
+     applied, which is followed by two dense layers with GELU
+     \citep{hendrycks2016gaussian} activation. These dense layers act
+     on each word vector separately (but share parameters across
+     words).  An outline of the model is presented in
+     \cref{fig:model}, where $f$ represents the different methods we
+     use to combine token vectors.
 
 	\subsubsection{Underlying Transformer Model}
          To extract a vector representation for BPE tokens, we use the
      XLM-RoBERTa \cite{conneau2019unsupervised} model\footnote{We use
      the huggingface implementation
      \url{https://huggingface.co/transformers/model_doc/xlmroberta.html}}. XLM-R
-     is a masked language model based on the transformer (specifically
-     RoBERTa \citep{liu2019roberta}), and trained on data from 100
+     is a masked language model based on the transformer, specifically
+     RoBERTa \citep{liu2019roberta}, and trained on data from 100
      different languages, using a shared vocabulary of 250000 BPE
      tokens. All the languages that we test are included in the XLM-R
      model. In this experiment we use the XLM-R\textsubscript{base} model
@@ -328,8 +340,8 @@
         \label{sec:bpe-features}
 
     %\adam{[Find 1 or 2 more citations]}
-                    The XLM-R model use 12 layers to compute a
-     vector representation for a BPE token, and it has been shown in previous
+         The XLM-R model use 12 layers to compute a vector
+     representation for a BPE token, and it has been shown in previous
      research
      \citep{kondratyukstraka,raganato2018analysis,liu2019linguistic}
      that the different layers of the transformer model encode
@@ -344,6 +356,18 @@
      %layer representation at layer $j$ and token position $i$, we
      %calculate the weighted sum as follows:
 
+    \begin{figure}%[h!]
+    \centering
+	\includegraphics[scale=0.5]{single-step-final.pdf}
+        \caption{\label{fig:model} Model outline for one input. A word
+     $w_n$ is tokenized into $k$ BPE tokens. The transformer model produces one vector per token per layer.
+     We then calculate a weighted sum over the layers to obain one representation vector per token.
+     The resulting token vectors are then passed to a
+     composition function $f$ that combines the $k$ different
+     token vectors into a word embedding. The word embedding is then
+     passed to a LSTM followed by a dense prediction layer. }
+	\end{figure}
+
                     To take advantage of this variety, we compute token
      vectors as a weighted sum of the layer representation
      \citep{kondratyukstraka}, where the weight vector $w$, of size
@@ -356,9 +380,11 @@
 		x_i = \sum_{j=1}^{l} \softmax(w)_j r_{ji}
 	\end{equation}
 
-        Consequently, in end-to-end training, the optimiser will find
-        a weight for extracting information from each layer
-        ($\softmax(w)_j$) which maximizes performance.
+    
+    
+     Consequently, in end-to-end training, the optimiser will find a
+     weight for extracting information from each layer
+     ($\softmax(w)_j$) which maximizes performance.
 
      \subsubsection{Composition of BPE token vectors}
           The weighted sum yields a token vector for each BPE token. We
@@ -367,12 +393,16 @@
      follows. For each sentence we extract $n$ token vectors $x^0$ to
      $x^{n-1}$ from XLM-R\textsubscript{base}, and then align them to words.
     %
-        We then pass all token vectors in a word to a to a function $f$ which combines
-     them into a word vector.
+                We then pass all token vectors in a word to a to a
+     function $f$ which combines the tokens aligned to a distinct word
+     into a word vector.
     
         %We then feed all words which consist of more than one
         %token vector\jp{I think that they all go through this, otherwise it really makes no sense to measure anything about 1-token words} to a function $f$ which combines the BPE
         %embeddings.
+
+
+    
 
                     We consider four methods: taking the first
      token vector, summation, averaging, and using an RNN. Taking the first
@@ -380,7 +410,7 @@
      work \citep{sachan2020syntax,kondratyuk2019cross,devlin2018bert},
      but using an RNN have not been explored before to our knowledge.
 
-        \paragraph{Fst:} The first method is the standard one used by
+        \paragraph{First:} The first method is the standard one used by
      \citet{devlin2018bert}, which is to use the first token vector in a word.
     
      \paragraph{Sum:} For the Sum method, we use an element-wise
@@ -406,9 +436,12 @@
      final output as our word representation.
 
      \subsubsection{Word-level feature sets and classification}
-     The above operation produces one vector per word, which is passed
-     to an LSTM (regardless of the method), to take into account the
-     context.
+         The above operation produces one contextual vector per word,
+     which is passed to an LSTM (regardless of the method), to take
+     into account the word context. That is, the contextual
+     information the Transformer provides in in terms of BPE tokens,
+     while the LSTM takes context words (that is, BPE tokens composed
+     into words) into account.
     %
     Commonly, systems analyzing morphology use character features. We
      opted not to include character features because these would
@@ -421,18 +454,6 @@
      that computes scores for each class in the output. We then use a
      softmax layer to assign probabilities, and compute the loss
      accordingly.
-
-	\begin{figure}%[h!]
-          \centering
-	\includegraphics[scale=0.5]{single-step-final.pdf}
-        \caption{\label{fig:model} Model outline for one input. A word
-     $w_n$ is tokenized into $k$ BPE tokens. The transformer model produces one vector per token per layer.
-     We then calculate a weighted sum over the layers to obain one representation vector per token.
-     The resulting token vectors are then passed to a
-     composition function $f$ that combines the $k$ different
-     token vectors into a word embedding. The word embedding is then
-     passed to a LSTM followed by a dense prediction layer. }
-	\end{figure}
 
 	\subsubsection{Label smoothing}
     	Given that many of the languages have a large number of
@@ -452,24 +473,11 @@
     \end{equation}
     In words, we remove $\alpha$ from the correct class then
     distribute $\alpha$ uniformly among all classes.
-     \subsection{Training}
 
-     In our experiments we consider two possible training regimes. In
-     the first regime we finetune the XLM-R models parameters, in the
-     second regime we only extract weights for BPE tokens, that is, we
-     use the model as a feature extractor. In all cases, we use
-     end-to-end training.
-     
-                 When finetuning the model we freeze the XLM-R
-     parameters for the first epoch, (effectively not finetuning at
-     first).  When training the model we use a cosine annealing
-     learning rate with restarts every epoch, that is, the learning
-     rate starts high then incrementally decreases to
-     $1\mathrm{e}{-12}$ over $N$ steps, where $N$ is the number of
-     batches in an epoch.  We use the Adam optimizer, using standard
-     parameters, with a learning rate of $0.001$ for layer importance
-     parameter ($w$ in \cref{sec:bpe-features}),
-    \begin{wraptable}{r}{4.8cm}
+
+    \subsection{Training}
+
+            \begin{wraptable}{r}{4.8cm}
 		\centering
 		\begin{tabular}{lr} \\
 			Parameter & Value \\
@@ -482,7 +490,7 @@
 			% optimizers
 			Optimizer & Adam \\
 			Learning rate & 0.001 \\
-			Learning rate$_{xlmr}$ & 1e-06 \\
+			Learning rate$_{xlmr}$ & \num{1e-06} \\
 			% regularization
             Weight decay & 0.05 \\
 			Label smoothing & 0.03 \\
@@ -498,26 +506,40 @@
      training the model. Slashed indicate the value of a parameter
      when we finetune or extract features.}
 	\end{wraptable}
-        the parameters of the word LSTM, of the classification layer, and
-     of the BPE-combination module (when an RNN is used).  For the transformer
-     parameters, we use a lower learning rate of $1\mathrm{e}{-6}$. We
-     summarize the hyperparameters used in \cref{tab:parameters}.
+    
+     In our experiments we consider two possible training regimes. In
+     the first regime we finetune the XLM-R models parameters, in the
+     second regime we only extract weights for BPE tokens, that is, we
+     use the model as a feature extractor. In all cases, we use
+     end-to-end training.
+     
+                             When finetuning the model we freeze the
+     XLM-R parameters for the first epoch, (effectively not finetuning
+     at first).  When training the model we use a cosine annealing
+     learning rate \citep{loshchilov2016sgdr} with restarts every
+     epoch, that is, the learning rate starts high then incrementally
+     decreases to \num{1e-12} over $N$ steps, where $N$ is the
+     number of batches in an epoch.  We use the Adam optimizer, using
+     standard parameters, with a learning rate of $0.001$ for layer
+     importance parameter ($w$ in \cref{sec:bpe-features}), the
+     parameters of the word LSTM, of the classification layer, and of
+     the BPE-combination module (when an RNN is used).  For the
+     transformer parameters, we use a lower learning rate of
+     \num{1e-6}.  We summarize the hyperparameters used in
+     \cref{tab:parameters}.
 
             As an additional regularization in addition to weight
      decay and adaptive learning rate, we use dropout througout the
-     model.  Generally, we apply dropoout before some feature is
+     model.  Generally, we apply dropout before some feature is
      computed. We summarize the dropout as:
 
     \begin{enumerate}
-    \item
-      % The first thing our model does is compute features
-      %     for each BPE-token,
-          We replace 20 percent of the BPE tokens with
+        \item We replace 20 percent of the BPE tokens with
      \texttt{<UNK>}.
-        \item Then, we compute a weighted sum of the layer
-     representations, to regularize this we we apply dropout on layers
-     with a probability of $0.1$, that is we set all representations
-     in the layer to $0$.
+             \item Then, we compute a weighted sum of the layer
+     representations, to regularize this operation we we apply dropout
+     on layer representations with a probability of $0.1$, that is we
+     set all representations in the layer to $0$.
         \item We then combine the token vectors into word vectors
      and apply a dropout of $0.4\%$, and pass these into the
      Word-LSTM.
@@ -562,7 +584,7 @@
 	\centering
 	\begin{tabular}{l|c|cccc|cccc}
 		& & \multicolumn{4}{c}{Finetuning} & \multicolumn{4}{c}{Feature extraction} \\
-		Treebank & Baseline & Fst & Sum & Mean & RNN & Fst & Sum & Mean & RNN \\
+		Treebank & Baseline & First & Sum & Mean & RNN & First & Sum & Mean & RNN \\
 		\hline
 		Basque-BDT      & .676 & .857 & .884 & .877 & \textbf{.901} & .759 & .789 & .780 & \textbf{.834} \\
 		Finnish-TDT     & .751 & .961 & .958 & .960 & \textbf{.965} & .853 & .856 & .847 & \textbf{.899} \\
@@ -596,8 +618,8 @@
     
                 Focusing on the finetuning regime only, we see the
      largest benefits of the RNN method for Basque with an increased
-     performance of $3.25$ points, and Turkish ($2.7$ points) over
-     using mean or averaging. The Fst method for Basque and Turkish
+     performance of $3.25$ points, and $2.7$ points for Turkish over
+     using mean or averaging. The First method for Basque and Turkish
      performs much worse with a decrease of $4.4$ percentage points
      for Basque and $3.6$ points for Turkish with respect to the RNN method.
     %\jp{In this paragraph we don't know the reference for ``increase'' or ``decrease''}
@@ -621,7 +643,7 @@
 	\centering
 	\begin{tabular}{l|cccc|cccc}
 		 & \multicolumn{4}{c}{Finetuning} & \multicolumn{4}{c}{Feature extraction} \\
-		Treebank & Fst & Sum & Mean & RNN & Fst & Sum & Mean & RNN  \\
+		Treebank & First & Sum & Mean & RNN & First & Sum & Mean & RNN  \\
 		 \hline
 		% agglutinative languages
         Basque-BDT      & .739 & .802 & .790 & \textbf{.835} & .657 & .715 & .703 & \textbf{.774} \\
@@ -1282,26 +1304,25 @@
         \end{axis}
 	\end{tikzpicture}
 
-         \caption{\label{fig:bpe_lens} Per-language accuracy on tokens
-     with different numbers of BPE components, for the finetuning
-     training regime. The last data point on the $x$-axis refers to
-     all tokens composed of seven or more BPE tokens.  We indicate the
-     method by encoding {\color{brown} Fst as brown}, {\color{green} summation as green}, {\color{blue} averaging as
-     blue} and {\color{red} RNN as red}. The accuracy is given on the $y$-axis. We
-     show the the Agresti-Coull approximation of a 95\%-confidence
-     interval for the RNN method \citep{agresti1998approximate}.  We
-     do not show the intervals for other methods to avoid excessive
-     clutter.}
+             \caption{\label{fig:bpe_lens} Per-language accuracy on
+     tokens with different numbers of BPE components, for the
+     finetuning training regime. The last data point on the $x$-axis
+     refers to all tokens composed of seven or more BPE tokens.  We
+     indicate the method by encoding {\color{brown} First as brown},
+     {\color{green} summation as green}, {\color{blue} averaging as
+     blue} and {\color{red} RNN as red}. The accuracy is given on the
+     $y$-axis. We show the the Agresti-Coull approximation of a
+     95\%-confidence interval for the RNN method
+     \citep{agresti1998approximate}.  We do not show the intervals for
+     other methods to avoid excessive clutter.}
 	\end{figure}
-
-	
 	
 	\section{Discussion}
 
 %    \subsection{BPE composition methods}
     % For our experiments
     % We see that
-        For morphological feature prediction, the RNN method is more
+        For predicting morphological features, the RNN method is more
      effective than the other proposed methods (summing, averaging or
      taking the first BPE token). This holds regardless of training
      regime (finetuning versus feature extraction) and across
@@ -1313,7 +1334,7 @@
      terms, information about the order of elements in morphology
      allows a system to determine what is a stem, prefix, or suffix.
       Thus allowing a model to collect more predictive information
-     from sub-word embeddings.
+     from token vectors.
 
              We can suspect that the average BPE per word ratio in a
      language affects the performance of the composition method
@@ -1340,7 +1361,7 @@
         Our sample of languages contain both fusional and
      agglutinative languages, and the typology does not appear to have
      an effect in our experiments. We see about the same trends for
-     the fusional languages with a high BPE-to-token ratio as the
+     the fusional languages with a high BPE per word ratio as the
      agglutinative languages.
 
     %%%%%%%%
@@ -1356,9 +1377,9 @@
     %\adam{Effect of training data?}
     %\adam{This may be influenced by our choice of creating composite tags instead of predicting each feature individually.}
 
-    \subsection{Fst method}
+    \subsection{First method}
 
-            The idea behind the Fst method is that the transformer is
+            The idea behind the First method is that the transformer is
      sufficiently powerful to pool the relevant information into the
      first BPE token vector.
     %
@@ -1378,7 +1399,7 @@
      increases, showing a gain of $3.2$ percentage points and $7.7$
      points for finetuning and feature extraction respectively.
 
-                             While the Fst method may be effective,
+                             While the First method may be effective,
      primarily because of the expressivity of the transformer
      architecture, the method forces the model to push the predictive
      information of several BPE token vectors into the first one. This
@@ -1418,7 +1439,7 @@
      information across multiple BPE token vectors more efficiently than
      pushing the information into the first token. This is shown by
      the large difference in accuracy between finetuning and feature extraction
-     for the Fst and averaging method.
+     for the First and averaging method.
    
 \begin{figure}%{r}{8cm}
     \centering  
@@ -1498,18 +1519,27 @@
     \label{fig:scatter_len}
     \end{figure}
 
-    \section{Parameterization of Fst, Sum and Mean}
+    \subsection{Parameterization of First, Sum and Mean}
 
-        One question that arises when we look at
-     \cref{fig:bpe_lens}, specifically considering the performance on
-     words composed of only one BPE token, is whether this is due to
-     the additional parameters in the RNN model, or the added
-     contextual information of the words. We would expect that for the
-     words with only one BPE token, the performance of the model would
-     be the same for all methods. But for practical reasons we push
-     all word vectors through an RNN, effectively doing a non-linear
-     transformation with $\mathsf{tanh}$ activations on the words
-     composed of only one BPE token.
+     %   One question that arises when we look at
+     %\cref{fig:bpe_lens}, specifically considering the performance on
+     %words composed of only one BPE token, is whether  is due to
+     %the additional parameters in the RNN model, or the added
+     %contextual information of the words.
+
+    
+        One question that arises when looking at \cref{fig:bpe_lens},
+     specifically considering the performance on words composed of
+     only one BPE token, is whether the RNNs performance is better due
+     the contextual information it adds or that it contains more
+     parameters and thus are able to model the data better.
+    %
+         We would expect that for the words with only one BPE token,
+     the performance of the model would be the same for all
+     methods. But for practical reasons we push all word vectors
+     through an RNN, effectively doing a non-linear transformation
+     with $\mathsf{tanh}$ activations on the words composed of only
+     one BPE token.
     %
                 Typically, the difference in accuracy between various
      methods for one-BPE-token words is small (barely visible in
@@ -1520,10 +1550,14 @@
      words of BPE length one, because we will have more accurarate
      representations of the contextual words.
 
-            We test this by parameterizing the Fst, Sum, and Mean
-     method. This is sone by adding a non-linear transformation with
-     $\mathsf{ReLU}$ activation before we compute the Sum, Mean, or
-     select the first BPE-token.
+         We test this by parameterizing the First, Sum, and Mean
+     method.  This is done by passing all BPE vectors throught a
+     non-linear transformation with $\mathsf{ReLU}$ activation before
+     we compute the Sum, Mean, or select the first BPE-token.
+    
+    %This is done by adding a non-linear transformation
+    % with $\mathsf{ReLU}$ activation before we compute the Sum, Mean,
+    % or select the first BPE-token.
 
 
         \begin{table}%[h]
@@ -1531,22 +1565,31 @@
 	\centering
 	\begin{tabular}{l|c|cccc|cccc}
 		& & \multicolumn{4}{c}{Finetuning} & \multicolumn{4}{c}{Feature extraction} \\
-		Treebank & Baseline & Fst & Sum & Mean & RNN & Fst & Sum & Mean & RNN \\
+		Treebank & Baseline & First & Sum & Mean & RNN & First & Sum & Mean & RNN \\
 		\hline
-		Basque-BDT      & .676 & .857 & .884 & .877 & \textbf{.901} & .759 & .793 & .794 & \textbf{.834} \\
-		Finnish-TDT     & .751 & .961 & .958 & .960 & \textbf{.965} & .853 & .856 & .855 & \textbf{.899} \\
-		Turkish-IMST    & .620 & .848 & .859 & .855 & \textbf{.884} & .742 & .722 & .729 & \textbf{.775} \\
-		Estonian-EDT    & .740 & .956 & .955 & .955 & \textbf{.961} & .855 & .856 & .853 & \textbf{.901} \\
-		Spanish-AnCora  & .842 & .977 & .977 & .977 & \textbf{.979} & .951 & .954 & .952 & \textbf{.962} \\
-		Arabic-PADT     & .770 & .946 & .946 & .947 & \textbf{.951} & .920 & .923 & .920 & \textbf{.936} \\
-		Czech-CAC       & .771 & .968 & .968 & .968 & \textbf{.975} & .863 & .887 & .881 & \textbf{.924} \\
-		Polish-LFG      & .657 & .956 & .953 & .953 & \textbf{.959} & .828 & .844 & .840 & \textbf{.878} \\
+		Basque-BDT      & .676 & .864 & .894 & .890 & \textbf{.901} & .772 & .793 & .794 & \textbf{.834} \\
+		Finnish-TDT     & .751 & .958 & .959 & .961 & \textbf{.965} & .857 & .856 & .855 & \textbf{.899} \\
+		Turkish-IMST    & .620 & .850 & .875 & .867 & \textbf{.884} & .742 & .722 & .729 & \textbf{.775} \\
+		Estonian-EDT    & .740 & .956 & .958 & .958 & \textbf{.961} & .865 & .856 & .853 & \textbf{.901} \\
+		Spanish-AnCora  & .842 & .978 & .977 & .978 & \textbf{.979} & .953 & .954 & .952 & \textbf{.962} \\
+		Arabic-PADT     & .770 & .949 & .945 & .947 & \textbf{.951} & .925 & .923 & .920 & \textbf{.936} \\
+		Czech-CAC       & .771 & .969 & .972 & .972 & \textbf{.975} & .873 & .887 & .881 & \textbf{.924} \\
+		Polish-LFG      & .657 & .957 & .953 & .955 & \textbf{.959} & .832 & .844 & .840 & \textbf{.878} \\
         \hline
-        Average         & .728 & .933 & .937 & .936 & \textbf{.946} & .846 & .854 (-.002) & .853 ($+.002$) & \textbf{.888} \\
+        Average         & .728 & .935 & .942 & .941 & \textbf{.946} & .852 & .854 & .853 & \textbf{.888} \\
 	\end{tabular}
-    	\caption{\label{tab:parameters} The accuracy of morphological tagging when we let the fst, sum and mean method use a linear transformation layer.}
-    
+        	\caption{\label{tab:commutative-parameters} The accuracy
+     of morphological tagging when we parameterize let the First, Sum and Mean method
+     with a non-linear transformation layer.}
     \end{table}
+
+                Our expriment in \cref{tab:commutative-parameters}
+     shows that while adding parameters to the First, Sum and Mean
+     method improve their performance slightly, ranging between a
+     improvements of $0.2$ and $0.6$ percentage points, the
+     performance never exceed that of the RNN method.
+
+    
 
     \section{Conclusions and Future Work}
 
@@ -1556,31 +1599,36 @@
     % than summation, averaging or taking the first BPE token.  This
     % have implications for systems that use pretrained models with BPE
     % tokenization that perform some type of word classification. 
-    
-                In conclusion, our results indicate that using an RNN
-     to compose word-vector representations from BPE-token vector representations is more efficient
-     than two commutative methods, summing and averaging, and also
-     more effective than letting a transformer model automatically pool the
-     predictive word-level information into a single BPE token vector.
+
+        In conclusion, our results indicate that using an RNN to
+     compose word-vector representations from BPE-token vector
+     representations is more efficient than two commutative methods,
+     summing and averaging, and also more effective than letting a
+     transformer model automatically pool the predictive word-level
+     information into a single BPE token vector.
     %
-    We show this for the task of morphological sequence classification in 
-     eight different languages with varying morphology and word-lengths in term of BPE
-     tokens, aswell as for two training regimes, finetuning and
-     feature extraction.
+        We show this for the task of morphological sequence
+     classification in eight different languages with varying
+     morphology and word-lengths in term of BPE tokens, aswell as for
+     two training regimes, finetuning and feature extraction.
 
     % consequences for probing?
-    % Lexical probes om pretrained word-embeddings using the Fst model will be bad.
+    % Lexical probes om pretrained word-embeddings using the First model will be bad.
      
     In future work we want to continue experimenting with the different
     BPE token-vector composition methods, specifically looking at more complex
     syntactic and semantic tasks, such as dependency and/or
     constituency parsing, semantic role labeling and named entity recognition. 
     %
-        We also wish to run our experiments on the hundreds
-     of available UD treebanks to improve the robustness of our
-     results.
+            We also wish to run our experiments on the hundreds of
+     available UD treebanks to improve the robustness of our results.
     
-%	\section*{Acknowledgments}
+	\section*{Acknowledgments}
+            The research reported in this paper was supported by grant
+     2014-39 from the Swedish Research Council, which funds the Centre
+     for Linguistic Theory and Studies in Probability (CLASP) in the
+     Department of Philosophy, Linguistics, and Theory of Science at
+     the University of Gothenburg.
 
 	% include your own bib file like this:
 	\bibliographystyle{coling}
