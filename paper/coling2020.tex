@@ -436,10 +436,10 @@
      final output as our word representation.
 
      \subsubsection{Word-level feature sets and classification}
-         The above operation produces one contextual vector per word,
+         The above operation produces one BPE-contextualized vector per word,
      which is passed to an LSTM (regardless of the method), to take
      into account the word context. That is, the contextual
-     information the Transformer provides in in terms of BPE tokens,
+     information that the Transformer provides is in terms of BPE tokens,
      while the LSTM takes context words (that is, BPE tokens composed
      into words) into account.
     %
@@ -1521,25 +1521,18 @@
 
     \subsection{Parameterization of First, Sum and Mean}
 
-     %   One question that arises when we look at
-     %\cref{fig:bpe_lens}, specifically considering the performance on
-     %words composed of only one BPE token, is whether  is due to
-     %the additional parameters in the RNN model, or the added
-     %contextual information of the words.
-
-    
         One question that arises when looking at \cref{fig:bpe_lens},
      specifically considering the performance on words composed of
-     only one BPE token, is whether the RNNs performance is better due
-     the contextual information it adds or that it contains more
-     parameters and thus are able to model the data better.
+     only one BPE token is the following. Can the superiority of the RNNs be attributed to
+     its ability to take context into account, or simply to its containing more
+     parameters and extra layers?
     %
          We would expect that for the words with only one BPE token,
      the performance of the model would be the same for all
      methods. But for practical reasons we push all word vectors
      through an RNN, effectively doing a non-linear transformation
      with $\mathsf{tanh}$ activations on the words composed of only
-     one BPE token.
+     one BPE token for each of them.
     %
                 Typically, the difference in accuracy between various
      methods for one-BPE-token words is small (barely visible in
@@ -1550,8 +1543,8 @@
      words of BPE length one, because we will have more accurarate
      representations of the contextual words.
 
-         We test this by parameterizing the First, Sum, and Mean
-     method.  This is done by passing all BPE vectors throught a
+         We test this hypothesis by parameterizing the First, Sum, and Mean
+     method.  This is done by passing all BPE vectors through a
      non-linear transformation with $\mathsf{ReLU}$ activation before
      we compute the Sum, Mean, or select the first BPE-token.
     
@@ -1583,10 +1576,10 @@
      with a non-linear transformation layer.}
     \end{table}
 
-                Our expriment in \cref{tab:commutative-parameters}
+                Our expriment, whose results are shown in \cref{tab:commutative-parameters},
      shows that while adding parameters to the First, Sum and Mean
      method improve their performance slightly, ranging between a
-     improvements of $0.2$ and $0.6$ percentage points, the
+     improvements of $0.2$ and $0.6$ percentage points, their
      performance never exceed that of the RNN method.
 
     
@@ -1605,7 +1598,7 @@
      representations is more efficient than two commutative methods,
      summing and averaging, and also more effective than letting a
      transformer model automatically pool the predictive word-level
-     information into a single BPE token vector.
+     information into a single BPE token vector representation.
     %
         We show this for the task of morphological sequence
      classification in eight different languages with varying
