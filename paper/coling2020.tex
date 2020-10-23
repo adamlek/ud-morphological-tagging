@@ -1403,14 +1403,12 @@
      primarily because of the expressivity of the transformer
      architecture, the method forces the model to push the predictive
      information of several BPE token vectors into the first one. This
-     adds an implicit objective to the model, that appears to degrade
-     the performance, which is not strictly necessary since we can
-     pool this information.
-     %and appear to
-     %degrade the performance.
-    \jp{... since doing so apears to degrade performance. (?)}
-     %
-    % This present 
+     puts an additional burden on the transformer model, and we believe that this
+     is the reason for the performance degradation which we observe.
+     Besides, putting this burden on the model is not necessary: pooling
+     information from several BPE vectors can be done effectively using additional layers.
+     % which is not strictly necessary since we can pool this information.
+     % JP: I think that this is ala
 
     \subsection{Sum and Mean}
                 When we consider the commutative methods of combining
