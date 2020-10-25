@@ -8,12 +8,14 @@ from itertools import chain
 from typing import List
 from collections import Counter
 import numpy as np
+from args import args
 
 device = torch.device('cuda:0')
 
-np.random.seed(999)
-torch.manual_seed(999)
-torch.cuda.manual_seed(999)
+random.seed(args.seed)
+np.random.seed(args.seed)
+torch.manual_seed(args.seed)
+torch.cuda.manual_seed(args.seed)
 
 class XLMRUDDataloader():
     """Documentation for XLMRDataloader

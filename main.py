@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import pickle
 import numpy as np
+import random
 import pprint
 from dataloader import XLMRUDDataloader, dataloader
 from IPython import embed
@@ -13,13 +14,15 @@ from collections import Counter, defaultdict
 from args import args
 import pytorch_warmup as warmup
 import sklearn.metrics as m
+from itertools import chain
+import toolz as tz
 
 device = torch.device('cuda:0')
 
-
-np.random.seed(999)
-torch.manual_seed(999)
-torch.cuda.manual_seed(999)
+random.seed(args.seed)
+np.random.seed(args.seed)
+torch.manual_seed(args.seed)
+torch.cuda.manual_seed(args.seed)
 
 def get_opts(model, num_steps):
     opt = optim.AdamW([
@@ -27,12 +30,9 @@ def get_opts(model, num_steps):
         {'params': model.msd_tagger.parameters()},
         {'params': model.msd_transform.parameters()},
         {'params': model.word_lstm.parameters()},
-        {'params': model.char_rnn.parameters()},
-        #{'params': model.context_attention.parameters()},
         {'params': model.xlmr_model.parameters(), 'lr': args.xlmr_lr}
     ], lr=args.lr, weight_decay=args.weight_decay, amsgrad=False)
     
-    #lr_scheduler = optim.lr_scheduler.StepLR(opt, step_size=5, gamma=0.1)
     lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(opt, T_max=num_steps, eta_min=args.min_lr)
     return opt, lr_scheduler
     
@@ -64,6 +64,9 @@ def xlmr_main(treebank, mode):
     warmup_scheduler = 0
     #print(model)
     dev_accs = []
+    dev_losses = []
+    train_losses = []
+    
     patience_counter = 0
 
     print(treebank)
@@ -93,10 +96,12 @@ def xlmr_main(treebank, mode):
         
         dev_loss, dev_acc, dev_sacc = validate(dev_iter, model, criterion, criterion2)
         dev_accs.append(dev_acc)
+        dev_losses.append(dev_loss)
+        train_losses.append(train_loss)
 
         # save model if acc >= previous best model
         if dev_acc >= best_dev_score:
-            torch.save(model.state_dict(), f'./models/{treebank.lower()}-{mode}.pt')
+            torch.save(model.state_dict(), f'./models/{treebank.lower()}-{mode}-finetune={args.finetune}-chars={args.use_char_representations}.pt')
             best_dev_score = dev_acc
             patience_counter = 0
         else:
@@ -105,14 +110,14 @@ def xlmr_main(treebank, mode):
         print(epoch, ':',
               np.round(train_loss,3), np.round(dev_loss, 3), ':', 
               np.round(train_acc, 3), np.round(dev_acc, 3), ':',
-              c) # Accuracy for complete sentences
+              patience_counter) # Accuracy for complete sentences
 
         # early stopping
         if args.early_stopping:
             if patience_counter == args.early_stopping_patience:
                 break
         
-    model.load_state_dict(torch.load(f'./models/{treebank.lower()}-{mode}.pt'))
+    model.load_state_dict(torch.load(f'./models/{treebank.lower()}-{mode}-finetune={args.finetune}-chars={args.use_char_representations}.pt'))
     test_loss, test_acc, test_sacc, outp = validate(test_iter,
                                                     model,
                                                     criterion,
@@ -120,6 +125,8 @@ def xlmr_main(treebank, mode):
                                                     test=True)
 
     bpe_accuracy = bpe_len_accuracy(outp)
+    with open(f'./results/{treebank.lower()}-{mode}-finetune={args.finetune}-chars={args.use_char_representations}', '+wb') as f:
+        pickle.dump((train_losses, dev_losses, dev_accs, bpe_accuracy), f)
     
     print(f'TOKEN ACCURACY: {np.round(test_acc,3)} SENT ACCURACY: {np.round(test_sacc, 3)}')
     
@@ -129,7 +136,7 @@ def bpe_len_accuracy(outp):
     bpe_accuracies = defaultdict(list)
     for pred, gold, alignment in outp:
         for y_hat, y, bpe_tokens in zip(pred, gold, alignment):
-            bpe_accuracies[len(bpe)].append(y_hat==y)
+            bpe_accuracies[len(bpe_tokens)].append((y_hat==y).item())
     return bpe_accuracies
     
 
@@ -156,9 +163,12 @@ def train(data_iter, model, criterion, criterion2, opt, lr_scheduler, warmup_sch
                 p.requires_grad = False
         #model.xlmr_model.requires_grad = False
     else:
-        for n, p in model.named_parameters():
-            if n.startswith('xlmr'):
-                p.requires_grad = True
+        if args.finetune:
+            for n, p in model.named_parameters():
+                if n.startswith('xlmr'):
+                    p.requires_grad = True
+        else:
+            pass
         #model.xlmr_model.requires_grad = True
     
     for i, batch in enumerate(data_iter):
@@ -173,19 +183,9 @@ def train(data_iter, model, criterion, criterion2, opt, lr_scheduler, warmup_sch
         output, alignment = model(sentences, tokens, char_features)#, alignment)
 
         targets = label_smoothing(features, num_labels)
-        
-#        loss_v2 = criterion2(output.contiguous().view(-1, output.size(-1)),
-#                             features.contiguous().view(-1))
         loss_v2 = criterion2(output.contiguous().view(-1, output.size(-1)),
                              targets.contiguous().view(-1, targets.size(-1)))
-        #embed()
-        #assert False
-
         e_loss += loss_v2.item()
-
-        #pred_nopad, gold_nopad = remove_pad(torch.argmax(output, -1),
-        #                                    features,
-        #                                    seq_mask)
 
         pred = torch.argmax(output.contiguous().view(-1, output.size(-1)),-1) 
         gold = features.view(-1)
@@ -221,18 +221,13 @@ def validate(data_iter, model, criterion, criterion2, test=False, output_report=
         
         with torch.no_grad():
             output, alignment = model(sentences, tokens, char_features)#, alignment)
-            #output, alignment = model(bpe_features, tokens, char_features)#, alignment)
-            
-        #features = label_smoothing(features)
-        #embed()
-        #assert False    
+
         loss_v2 = criterion(output.contiguous().view(-1, output.size(-1)),
                             features.contiguous().view(-1))
 
         loss_v = loss_v2
         e_loss += loss_v.item()
 
-        #pred_nopad, gold_nopad = remove_pad(torch.argmax(output, -1), features, seq_mask)
         pred = torch.argmax(output.contiguous().view(-1, output.size(-1)),-1) 
         gold = features.view(-1)
         correct += (pred==gold).sum().item()
@@ -282,37 +277,71 @@ def dataset_test(treebank):
     for i, x in enumerate(train_iter):
         print(i)
 
-if __name__ == '__main__':
+def probe_model(treebank, mode):
+    ddir = 'data/'
+    train_i, dev_i, test_i, tokens, lemma, features = dataloader(ddir,
+                                                                 treebank,
+                                                                 args.batch_size)
+
+    ud_loader = XLMRUDDataloader(train_i, dev_i, test_i, tokens, lemma, features)
+
+    num_labels = len(features.vocab)
+    num_tokens = len(tokens.vocab)
+    model = MorphologicalTagger(num_labels, num_tokens, len(ud_loader.chars), mode).to(device)
+    model.load_state_dict(torch.load(f'./models/{treebank.lower()}-{mode}-finetune={args.finetune}-chars={args.use_char_representations}.pt'))
+
+    return F.softmax(model.bpe2word.layer_w, -1)
+
+def add_zero(num):
+    num = str(num)[2:]
+    if len(num) == 1:
+        num += '0'
+        return num
+    elif num.startswith('0'):
+        return num[1:]
+    else:
+        return num
+
+
+def probe_language(treebank):
+    #print('finetune:', args.finetune)
+    modes_lw = torch.zeros(4,13)
+    for i, mode in enumerate([7,8,9,3]):
+        layer_weights = probe_model(treebank, mode)
+        modes_lw[i,:] = layer_weights
+
+    for j in range(modes_lw.size(-1)):
+        imp_v = [np.round(x, 2) for x in modes_lw[:,j].tolist()] 
+        s = ' & '.join([f'{j}']+[f'\cellcolor{{red!{add_zero(v)}}}'+str(v) for v in imp_v])+'\\\\' 
+        print(s)
+
+    
+
+def train_and_test_all_models():
     mode_map = {'sum':1,
                 'mean':2,
                 'rnn':3,
                 'att1':4,
                 'att3':5,
                 'max':6,
-                'final':7}
+                'first':7,
+                'sum_p':8,
+                'mean_p':9}
     
     tb_scores = {}
     
-    for treebank in ['UD_Basque-BDT',
-                    'UD_Finnish-TDT',
-                    'UD_Arabic-PADT',
-                    'UD_Spanish-AnCora',
-                    'UD_Turkish-IMST',
-                    'UD_Czech-CAC']:
-                    #'UD_Turkish-PUD',
-                    #'UD_English-PUD',
-                    #'UD_Russian-PUD',
-                    #'UD_Swedish-PUD',
-                    #'UD_Turkish-PUD',
-                    #'UD_Czech-PUD',
-                    #'UD_Arabic-PUD',
-                    #'UD_Finnish-PUD',
-                    #'UD_Estonian-EDT',
-                    #'UD_German-GSD',
-                    #'UD_Finnish-FTB',]:
+    for treebank in ['UD_Basque-BDT', # agglut
+                    'UD_Finnish-TDT', # agglut
+                    'UD_Turkish-IMST', # agglut
+                    'UD_Estonian-EDT', # agglut
+                    'UD_Spanish-AnCora', # fusional
+                    'UD_Arabic-PADT', # fusional
+                    'UD_Czech-CAC', # fusional 
+                    'UD_Polish-LFG', # fusional
+                    ]:                    
 
         scores = {'token':[], 'bpe':[]}
-        for mode in [1,3]:
+        for mode in [7]:
             print('=======================')
             print('mode =', mode)
             print('=======================')
@@ -324,7 +353,14 @@ if __name__ == '__main__':
         tb_scores[treebank[3:]] = ' & '.join(
             map(lambda x: str(x), scores['token']+scores['bpe']))+'\\\\'
         
-    #with open('latest_run.txt', '+w') as f:
     for k, v in tb_scores.items():
         print(k, ' &   & ' + v)
     
+
+if __name__ == '__main__':
+    tb = 'UD_Czech-CAC'
+    args.finetune = True
+    probe_language(tb)
+    print('\\hline')
+    args.finetune = False
+    probe_language(tb)

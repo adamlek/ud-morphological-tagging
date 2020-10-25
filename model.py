@@ -134,6 +134,9 @@ class MorphologicalTagger(nn.Module):
         if args.use_word_lstm:
             sequence, _ = self.word_lstm(sequence)
 
+        #embed()
+        #assert False
+
         #sequence = self.context_attention(sequence)
 
         # residual conntection
@@ -266,6 +269,9 @@ class BPE2Word(nn.Module):
             #self.lstm = nn.LSTM(1024, 1024, bidirectional=True, batch_first=True)
             self.ln1 = nn.LayerNorm(self.xlmr_dim, elementwise_affine=False)
             self.rnn = nn.LSTM(self.xlmr_dim, self.xlmr_dim, bidirectional=True, batch_first=True)
+        elif mode in [7,8,9]:
+            self.feature_transform = nn.Sequential(nn.Linear(self.xlmr_dim, self.xlmr_dim),
+                                                   nn.ReLU())
 
     def layer_attention(self, bpe_features: List[torch.Tensor]) -> List[torch.Tensor]:
         w = torch.mul(self.layer_w, self.layer_dropout)
@@ -279,9 +285,6 @@ class BPE2Word(nn.Module):
         # layer dropout, set all representations of layer j to 0.
         self.layer_dropout = torch.mul(self.layer_dropout,
                                        (torch.randn(self.layers).uniform_().to(device)>self.layer_dropout_p).float()).to(device)
-
-        # to cuda
-        #bpe_features = list(map(lambda x: x.to(device), bpe_features))
 
         # apply layer attention, weighted sum of all layers
         bpe_features = self.layer_attention(bpe_features)
@@ -298,6 +301,10 @@ class BPE2Word(nn.Module):
             return self.bpe_max(bpe_features, alignment, max_len)
         elif self.mode == 7:
             return self.bpe_first(bpe_features, alignment, max_len)
+        elif self.mode == 8:
+            return self.bpe_sum_withparameters(bpe_features, alignment, max_len)
+        elif self.mode == 9:
+            return self.bpe_mean_withparameters(bpe_features, alignment, max_len)
         else:
             pass
 
@@ -318,21 +325,60 @@ class BPE2Word(nn.Module):
                     batch_features[i,j,:] = bpe_features[i,token[0]:token[-1]+1,:].sum(0)
 
         return batch_features, None
-    
+
+    def bpe_sum_withparameters(self,
+                               bpe_features: List[torch.Tensor],
+                               alignment: List[List[int]],
+                               max_len: int) -> torch.Tensor:
+
+        batch_features = torch.zeros(len(walignment), max_len, self.xlmr_dim).to(device)
+
+        for i, sentence in enumerate(alignment):
+            #bpe_t = self.transform(bpe_features[i].to(device))
+            for j, token in enumerate(sentence):
+                if len(token) == 1:
+                    batch_features[i,j,:] = bpe_features[i,token[0],:]
+                else:
+                    features_transformed = self.feature_transform(
+                        bpe_features[i,token[0]:token[-1]+1,:])
+                    batch_features[i,j,:] = features_transformed.sum(0)
+                    #batch_features[i,j,:] = bpe_features[i,token[0]:token[-1]+1,:].sum(0)
+
+        return batch_features, None
+        
     def bpe_mean(self,
                  bpe_features: List[torch.Tensor],
                  alignment: List[List[int]],
                  max_len: int) -> torch.Tensor:
-        
-        batch_features = torch.zeros(len(bpe_features), max_len, self.xlmr_dim).to(device)
+
+        batch_features = torch.zeros(len(alignment), max_len, self.xlmr_dim).to(device)
+
         for i, sentence in enumerate(alignment):
             #bpe_t = self.transform(bpe_features[i].to(device))
-            bpe_t = bpe_features[i].to(device)
             for j, token in enumerate(sentence):
                 if len(token) == 1:
-                    batch_features[i,j,:] = bpe_t[token[0]]
+                    batch_features[i,j,:] = bpe_features[i,token[0],:]
                 else:
-                    batch_features[i,j,:] = bpe_t[token[0]:token[-1]+1,:].t().mean(1)
+                    batch_features[i,j,:] = bpe_features[i,token[0]:token[-1]+1,:].mean(0)
+    
+        return batch_features, None
+
+    def bpe_mean_withparameters(self,
+                                bpe_features: List[torch.Tensor],
+                                alignment: List[List[int]],
+                                max_len: int) -> torch.Tensor:
+
+        batch_features = torch.zeros(len(alignment), max_len, self.xlmr_dim).to(device)
+
+        for i, sentence in enumerate(alignment):
+            for j, token in enumerate(sentence):
+                if len(token) == 1:
+                    batch_features[i,j,:] = bpe_features[i,token[0],:]
+                else:
+                    features_transformed = self.feature_transform(
+                        bpe_features[i,token[0]:token[-1]+1,:])
+                    batch_features[i,j,:] = features_transformed.mean(0)
+
         return batch_features, None
 
     def bpe_lstm(self,
@@ -365,11 +411,16 @@ class BPE2Word(nn.Module):
         #rnn_input = self.bpe_dropout(batch_features)
         _, (hx, cx) = self.rnn(batch_features)
         sentence_lens = [len(a) for a in alignment]
-        output_features = torch.zeros(bpe_features.size(0), max(sentence_lens), self.xlmr_dim).to(device)
+        output_features = torch.zeros(bpe_features.size(0), max(sentence_lens), self.xlmr_dim*2).to(device)
         curr_i = 0
         for i, x in enumerate(sentence_lens):
             try:
-                output_features[i,:abs(curr_i - (curr_i+x)),:] = hx[:,curr_i:curr_i+x,:].sum(0)
+                #word_repr = hx[:,curr_i:curr_i+x,:].sum(0)
+                word_repr = torch.cat([hx[0,curr_i:curr_i+x,:], hx[1,curr_i:curr_i+x,:]], 1)
+                #embed()
+                #assert False
+                #word_repr = hx[:,curr_i:curr_i+x,:]
+                output_features[i,:abs(curr_i - (curr_i+x)),:] = word_repr
                 curr_i += x
             except:
                 print('batch reconstruction error')
@@ -395,7 +446,24 @@ class BPE2Word(nn.Module):
                         bpe_t[token[0]:token[-1]+1,:].unsqueeze(1).to(device))
         return batch_features, None
 
+
     def bpe_max(self,
+                 bpe_features: List[torch.Tensor],
+                 alignment: List[List[int]],
+                 max_len: int) -> torch.Tensor:
+
+        batch_features = torch.zeros(len(alignment), max_len, self.xlmr_dim).to(device)
+
+        for i, sentence in enumerate(alignment):
+            for j, token in enumerate(sentence):
+                if len(token) == 1:
+                    batch_features[i,j,:] = bpe_features[i,token[0],:]
+                else:
+                    batch_features[i,j,:] = torch.max(bpe_features[i,token[0]:token[-1]+1,:], 0)[0]
+    
+        return batch_features, None
+    
+    def bpe_max_old(self,
                 bpe_features: List[torch.Tensor],
                 alignment: List[List[int]],
                 max_len: int) -> torch.Tensor:
@@ -417,12 +485,13 @@ class BPE2Word(nn.Module):
                   alignment: List[List[int]],
                   max_len: int) -> torch.Tensor:
         
-        batch_features = torch.zeros(len(bpe_features), max_len, self.xlmr_dim).to(device)
+        batch_features = torch.zeros(len(alignment), max_len, self.xlmr_dim).to(device)
+
         for i, sentence in enumerate(alignment):
-            bpe_t = bpe_features[i].to(device)
-            
             for j, token in enumerate(sentence):
-                batch_features[i,j,:] = bpe_t[token[0]]
+                first_token = self.feature_transform(bpe_features[i,token[0],:])
+                batch_features[i,j,:] = first_token
+    
         return batch_features, None
     
 class BPEAttention(nn.Module):

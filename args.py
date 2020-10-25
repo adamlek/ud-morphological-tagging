@@ -4,7 +4,7 @@ a_parser = ArgumentParser()
 
 ## model architecture
 # representations based on characters
-a_parser.add_argument('--use_char_representations', type=bool, default=True)
+a_parser.add_argument('--use_char_representations', type=bool, default=False)
 a_parser.add_argument('--char_dim', type=int, default=128)
 a_parser.add_argument('--char_bidir', type=bool, default=True)
 # representations based on words
@@ -34,10 +34,11 @@ a_parser.add_argument('--early_stopping', type=bool, default=True)
 a_parser.add_argument('--early_stopping_patience', type=float, default=2)
 
 ## other hyperparams
-a_parser.add_argument('--n_epochs', type=int, default=10)
-a_parser.add_argument('--batch_size', type=int, default=4)
+a_parser.add_argument('--n_epochs', type=int, default=15)
+a_parser.add_argument('--batch_size', type=int, default=32)
 a_parser.add_argument('--clipping', type=float, default=5.0)
 a_parser.add_argument('--label_smoothing', type=float, default=0.03) # 0.0 = no smoothing
+a_parser.add_argument('--finetune', type=bool, default=True)
 
 ## etc
 a_parser.add_argument('--seed', type=int, default=333)
