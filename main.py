@@ -358,9 +358,10 @@ def train_and_test_all_models():
     
 
 if __name__ == '__main__':
-    tb = 'UD_Czech-CAC'
-    args.finetune = True
-    probe_language(tb)
-    print('\\hline')
-    args.finetune = False
-    probe_language(tb)
+    train_and_test_all_models()
+    #tb = 'UD_Czech-CAC'
+    #args.finetune = True
+    #probe_language(tb)
+    #print('\\hline')
+    #args.finetune = False
+    #probe_language(tb)
